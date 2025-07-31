@@ -6,3 +6,4 @@ pandas
 python-docx
 openpyxl
 APScheduler
+gunicorn
