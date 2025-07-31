@@ -1,0 +1,8 @@
+Flask
+Pillow
+PyMuPDF
+pdf2docx
+pandas
+python-docx
+openpyxl
+APScheduler
