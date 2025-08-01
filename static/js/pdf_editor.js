@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let edits = {}; // { pageNum: [ {type, ...data} ] }
 
     // --- PDF.js Setup ---
-    // Ensure this path is correct if you host it locally
+    // This path is crucial for the library to work.
     pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js`;
 
     // --- File Handling ---

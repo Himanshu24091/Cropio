@@ -8,7 +8,6 @@ from io import BytesIO
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from docx import Document
-# CORRECTED: Added send_file to the import list
 from flask import (Flask, jsonify, redirect, render_template, request,
                    send_from_directory, flash, url_for, send_file)
 from pdf2docx import Converter
@@ -21,11 +20,16 @@ import pandas as pd
 # App Initialization & Configuration
 # ==============================================================================
 app = Flask(__name__, static_folder='static', template_folder='templates')
-app.config['SECRET_KEY'] = 'your_super_secret_key_change_me'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'a_default_secret_key_for_development')
 app.config['MAX_CONTENT_LENGTH'] = 32 * 1024 * 1024
 
-# --- Folder Setup ---
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# --- Folder Setup for Render's Persistent Disk ---
+RENDER_DISK_PATH = '/var/data'
+if os.path.exists(RENDER_DISK_PATH):
+    BASE_DIR = RENDER_DISK_PATH
+else:
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 app.config['UPLOAD_FOLDER'] = os.path.join(BASE_DIR, 'uploads')
 app.config['COMPRESSED_FOLDER'] = os.path.join(BASE_DIR, 'compressed')
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
