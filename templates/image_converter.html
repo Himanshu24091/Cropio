@@ -38,3 +38,7 @@
     </div>
 </form>
 {% endblock %}
+
+{% block converter_scripts %}
+<script src="{{ url_for('static', filename='js/converter.js') }}" defer></script>
+{% endblock %}

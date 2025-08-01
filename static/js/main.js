@@ -43,8 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file');
     const filePreview = document.getElementById('file-preview');
-    const loader = document.getElementById('loader-wrapper');
-
     if (converterForm && dropZone && fileInput && filePreview) {
         const handleFileSelect = (file) => {
             if (!file) return;
@@ -109,13 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        if (loader) {
-            converterForm.addEventListener('submit', () => {
-                if (fileInput.files.length > 0) {
-                    loader.classList.add('show');
-                }
-            });
-        }
     }
 
     // --- COMPRESSOR PAGE LOGIC ---

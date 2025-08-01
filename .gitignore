@@ -30,3 +30,17 @@ compressed/
 build/
 dist/
 *.egg-info/
+
+# Backup and temporary files
+app_backup.py
+app_new.py
+test_routes.py
+
+# Development files
+*.log
+*.tmp
+
+# OS specific
+.DS_Store
+Thumbs.db
+MODULAR_STRUCTURE.md

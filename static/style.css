@@ -1,23 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-    /* Base colors */
-    --card-light: rgba(255, 255, 255, 0.85);
-    --card-dark: rgba(33, 38, 45, 0.8);
-    --text-light: #212529;
+/* Base colors */
+    --card-light: rgba(255, 255, 255, 0.95);
+    --card-dark: rgba(33, 38, 45, 0.95);
+    --text-light: #1c1f24;
     --text-dark: #e6edf3;
-    --text-muted-light: #6c757d;
-    --text-muted-dark: #8b949e;
+    --text-muted-light: #4b5563; /* Darker for better contrast */
+    --text-muted-dark: #9ca3af; /* Lighter for dark mode */
     
     /* Borders and accents */
     --border-light: rgba(0, 0, 0, 0.1);
-    --border-dark: rgba(255, 255, 255, 0.15);
+    --border-dark: rgba(255, 255, 255, 0.2);
     --primary-color: #6366f1;
     --primary-hover: #4f46e5;
     
-    /* Focus states */
-    --focus-ring: 0 0 0 3px rgba(99, 102, 241, 0.5);
-    --focus-ring-dark: 0 0 0 3px rgba(129, 140, 248, 0.5);
+/* Focus states */
+    --focus-ring: 0 0 0 2px rgba(99, 102, 241, 0.5);
+    --focus-ring-dark: 0 0 0 2px rgba(129, 140, 248, 0.5);
     
     /* Shadows */
     --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -164,73 +164,30 @@ html.dark #drop-zone {
     transform: scale(1.02);
 }
 
-.loader-wrapper {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    -webkit-backdrop-filter: blur(5px);
-            backdrop-filter: blur(5px);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.4s, visibility 0.4s;
-    pointer-events: none;
-}
-
-.loader-wrapper.show {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-}
-
-.loader {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    position: relative;
-    background: conic-gradient(from 0deg, transparent 0%, transparent 10%, var(--primary-color) 100%);
-    animation: spin 1s linear infinite;
-}
-
-.loader::after {
-    content: '';
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    right: 4px;
-    bottom: 4px;
-    background: #eef2f9; 
-    border-radius: 50%;
-}
-
-html.dark .loader::after {
-    background: #0d1117;
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
 
 .nav-link {
     position: relative;
     padding-bottom: 0.25rem;
-    color: var(--text-light);
+    color: white; /* White text for both light and dark modes */
     transition: color 0.3s ease;
+    font-weight: 500;
 }
 
 html.dark .nav-link {
-    color: var(--text-dark);
+    color: white; /* White text in dark mode */
 }
 
 .nav-link:hover {
-    color: var(--primary-color);
+    color: var(--primary-color); /* Keep hover effect */
+}
+
+.nav-link.font-semibold {
+    color: white; /* White text for semibold links in both modes */
+    font-weight: 600;
+}
+
+html.dark .nav-link.font-semibold {
+    color: white; /* White text for semibold links in dark mode */
 }
 
 .nav-link::after {
@@ -246,6 +203,104 @@ html.dark .nav-link {
 
 .nav-link:hover::after {
     width: 100%;
+}
+
+/* Text color utilities for better contrast */
+.text-muted-light {
+    color: var(--text-muted-light) !important;
+}
+
+.dark .text-muted-light {
+    color: var(--text-muted-dark) !important;
+}
+
+.text-muted-dark {
+    color: var(--text-muted-dark) !important;
+}
+
+/* Converter page text improvements */
+.converter-container h1 {
+    color: var(--text-light) !important;
+}
+
+html.dark .converter-container h1 {
+    color: var(--text-dark) !important;
+}
+
+.converter-container p {
+    color: var(--text-muted-light) !important;
+}
+
+html.dark .converter-container p {
+    color: var(--text-muted-dark) !important;
+}
+
+.converter-container label {
+    color: var(--text-light) !important;
+}
+
+html.dark .converter-container label {
+    color: var(--text-dark) !important;
+}
+
+/* Drop zone text contrast */
+#drop-zone p {
+    color: var(--text-muted-light) !important;
+}
+
+html.dark #drop-zone p {
+    color: var(--text-muted-dark) !important;
+}
+
+#drop-zone .text-primary-color {
+    color: var(--primary-color) !important;
+}
+
+/* File name display */
+#file-name {
+    color: var(--text-light) !important;
+}
+
+html.dark #file-name {
+    color: var(--text-dark) !important;
+}
+
+/* Ensure logo text is visible */
+.text-primary-color {
+    color: var(--primary-color) !important;
+}
+
+/* 3D Cropio Logo Animations */
+.cropio-logo {
+    transition: all 0.3s ease;
+}
+
+.cropio-logo:hover {
+    transform: scale(1.05);
+}
+
+.cropio-logo svg {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cropio-logo:hover svg {
+    transform: rotate(2deg) scale(1.1);
+    filter: drop-shadow(0 4px 8px rgba(99, 102, 241, 0.3));
+}
+
+/* Logo gradient animation */
+@keyframes gradientShift {
+    0%, 100% {
+        stop-color: #6366f1;
+    }
+    50% {
+        stop-color: #a855f7;
+    }
+}
+
+.cropio-logo:hover #cropGradient1 stop:first-child,
+.cropio-logo:hover #cropGradient2 stop:first-child {
+    animation: gradientShift 2s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -271,25 +326,29 @@ html.dark .nav-link {
 }
 
 html.dark {
-    --card-bg-image-dark: rgba(99, 102, 241, 0.15);
-    --card-bg-pdf-dark: rgba(239, 68, 68, 0.15);
-    --card-bg-doc-dark: rgba(34, 197, 94, 0.15);
-    --card-bg-excel-dark: rgba(245, 158, 11, 0.15);
+    --card-bg-image-dark: rgba(99, 102, 241, 0.25);
+    --card-bg-pdf-dark: rgba(239, 68, 68, 0.25);
+    --card-bg-doc-dark: rgba(34, 197, 94, 0.25);
+    --card-bg-excel-dark: rgba(245, 158, 11, 0.25);
 }
 
 /* --- Individual Card Styles --- */
 
 .card-image {
     background-color: var(--card-bg-image-light);
+    color: #1e293b; /* Dark text for light mode */
 }
 .card-pdf {
     background-color: var(--card-bg-pdf-light);
+    color: #1e293b; /* Dark text for light mode */
 }
 .card-doc {
     background-color: var(--card-bg-doc-light);
+    color: #1e293b; /* Dark text for light mode */
 }
 .card-excel {
     background-color: var(--card-bg-excel-light);
+    color: #1e293b; /* Dark text for light mode */
 }
 
 .card-image .card-icon {
@@ -305,17 +364,59 @@ html.dark {
     color: var(--icon-color-excel);
 }
 
+/* Dark mode card styles */
 html.dark .card-image {
-    background-color: var(--card-bg-image-dark);
+    background-color: var(--card-bg-image-dark) !important;
+    color: #e2e8f0 !important; /* Light text for dark mode */
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
 }
 html.dark .card-pdf {
-    background-color: var(--card-bg-pdf-dark);
+    background-color: var(--card-bg-pdf-dark) !important;
+    color: #e2e8f0 !important; /* Light text for dark mode */
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
 }
 html.dark .card-doc {
-    background-color: var(--card-bg-doc-dark);
+    background-color: var(--card-bg-doc-dark) !important;
+    color: #e2e8f0 !important; /* Light text for dark mode */
+    border: 1px solid rgba(34, 197, 94, 0.3) !important;
 }
 html.dark .card-excel {
-    background-color: var(--card-bg-excel-dark);
+    background-color: var(--card-bg-excel-dark) !important;
+    color: #e2e8f0 !important; /* Light text for dark mode */
+    border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+/* Ensure headings and paragraphs inherit the card text color */
+.card h2, .card p {
+    color: inherit !important;
+}
+
+/* Override any default link colors on cards */
+a.card:hover {
+    text-decoration: none;
+}
+a.card h2, a.card p {
+    color: inherit !important;
+}
+
+/* Dark mode text color enforcement */
+html.dark .card h2, 
+html.dark .card p {
+    color: #e2e8f0 !important;
+}
+
+/* Icon colors for dark mode */
+html.dark .card-image .card-icon {
+    color: #a5b4fc !important; /* Lighter indigo for dark mode */
+}
+html.dark .card-pdf .card-icon {
+    color: #fca5a5 !important; /* Lighter red for dark mode */
+}
+html.dark .card-doc .card-icon {
+    color: #86efac !important; /* Lighter green for dark mode */
+}
+html.dark .card-excel .card-icon {
+    color: #fbbf24 !important; /* Lighter amber for dark mode */
 }
 
 /* --- STYLES FOR COMPRESSOR PAGE --- */

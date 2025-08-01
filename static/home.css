@@ -1,0 +1,146 @@
+/* Home Page Styles - Hero Section and Cards */
+
+.hero-bg {
+    background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-bg::before,
+.hero-bg::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+    filter: blur(45px);
+    animation: pulse 8s ease-in-out infinite;
+    z-index: 0;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.1); opacity: 0.4; }
+}
+
+.hero-bg::before {
+    width: 450px;
+    height: 450px;
+    top: -150px;
+    left: -200px;
+}
+
+.hero-bg::after {
+    width: 350px;
+    height: 350px;
+    bottom: -150px;
+    right: -150px;
+}
+
+.hero-text-container {
+    position: relative;
+    z-index: 1;
+}
+
+/* Card Styles */
+.card {
+    border: 1px solid var(--border-light);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+html.dark .card {
+    border: 1px solid var(--border-dark);
+}
+
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-xl);
+}
+
+/* Individual Card Styles */
+.card-image {
+    background-color: var(--card-bg-image-light);
+    color: #1e293b; /* Dark text for light mode */
+}
+.card-pdf {
+    background-color: var(--card-bg-pdf-light);
+    color: #1e293b; /* Dark text for light mode */
+}
+.card-doc {
+    background-color: var(--card-bg-doc-light);
+    color: #1e293b; /* Dark text for light mode */
+}
+.card-excel {
+    background-color: var(--card-bg-excel-light);
+    color: #1e293b; /* Dark text for light mode */
+}
+
+.card-image .card-icon {
+    color: var(--icon-color-image);
+}
+.card-pdf .card-icon {
+    color: var(--icon-color-pdf);
+}
+.card-doc .card-icon {
+    color: var(--icon-color-doc);
+}
+.card-excel .card-icon {
+    color: var(--icon-color-excel);
+}
+
+/* Dark mode card styles */
+html.dark .card-image {
+    background-color: var(--card-bg-image-dark) !important;
+    color: #e2e8f0 !important; /* Light text for dark mode */
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+}
+html.dark .card-pdf {
+    background-color: var(--card-bg-pdf-dark) !important;
+    color: #e2e8f0 !important; /* Light text for dark mode */
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+html.dark .card-doc {
+    background-color: var(--card-bg-doc-dark) !important;
+    color: #e2e8f0 !important; /* Light text for dark mode */
+    border: 1px solid rgba(34, 197, 94, 0.3) !important;
+}
+html.dark .card-excel {
+    background-color: var(--card-bg-excel-dark) !important;
+    color: #e2e8f0 !important; /* Light text for dark mode */
+    border: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+/* Ensure headings and paragraphs inherit the card text color */
+.card h2, .card p {
+    color: inherit !important;
+}
+
+/* Override any default link colors on cards */
+a.card:hover {
+    text-decoration: none;
+}
+a.card h2, a.card p {
+    color: inherit !important;
+}
+
+/* Dark mode text color enforcement */
+html.dark .card h2, 
+html.dark .card p {
+    color: #e2e8f0 !important;
+}
+
+/* Icon colors for dark mode */
+html.dark .card-image .card-icon {
+    color: #a5b4fc !important; /* Lighter indigo for dark mode */
+}
+html.dark .card-pdf .card-icon {
+    color: #fca5a5 !important; /* Lighter red for dark mode */
+}
+html.dark .card-doc .card-icon {
+    color: #86efac !important; /* Lighter green for dark mode */
+}
+html.dark .card-excel .card-icon {
+    color: #fbbf24 !important; /* Lighter amber for dark mode */
+}

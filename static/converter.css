@@ -1,0 +1,107 @@
+/* Converter Pages Common Styles */
+
+.converter-body {
+    background-image: 
+        radial-gradient(circle at 1px 1px, rgba(0,0,0,0.05) 1px, transparent 0);
+    background-size: 20px 20px;
+}
+
+html.dark .converter-body {
+     background-image: 
+        radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0);
+}
+
+.converter-container {
+    background-color: var(--card-light);
+    border: 1px solid var(--border-light);
+    -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+    border-radius: 1.5rem;
+    box-shadow: var(--shadow-lg);
+    padding: 2rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+html.dark .converter-container {
+    background-color: var(--card-dark);
+    border: 1px solid var(--border-dark);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px -4px rgba(99, 102, 241, 0.5);
+}
+
+#drop-zone {
+    border: 2px dashed var(--border-light);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 2rem;
+    border-radius: 1rem;
+}
+
+html.dark #drop-zone {
+    border-color: var(--border-dark);
+}
+
+#drop-zone.dragover {
+    border-color: var(--primary-color);
+    background-color: rgba(99, 102, 241, 0.05);
+    transform: scale(1.02);
+}
+
+/* Converter page text improvements */
+.converter-container h1 {
+    color: var(--text-light) !important;
+}
+
+html.dark .converter-container h1 {
+    color: var(--text-dark) !important;
+}
+
+.converter-container p {
+    color: var(--text-muted-light) !important;
+}
+
+html.dark .converter-container p {
+    color: var(--text-muted-dark) !important;
+}
+
+.converter-container label {
+    color: var(--text-light) !important;
+}
+
+html.dark .converter-container label {
+    color: var(--text-dark) !important;
+}
+
+/* Drop zone text contrast */
+#drop-zone p {
+    color: var(--text-muted-light) !important;
+}
+
+html.dark #drop-zone p {
+    color: var(--text-muted-dark) !important;
+}
+
+#drop-zone .text-primary-color {
+    color: var(--primary-color) !important;
+}
+
+/* File name display */
+#file-name {
+    color: var(--text-light) !important;
+}
+
+html.dark #file-name {
+    color: var(--text-dark) !important;
+}

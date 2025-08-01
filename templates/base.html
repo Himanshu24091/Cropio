@@ -3,26 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}File Tool Pro{% endblock %}</title>
+    <title>{% block title %}Cropio{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
     <script>
-        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        // Default to light mode (white) - only use dark mode if explicitly set
+        if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
+            // Set default to light if no preference is stored
+            if (!localStorage.getItem('theme')) {
+                localStorage.setItem('theme', 'light');
+            }
         }
     </script>
 </head>
 <body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 antialiased flex flex-col min-h-screen">
-    <div id="loader-wrapper">
-        <div class="loader"></div>
-    </div>
 
-    <header class="site-header bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm sticky top-0 z-50 shadow-md">
+    <header class="site-header bg-slate-800/90 dark:bg-slate-800/90 backdrop-blur-sm sticky top-0 z-50 shadow-md">
         <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
-            <a href="/" class="text-2xl font-bold text-primary-color">
-                FileTool
+            <a href="/" class="cropio-logo flex items-center text-2xl font-bold text-primary-color">
+                <!-- 3D Cropio Logo SVG -->
+                <svg width="32" height="32" viewBox="0 0 32 32" class="mr-2" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <linearGradient id="cropGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+                        </linearGradient>
+                        <linearGradient id="cropGradient2" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#4f46e5;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#9333ea;stop-opacity:1" />
+                        </linearGradient>
+                        <filter id="shadow">
+                            <feDropShadow dx="1" dy="2" stdDeviation="1" flood-color="rgba(0,0,0,0.3)"/>
+                        </filter>
+                    </defs>
+                    
+                    <!-- Main crop frame (3D effect) -->
+                    <rect x="4" y="4" width="20" height="20" rx="2" fill="url(#cropGradient1)" filter="url(#shadow)" transform="rotate(-2 14 14)"/>
+                    <rect x="6" y="6" width="16" height="16" rx="1" fill="none" stroke="white" stroke-width="1.5" opacity="0.8" transform="rotate(-2 14 14)"/>
+                    
+                    <!-- Corner crop handles -->
+                    <rect x="3" y="3" width="4" height="4" rx="1" fill="url(#cropGradient2)" filter="url(#shadow)"/>
+                    <rect x="25" y="3" width="4" height="4" rx="1" fill="url(#cropGradient2)" filter="url(#shadow)"/>
+                    <rect x="3" y="25" width="4" height="4" rx="1" fill="url(#cropGradient2)" filter="url(#shadow)"/>
+                    <rect x="25" y="25" width="4" height="4" rx="1" fill="url(#cropGradient2)" filter="url(#shadow)"/>
+                    
+                    <!-- Center crop lines for 3D depth -->
+                    <line x1="10" y1="16" x2="22" y2="16" stroke="white" stroke-width="1" opacity="0.6"/>
+                    <line x1="16" y1="10" x2="16" y2="22" stroke="white" stroke-width="1" opacity="0.6"/>
+                </svg>
+                Cropio
             </a>
             <div class="hidden md:flex items-center space-x-6">
                 <a href="/image-converter" class="nav-link">Image Converter</a>
@@ -30,9 +62,9 @@
                 <!-- ADDED DOCUMENT AND EXCEL CONVERTER LINKS BACK -->
                 <a href="/document-converter" class="nav-link">Doc Converter</a>
                 <a href="/excel-converter" class="nav-link">Excel Converter</a>
-                <a href="/compressor" class="nav-link font-semibold text-indigo-600 dark:text-indigo-400">Compressor</a>
-                <a href="/image-cropper" class="nav-link font-semibold text-indigo-600 dark:text-indigo-400">Image Cropper</a>
-                <a href="/pdf-editor" class="nav-link font-semibold text-indigo-600 dark:text-indigo-400">PDF Editor</a>
+                <a href="/compressor" class="nav-link font-semibold">Compressor</a>
+                <a href="/image-cropper" class="nav-link font-semibold">Image Cropper</a>
+                <a href="/pdf-editor" class="nav-link font-semibold">PDF Editor</a>
             </div>
             <div class="flex items-center">
                 <button type="button" id="theme-toggle" class="text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none focus:ring-4 focus:ring-slate-200 dark:focus:ring-slate-700 rounded-lg text-sm p-2.5">
@@ -49,11 +81,15 @@
 
     <footer class="site-footer bg-white dark:bg-slate-800/90 border-t border-slate-200 dark:border-slate-700/50 py-8">
         <div class="container mx-auto px-6 text-center text-slate-600 dark:text-slate-400">
-            <p>&copy; 2025 File Tool Pro. All Rights Reserved.</p>
+            <p>&copy; 2025 Cropio. All Rights Reserved.</p>
             <p class="text-sm mt-2">A simple and powerful tool for your files.</p>
         </div>
     </footer>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+    <!-- Theme toggle functionality - loaded on all pages -->
+    <script src="{{ url_for('static', filename='js/theme.js') }}" defer></script>
+    
+    <!-- Page-specific scripts -->
+    {% block page_scripts %}{% endblock %}
 </body>
 </html>

@@ -1,0 +1,163 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+/* Base colors */
+    --card-light: rgba(255, 255, 255, 0.95);
+    --card-dark: rgba(33, 38, 45, 0.95);
+    --text-light: #1c1f24;
+    --text-dark: #e6edf3;
+    --text-muted-light: #4b5563; /* Darker for better contrast */
+    --text-muted-dark: #9ca3af; /* Lighter for dark mode */
+    
+    /* Borders and accents */
+    --border-light: rgba(0, 0, 0, 0.1);
+    --border-dark: rgba(255, 255, 255, 0.2);
+    --primary-color: #6366f1;
+    --primary-hover: #4f46e5;
+    
+/* Focus states */
+    --focus-ring: 0 0 0 2px rgba(99, 102, 241, 0.5);
+    --focus-ring-dark: 0 0 0 2px rgba(129, 140, 248, 0.5);
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+
+    /* Card Color Variables */
+    --card-bg-image-light: #e0e7ff; /* Light Indigo */
+    --card-bg-pdf-light: #fee2e2;   /* Light Red */
+    --card-bg-doc-light: #dcfce7;   /* Light Green */
+    --card-bg-excel-light: #fef3c7; /* Light Amber */
+
+    --icon-color-image: #6366f1; /* Indigo */
+    --icon-color-pdf: #ef4444;   /* Red */
+    --icon-color-doc: #22c55e;  /* Green */
+    --icon-color-excel: #f59e0b; /* Amber */
+}
+
+html.dark {
+    color-scheme: dark;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+    
+    --card-bg-image-dark: rgba(99, 102, 241, 0.25);
+    --card-bg-pdf-dark: rgba(239, 68, 68, 0.25);
+    --card-bg-doc-dark: rgba(34, 197, 94, 0.25);
+    --card-bg-excel-dark: rgba(245, 158, 11, 0.25);
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    transition: background-color 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                color 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    line-height: 1.6;
+}
+
+/* Text color utilities for better contrast */
+.text-muted-light {
+    color: var(--text-muted-light) !important;
+}
+
+.dark .text-muted-light {
+    color: var(--text-muted-dark) !important;
+}
+
+.text-muted-dark {
+    color: var(--text-muted-dark) !important;
+}
+
+/* Ensure logo text is visible */
+.text-primary-color {
+    color: var(--primary-color) !important;
+}
+
+/* 3D Cropio Logo Animations */
+.cropio-logo {
+    transition: all 0.3s ease;
+}
+
+.cropio-logo:hover {
+    transform: scale(1.05);
+}
+
+.cropio-logo svg {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cropio-logo:hover svg {
+    transform: rotate(2deg) scale(1.1);
+    filter: drop-shadow(0 4px 8px rgba(99, 102, 241, 0.3));
+}
+
+/* Logo gradient animation */
+@keyframes gradientShift {
+    0%, 100% {
+        stop-color: #6366f1;
+    }
+    50% {
+        stop-color: #a855f7;
+    }
+}
+
+.cropio-logo:hover #cropGradient1 stop:first-child,
+.cropio-logo:hover #cropGradient2 stop:first-child {
+    animation: gradientShift 2s ease-in-out infinite;
+}
+
+/* Navigation styles */
+.nav-link {
+    position: relative;
+    padding-bottom: 0.25rem;
+    color: white; /* White text for both light and dark modes */
+    transition: color 0.3s ease;
+    font-weight: 500;
+}
+
+html.dark .nav-link {
+    color: white; /* White text in dark mode */
+}
+
+.nav-link:hover {
+    color: var(--primary-color); /* Keep hover effect */
+}
+
+.nav-link.font-semibold {
+    color: white; /* White text for semibold links in both modes */
+    font-weight: 600;
+}
+
+html.dark .nav-link.font-semibold {
+    color: white; /* White text for semibold links in dark mode */
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--primary-color);
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

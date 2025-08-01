@@ -3,6 +3,7 @@
 {% block title %}File Compressor{% endblock %}
 
 {% block page_content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='compressor.css') }}">
 <div class="container mx-auto max-w-4xl px-4 py-8 md:py-16" id="compressor-app">
     <header class="text-center mb-10">
         <h1 class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white">FileCompressor <span class="text-indigo-600">Pro</span></h1>
@@ -53,4 +54,8 @@
          <button id="clear-btn" class="w-full max-w-xs mx-auto block bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold py-3 px-6 rounded-lg mt-8 hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">Start Over</button>
     </section>
 </div>
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/compressor.js') }}" defer></script>
 {% endblock %}

@@ -1,0 +1,59 @@
+/* PDF Editor Page Specific Styles */
+
+.toolbar-btn {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.toolbar-btn:hover {
+    background-color: #eef2ff; /* indigo-50 */
+}
+
+.dark .toolbar-btn:hover {
+    background-color: #374151; /* slate-700 */
+}
+
+.toolbar-btn.active {
+    background-color: #e0e7ff; /* indigo-100 */
+    color: #4f46e5; /* indigo-600 */
+}
+
+.dark .toolbar-btn.active {
+    background-color: #4338ca; /* indigo-700 */
+    color: white;
+}
+
+/* PDF Editor specific styles */
+.pdf-page-container {
+    position: relative;
+    margin: 0 auto 2rem;
+}
+
+.pdf-page {
+    display: block;
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-lg);
+}
+
+.annotation-overlay {
+    cursor: crosshair;
+    border-radius: 0.5rem;
+}
+
+.select-tool .annotation-overlay {
+    cursor: default;
+}
+
+#pdf-viewer {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+#thumbnails-panel {
+    border-right: 1px solid var(--border-light);
+}
+
+.dark #thumbnails-panel {
+    border-right-color: var(--border-dark);
+}

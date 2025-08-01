@@ -1,0 +1,52 @@
+/* Compressor Page Specific Styles */
+
+.compression-label {
+    display: block;
+    padding: 1rem;
+    border: 2px solid;
+    border-radius: 0.75rem;
+    text-align: center;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Light mode styles */
+.compression-label {
+    border-color: #e2e8f0;
+    color: #475569;
+}
+.peer:checked ~ .compression-label {
+    border-color: #4f46e5;
+    background-color: #eef2ff;
+    color: #4f46e5;
+    box-shadow: 0 0 0 2px #c7d2fe;
+}
+
+/* Dark mode styles */
+.dark .compression-label {
+    border-color: #475569;
+    color: #cbd5e1;
+}
+.dark .peer:checked ~ .compression-label {
+    border-color: #6366f1;
+    background-color: rgba(99, 102, 241, 0.1);
+    color: #a5b4fc;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+.download-btn {
+    display: block;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.625rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-weight: 600;
+    color: white;
+    background-color: #16a34a;
+    transition: background-color 0.2s;
+}
+.download-btn:hover {
+    background-color: #15803d;
+}
