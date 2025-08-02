@@ -59,7 +59,7 @@
                 </svg>
                 Cropio
             </a>
-<div class="hidden md:flex items-center space-x-6">
+        <div class="md:flex hidden md:items-center md:space-x-6">
                 <div class="relative group">
                     <button class="nav-link focus:outline-none flex items-center">
                         Converters
@@ -76,7 +76,20 @@
                 </div>
                 <a href="/compressor" class="nav-link font-semibold">Compressor</a>
                 <a href="/image-cropper" class="nav-link font-semibold">Image Cropper</a>
-                <a href="/pdf-editor" class="nav-link font-semibold">PDF Editor</a>
+                <div class="relative group">
+                    <button class="nav-link focus:outline-none flex items-center">
+                        PDF Tools
+                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </button>
+                    <div class="absolute left-0 mt-2 w-56 bg-slate-800 dark:bg-slate-700 shadow-xl rounded-lg hidden group-hover:block border border-slate-600 z-50">
+                        <a href="/pdf-editor" class="block px-4 py-3 text-sm text-white hover:bg-slate-700 dark:hover:bg-slate-600 hover:text-orange-300 transition-colors first:rounded-t-lg">✏️ PDF Editor</a>
+                        <a href="/pdf-merge" class="block px-4 py-3 text-sm text-white hover:bg-slate-700 dark:hover:bg-slate-600 hover:text-red-300 transition-colors">📑 PDF Merge</a>
+                        <a href="/pdf-signature" class="block px-4 py-3 text-sm text-white hover:bg-slate-700 dark:hover:bg-slate-600 hover:text-blue-300 transition-colors">✍️ PDF Signature</a>
+                        <a href="/secure-pdf" class="block px-4 py-3 text-sm text-white hover:bg-slate-700 dark:hover:bg-slate-600 hover:text-emerald-300 transition-colors last:rounded-b-lg">🔒 Secure PDF</a>
+                    </div>
+                </div>
             </div>
             <div class="flex items-center space-x-4">
                 <!-- Mobile menu button -->
@@ -132,17 +145,37 @@
                         <span class="text-cyan-400 mr-3 text-lg">✂️</span>
                         Image Cropper
                     </a>
-                    <a href="/pdf-editor" class="block text-white font-semibold hover:text-gray-300 transition-colors flex items-center py-3 px-2 rounded-lg hover:bg-slate-700">
-                        <span class="text-orange-400 mr-3 text-lg">✏️</span>
-                        PDF Editor
-                    </a>
+                </div>
+                <div class="border-b border-slate-700 pb-4">
+                    <p class="text-white font-semibold mb-3 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M4 3a2 2 0 00-2 2v1.816a2 2 0 00.25.968l2.5 3.124A2 2 0 005 11.816V13a2 2 0 002 2h6a2 2 0 002-2v-1.184a2 2 0 00.25-.968l2.5-3.124A2 2 0 0018 6.816V5a2 2 0 00-2-2H4z"></path>
+                        </svg>
+                        PDF Tools
+                    </p>
+                    <div class="pl-4 space-y-1">
+                        <a href="/pdf-editor" class="block text-slate-300 hover:text-white transition-colors flex items-center py-2">
+                            <span class="text-orange-400 mr-3">✏️</span>
+                            PDF Editor
+                        </a>
+                        <a href="/pdf-merge" class="block text-slate-300 hover:text-white transition-colors flex items-center py-2">
+                            <span class="text-red-400 mr-3">📑</span>
+                            PDF Merge
+                        </a>
+                        <a href="/pdf-signature" class="block text-slate-300 hover:text-white transition-colors flex items-center py-2">
+                            <span class="text-blue-400 mr-3">✍️</span>
+                            PDF Signature
+                        </a>
+                        <a href="/secure-pdf" class="block text-slate-300 hover:text-white transition-colors flex items-center py-2">
+                            <span class="text-emerald-400 mr-3">🔒</span>
+                            Secure PDF
+                        </a>
+                    </div>
+                </div>
+                <div class="space-y-1">
                     <a href="/text-ocr" class="block text-white font-semibold hover:text-gray-300 transition-colors flex items-center py-3 px-2 rounded-lg hover:bg-slate-700">
                         <span class="text-pink-400 mr-3 text-lg">🔍</span>
                         Text & OCR
-                    </a>
-                    <a href="/secure-pdf" class="block text-white font-semibold hover:text-gray-300 transition-colors flex items-center py-3 px-2 rounded-lg hover:bg-slate-700">
-                        <span class="text-emerald-400 mr-3 text-lg">🔒</span>
-                        Secure PDF
                     </a>
                 </div>
             </div>

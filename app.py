@@ -20,6 +20,8 @@ from routes.file_serving_routes import file_serving_bp
 from routes.reverse_converter_routes import reverse_converter_bp
 from routes.text_ocr_routes import text_ocr_bp
 from routes.secure_pdf_routes import secure_pdf_bp
+from routes.pdf_merge_routes import pdf_merge_bp
+from routes.pdf_signature_routes import pdf_signature_bp
 # from routes.universal_converter_routes import universal_converter_bp  # Commented out due to missing dependencies
 
 def create_app():
@@ -48,6 +50,8 @@ def create_app():
     app.register_blueprint(reverse_converter_bp)
     app.register_blueprint(text_ocr_bp)
     app.register_blueprint(secure_pdf_bp)
+    app.register_blueprint(pdf_merge_bp)
+    app.register_blueprint(pdf_signature_bp)
     
     return app
 

@@ -12,6 +12,24 @@
 - **Real-time Previews**: Interactive previews for images, PDFs, and cropping.
 - **Backend Processing**: Powered by a modular Flask backend using libraries like Pillow and PyMuPDF.
 - **Automatic Cleanup**: Background scheduler deletes temporary files after one hour to save server space.
+- **Responsive Navigation**: Organized dropdown menus for desktop and collapsible mobile menu.
+- **Intuitive Grouping**: Related tools grouped together for better user experience.
+
+---
+
+## 🧭 Navigation Structure
+
+### Desktop Navigation
+- **Converters** dropdown: Image, PDF, Document, Excel converters
+- **Compressor**: File compression tool
+- **Image Cropper**: Image and PDF cropping
+- **PDF Tools** dropdown: PDF Editor, PDF Merge, PDF Signature, Secure PDF
+
+### Mobile Navigation
+- **Hamburger Menu**: Collapsible menu with organized sections
+- **Converters Section**: All file conversion tools
+- **Individual Tools**: Compressor, Image Cropper, Text & OCR
+- **PDF Tools Section**: All PDF-related functionality grouped together
 
 ---
 
@@ -35,11 +53,27 @@
 - **Aspect Ratio Control**: Lock crop box to standard ratios (16:9, 4:3, 1:1, etc.).
 - **Multiple Output Formats**: Export cropped output as JPEG, PNG, WEBP, or PDF.
 
-### 4. PDF EditX
+### 4. PDF Tools Suite
+#### PDF Editor
 - **PDF Rendering**: View all pages with a thumbnail sidebar.
 - **Editing Tools**: Add text, draw freehand, and highlight.
 - **Client-Side Editing**: Fast, local edits using PDF-lib.js and PDF.js.
 - **Export Changes**: Download the modified PDF.
+
+#### PDF Merge
+- **Multiple File Support**: Combine multiple PDF files into one.
+- **Page Order Control**: Rearrange pages before merging.
+- **Batch Processing**: Handle multiple PDFs efficiently.
+
+#### PDF Signature
+- **Digital Signatures**: Add digital signatures to PDF documents.
+- **Multiple Signature Types**: Support for various signature formats.
+- **Secure Processing**: Client-side signature processing for security.
+
+#### Secure PDF
+- **Password Protection**: Add or remove password protection from PDFs.
+- **Encryption**: Secure PDFs with various encryption levels.
+- **Access Control**: Control document permissions and restrictions.
 
 ---
 
@@ -57,11 +91,10 @@
 ```
 converter1/
 ├── app.py                          # Main modular application
-├── app_backup.py                   # Backup of monolithic app.py
 ├── config.py                       # Configuration settings
-├── test_routes.py                  # Route testing script
 ├── requirements.txt                # Python dependencies
 ├── runtime.txt                     # Python version specification
+├── README.md                       # Project documentation
 ├── routes/                         # Route modules
 │   ├── __init__.py
 │   ├── main_routes.py
@@ -72,12 +105,22 @@ converter1/
 │   ├── compressor_routes.py
 │   ├── cropper_routes.py
 │   ├── pdf_editor_routes.py
-│   └── file_serving_routes.py
-├── utils/
-│   ├── __init__.py
-│   └── helpers.py
+│   ├── pdf_merge_routes.py
+│   ├── pdf_signature_routes.py
+│   ├── secure_pdf_routes.py
+│   ├── reverse_converter_routes.py
+│   └── text_ocr_routes.py
 ├── static/
-│   ├── css/
+│   ├── base.css
+│   ├── compressor.css
+│   ├── converter.css
+│   ├── cropper.css
+│   ├── home.css
+│   ├── pdf_editor.css
+│   ├── pdf_merge.css
+│   ├── pdf_signature.css
+│   ├── secure_pdf.css
+│   ├── style.css
 │   └── js/
 │       ├── theme.js
 │       ├── index.js
@@ -85,15 +128,29 @@ converter1/
 │       ├── cropper.js
 │       ├── converter.js
 │       ├── pdf_editor.js
-│       └── pdf_editor_simple.js
-└── templates/
-    ├── base.html
-    ├── layout.html
-    ├── index.html
-    ├── compressor.html
-    ├── cropper.html
-    ├── pdf_editor.html
-    └── [converter templates]
+│       ├── pdf_merge.js
+│       ├── pdf_signature.js
+│       ├── secure_pdf.js
+│       └── main.js
+├── templates/
+│   ├── base.html
+│   ├── layout.html
+│   ├── index.html
+│   ├── compressor.html
+│   ├── cropper.html
+│   ├── pdf_converter.html
+│   ├── pdf_editor.html
+│   ├── pdf_merge.html
+│   ├── pdf_signature.html
+│   ├── secure_pdf.html
+│   └── text_ocr.html
+├── utils/
+│   ├── __init__.py
+│   └── helpers.py
+└── uploads/                      # Uploads directory
+    ├── *.pdf                    # PDF uploads
+    ├── *.jpg                    # Image uploads
+    └── *.png                    # Signature files
 ```
 
 ### Route Modules Overview
@@ -106,17 +163,25 @@ converter1/
 - `compressor_routes.py` → Image and PDF compression
 - `cropper_routes.py` → Image/PDF cropping
 - `pdf_editor_routes.py` → PDF editing interface
+- `pdf_merge_routes.py` → PDF merging functionality
+- `pdf_signature_routes.py` → PDF digital signatures
+- `secure_pdf_routes.py` → PDF password protection
+- `text_ocr_routes.py` → OCR text extraction
+- `reverse_converter_routes.py` → PDF to image conversion
 - `file_serving_routes.py` → Downloads & previews
 
 ### JavaScript Modules
 
-- `theme.js` — Dark/light toggle
+- `theme.js` — Dark/light toggle and mobile menu functionality
 - `index.js` — Homepage interactivity
+- `main.js` — Main application logic
 - `compressor.js` — Compressor logic
 - `cropper.js` — Image/PDF crop tool
 - `converter.js` — Converter utilities
-- `pdf_editor.js` — Full PDF editor
-- `pdf_editor_simple.js` — Lightweight alternative
+- `pdf_editor.js` — Full PDF editor with advanced features
+- `pdf_merge.js` — PDF merging functionality
+- `pdf_signature.js` — PDF signature tools
+- `secure_pdf.js` — PDF security and encryption
 
 ### Configuration (config.py)
 - Constants, path setup, file extension rules
@@ -248,3 +313,4 @@ Follow the setup guide and start using Cropio on your local development server, 
 - Community contributors
 
 ---
+- Owned by Himanshu
