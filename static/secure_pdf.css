@@ -228,11 +228,11 @@
         grid-template-columns: 1fr;
     }
     
-    .flex.justify-between {
+    /* .flex.justify-between {
         flex-direction: column;
         gap: 1rem;
     }
-    
+     */
     .password-strength {
         max-width: 100%;
     }
@@ -374,4 +374,257 @@
 
 .dark .form-input.valid {
     background-color: #064e3b;
+}
+
+/* MOBILE MODE VISIBILITY FIXES FOR BOTH LIGHT AND DARK */
+@media (max-width: 768px) {
+    /* Background color for mobile - MOBILE ONLY */
+    body {
+        background-color: #1e293b !important;
+        background-image: none !important;
+    }
+    
+    /* Header fixes - MOBILE ONLY */
+    header {
+        padding: 1rem !important;
+        margin: 0 !important;
+    }
+    
+    .container {
+        max-width: 100% !important;
+        padding: 0 1rem !important;
+        margin: 0 auto !important;
+    }
+    
+    /* Navigation container - MOBILE ONLY */
+    nav {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        width: 100% !important;
+        padding: 0.75rem 1rem !important;
+        margin: 0 auto !important;
+        background-color: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        backdrop-filter: none !important;
+        box-shadow: none !important;
+    }
+    
+    .logo {
+        flex-shrink: 0 !important;
+        max-width: 120px !important;
+    }
+    
+    .nav-buttons {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        flex-shrink: 0 !important;
+    }
+    
+    /* Menu and theme toggle buttons - MOBILE ONLY */
+    .menu-button,
+    .theme-toggle {
+        background-color: transparent !important;
+        border: none !important;
+        color: #e5e7eb !important;
+        padding: 0.5rem !important;
+        border-radius: 0.375rem !important;
+        transition: all 0.2s ease !important;
+    }
+    
+    .menu-button:hover,
+    .theme-toggle:hover {
+        background-color: rgba(75, 85, 99, 0.5) !important;
+        color: #ffffff !important;
+    }
+    
+    /* Tab container centering */
+    .tab-container {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+        padding: 1rem 0.5rem !important;
+        margin: 0 auto !important;
+        max-width: 100% !important;
+    }
+    
+    /* Page title and subtitle - MOBILE ONLY */
+    h1 {
+        color: #ffffff !important;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+    }
+    
+    .text-gray-600,
+    .text-gray-300 {
+        color: #e5e7eb !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    }
+    
+    /* Tab buttons visibility - MOBILE ONLY */
+    .tab-button {
+        color: #d1d5db !important;
+        background-color: rgba(75, 85, 99, 0.5) !important;
+        border-color: #6b7280 !important;
+        padding: 0.5rem 0.75rem !important;
+        margin: 0.125rem !important;
+        border-radius: 0.5rem !important;
+        font-weight: 600 !important;
+        font-size: 0.875rem !important;
+        min-width: auto !important;
+        max-width: calc(33.333% - 0.5rem) !important;
+        flex: 1 1 auto !important;
+        text-align: center !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+    
+    .tab-button.active {
+        color: #ffffff !important;
+        background-color: #3b82f6 !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3) !important;
+    }
+    
+    .tab-button:hover {
+        background-color: #4b5563 !important;
+        color: #f3f4f6 !important;
+    }
+    
+    /* Card content visibility - MOBILE ONLY */
+    .bg-white {
+        background-color: #1f2937 !important;
+        border: 1px solid #374151 !important;
+    }
+    
+    .text-gray-900 {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+    }
+    
+    .text-gray-600 {
+        color: #e5e7eb !important;
+        font-weight: 500 !important;
+    }
+    
+    .text-gray-500 {
+        color: #d1d5db !important;
+        font-weight: 500 !important;
+    }
+    
+    .text-gray-700 {
+        color: #f3f4f6 !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Upload area visibility - MOBILE ONLY */
+    .upload-area {
+        background-color: #374151 !important;
+        border: 2px dashed #6b7280 !important;
+        color: #f3f4f6 !important;
+    }
+    
+    .upload-text {
+        color: #f3f4f6 !important;
+        font-weight: 600 !important;
+    }
+    
+    .upload-subtext {
+        color: #d1d5db !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Form inputs visibility - MOBILE ONLY */
+    .form-input {
+        background-color: #374151 !important;
+        border-color: #6b7280 !important;
+        color: #ffffff !important;
+    }
+    
+    .form-input::placeholder {
+        color: #9ca3af !important;
+    }
+    
+    /* Labels visibility - MOBILE ONLY */
+    label {
+        color: #f3f4f6 !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Button visibility - MOBILE ONLY */
+    .btn {
+        font-weight: 700 !important;
+        border: 2px solid transparent !important;
+    }
+    
+    .btn-primary {
+        background-color: #3b82f6 !important;
+        color: #ffffff !important;
+        border-color: #3b82f6 !important;
+    }
+    
+    .btn-secondary {
+        background-color: #6b7280 !important;
+        color: #ffffff !important;
+        border-color: #6b7280 !important;
+    }
+    
+    /* Icons visibility - MOBILE ONLY */
+    svg {
+        color: inherit !important;
+    }
+    
+    /* Success/Error message visibility - MOBILE ONLY */
+    .flash-message.success {
+        background-color: #065f46 !important;
+        color: #34d399 !important;
+        border-color: #10b981 !important;
+    }
+    
+    .flash-message.error {
+        background-color: #991b1b !important;
+        color: #fca5a5 !important;
+        border-color: #ef4444 !important;
+    }
+    
+    /* Loading overlay visibility - MOBILE ONLY */
+    #loading-overlay .bg-white {
+        background-color: #1f2937 !important;
+        color: #ffffff !important;
+    }
+    
+    /* QR result visibility - MOBILE ONLY */
+    #qr-result {
+        background-color: #1f2937 !important;
+    }
+    
+    #qr-result .bg-green-50 {
+        background-color: #065f46 !important;
+        border-color: #10b981 !important;
+    }
+    
+    #qr-result .text-green-800 {
+        color: #34d399 !important;
+    }
+    
+    /* Security status visibility - MOBILE ONLY */
+    #pdf-security-status {
+        background-color: #374151 !important;
+        border-color: #6b7280 !important;
+        color: #f3f4f6 !important;
+    }
+    
+    /* Password strength meter visibility - MOBILE ONLY */
+    .password-strength span {
+        color: #f3f4f6 !important;
+        font-weight: 600 !important;
+    }
+    
+    .strength-meter {
+        background-color: #4b5563 !important;
+    }
 }

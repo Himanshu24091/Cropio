@@ -18,6 +18,7 @@
     width: 100%;
     max-width: 1200px;
     text-align: center;
+    padding-top: 10rem !important;
 }
 
 .hero-badge {
@@ -85,6 +86,32 @@
     .hero-bg {
         min-height: 30vh;
         padding: 3rem 0;
+    }
+    
+    .hero-content {
+        padding: 2rem 1rem;
+        text-align: center;
+        max-width: 100%;
+        margin: 0 auto;
+        padding-top: 5rem !important;
+    }
+    
+    .hero-content h1 {
+        font-size: 1.875rem;
+        line-height: 1.2;
+        margin-bottom: 1rem;
+    }
+    
+    .hero-content p {
+        font-size: 1rem;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+    }
+    
+    .hero-content .btn {
+        width: 100%;
+        padding: 0.875rem 1.5rem;
+        font-size: 1rem;
     }
     
     .hero-title {
@@ -173,7 +200,7 @@
 
 /* Tools Section */
 .tools-section {
-    padding: 0px 0;
+    padding:0rem 0;
 }
 
 .section-header {
@@ -181,17 +208,35 @@
 }
 
 .section-title {
-    color: #ffffff;
+    color: #354c83; /* Dark color for light mode */
+}
+
+html.dark .section-title {
+    color: #ffffff; /* White for dark mode */
 }
 
 .section-subtitle {
-    color: rgba(255, 255, 255, 0.8);
+    color: #475569; /* Dark gray for light mode */
+}
+
+html.dark .section-subtitle {
+    color: rgba(255, 255, 255, 0.8); /* Light for dark mode */
 }
 
 .tools-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
+    padding: 0 1rem;
+}
+
+/* Mobile responsive grid */
+@media (max-width: 640px) {
+    .tools-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0 0.5rem;
+    }
 }
 
 /* Individual Card Styles */
@@ -453,4 +498,187 @@ html.dark .card-doc .card-icon {
 }
 html.dark .card-excel .card-icon {
     color: #fbbf24 !important; /* Lighter amber for dark mode */
+}
+
+/* MOBILE-ONLY TEXT VISIBILITY FIXES */
+@media (max-width: 768px) {
+    /* CRITICAL SECTION TITLE AND SUBTITLE FIXES - MOBILE ONLY */
+    
+    /* Light mode section titles */
+    .section-title {
+        color: #354c83 !important; /* Very dark for light mode */
+        font-weight: 800 !important;
+    }
+    
+    .section-subtitle {
+        color: #374151 !important; /* Dark gray for light mode */
+        font-weight: 600 !important;
+    }
+    
+    /* Dark mode section titles - MOBILE ONLY */
+    html.dark .section-title {
+        color: #354c83 !important; /* Pure white for dark mode */
+        font-weight: 800 !important;
+        /* text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important; */
+    }
+    
+    html.dark .section-subtitle {
+        color: #11111192 !important; /* Light gray for dark mode */
+        font-weight: 600 !important;
+        /* text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important; */
+    }
+    
+    /* CRITICAL LIGHT MODE TEXT VISIBILITY FIXES - MOBILE ONLY */
+    
+    /* Light mode - Make all card text highly visible on mobile */
+    .tool-card .card-title,
+    .card .card-title,
+    .tool-card h3,
+    .card h3 {
+        color: #0f172a !important; /* Very dark slate */
+        font-weight: 700 !important;
+        text-shadow: none !important;
+    }
+    
+    .tool-card .card-description,
+    .card .card-description,
+    .tool-card p,
+    .card p {
+        color: #334155 !important; /* Dark slate */
+        font-weight: 500 !important;
+        opacity: 1 !important;
+    }
+    
+    .tool-card .card-category,
+    .card .card-category,
+    .tool-card .card-header span,
+    .card .card-header span {
+        color: #475569 !important; /* Medium slate */
+        font-weight: 600 !important;
+        opacity: 1 !important;
+    }
+    
+    /* Feature tags - high contrast on mobile */
+    .tool-card .feature-tag,
+    .card .feature-tag {
+        background-color: #1e293b !important; /* Dark background */
+        color: #ffffff !important; /* White text */
+        border: 1px solid #334155 !important;
+        font-weight: 500 !important;
+        opacity: 1 !important;
+    }
+    
+    /* Card icons - ensure visibility on mobile */
+    .tool-card .card-icon,
+    .card .card-icon {
+        opacity: 1 !important;
+        filter: none !important;
+    }
+    
+    /* Force all card content to be visible in light mode on mobile */
+    .tool-card,
+    .card {
+        background-color: rgba(255, 255, 255, 0.95) !important;
+        border: 2px solid rgba(0, 0, 0, 0.1) !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+    }
+    
+    /* Specific card type backgrounds for better contrast on mobile */
+    .tool-card.card-image {
+        background-color: #e0e7ff !important; /* Light indigo */
+        border-color: #6366f1 !important;
+    }
+    
+    .tool-card.card-pdf {
+        background-color: #fee2e2 !important; /* Light red */
+        border-color: #ef4444 !important;
+    }
+    
+    .tool-card.card-doc {
+        background-color: #dcfce7 !important; /* Light green */
+        border-color: #22c55e !important;
+    }
+    
+    .tool-card.card-excel {
+        background-color: #fef3c7 !important; /* Light amber */
+        border-color: #f59e0b !important;
+    }
+    
+    /* DARK MODE OVERRIDES - MOBILE ONLY */
+    html.dark .tool-card,
+    html.dark .card {
+        background-color: rgba(33, 38, 45, 0.95) !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+    
+    html.dark .tool-card .card-title,
+    html.dark .card .card-title,
+    html.dark .tool-card h3,
+    html.dark .card h3 {
+        color: #f8fafc !important;
+    }
+    
+    html.dark .tool-card .card-description,
+    html.dark .card .card-description,
+    html.dark .tool-card p,
+    html.dark .card p {
+        color: #cbd5e1 !important;
+    }
+    
+    html.dark .tool-card .card-category,
+    html.dark .card .card-category,
+    html.dark .tool-card .card-header span,
+    html.dark .card .card-header span {
+        color: #94a3b8 !important;
+    }
+    
+    html.dark .tool-card .feature-tag,
+    html.dark .card .feature-tag {
+        background-color: rgba(255, 255, 255, 0.15) !important;
+        color: #a5b4fc !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+    
+    /* Enhanced dark mode card backgrounds and text - MOBILE ONLY */
+    html.dark .tool-card.card-image, html.dark .card.card-image {
+        background-color: #1e40af !important; /* Navy blue */
+        border-color: #3b82f6 !important; /* Light blue */
+    }
+    
+    html.dark .tool-card.card-pdf, html.dark .card.card-pdf {
+        background-color: #9f1239 !important; /* Dark red */
+        border-color: #f87171 !important; /* Red */
+    }
+    
+    html.dark .tool-card.card-doc, html.dark .card.card-doc {
+        background-color: #166534 !important; /* Dark green */
+        border-color: #4ade80 !important; /* Green */
+    }
+    
+    html.dark .tool-card.card-excel, html.dark .card.card-excel {
+        background-color: #78350f !important; /* Dark amber */
+        border-color: #fdba74 !important; /* Amber */
+    }
+    
+    html.dark .tool-card .card-title, html.dark .card .card-title {
+        color: #ffffff !important; /* White text */
+        font-weight: 700 !important;
+    }
+    
+    html.dark .tool-card .card-description, html.dark .card .card-description {
+        color: #e5e7eb !important; /* Light gray */
+        font-weight: 500 !important;
+    }
+    
+    html.dark .tool-card .card-category, html.dark .card .card-category {
+        color: #d1d5db !important; /* Gray */
+        font-weight: 600 !important;
+    }
+    
+    html.dark .tool-card .feature-tag, html.dark .card .feature-tag {
+        background-color: #475569 !important; /* Dark Slate */
+        color: #f1f5f9 !important; /* Light text */
+        border-color: #64748b !important;
+        font-weight: 500 !important;
+    }
 }

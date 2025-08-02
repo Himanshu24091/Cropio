@@ -57,3 +57,173 @@
 .dark #thumbnails-panel {
     border-right-color: var(--border-dark);
 }
+
+/* Mobile fixes for PDF Editor */
+@media (max-width: 768px) {
+    /* Background color for mobile - MOBILE ONLY */
+    body {
+        background-color: #1e293b !important;
+        background-image: none !important;
+    }
+    
+    /* Header/Toolbar mobile fixes */
+    .bg-white {
+        background-color: #1f2937 !important;
+        padding: 0.5rem 1rem !important;
+    }
+    
+    .dark\:bg-slate-800 {
+        background-color: #1f2937 !important;
+    }
+    
+    /* Title styling */
+    h1 {
+        color: #ffffff !important;
+        font-size: 1.125rem !important;
+        margin-left: 0 !important;
+    }
+    
+    /* Toolbar container */
+    #toolbar {
+        gap: 0.25rem !important;
+        overflow-x: auto !important;
+        flex-wrap: nowrap !important;
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+    }
+    
+    #toolbar::-webkit-scrollbar {
+        display: none !important;
+    }
+    
+    /* Toolbar buttons */
+    .toolbar-btn {
+        min-width: 2.5rem !important;
+        height: 2.5rem !important;
+        padding: 0.5rem !important;
+        flex-shrink: 0 !important;
+        background-color: #4b5563 !important;
+        border-color: #6b7280 !important;
+        color: #e5e7eb !important;
+    }
+    
+    .toolbar-btn:hover {
+        background-color: #374151 !important;
+        color: #ffffff !important;
+    }
+    
+    .toolbar-btn.active {
+        background-color: #2563eb !important;
+        color: #ffffff !important;
+    }
+    
+    /* Right side controls */
+    .flex.items-center.space-x-3 {
+        gap: 0.5rem !important;
+        flex-wrap: wrap !important;
+    }
+    
+    /* Color picker and size controls */
+    .flex.items-center.space-x-2 {
+        gap: 0.25rem !important;
+    }
+    
+    .flex.items-center.space-x-2 label {
+        color: #e5e7eb !important;
+        font-size: 0.75rem !important;
+    }
+    
+    #color-picker {
+        width: 1.5rem !important;
+        height: 1.5rem !important;
+        border-color: #6b7280 !important;
+    }
+    
+    #line-width {
+        width: 3rem !important;
+    }
+    
+    #line-width-value {
+        color: #e5e7eb !important;
+        font-size: 0.75rem !important;
+    }
+    
+    /* Download button */
+    #download-btn {
+        background-color: #3b82f6 !important;
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.875rem !important;
+        border-radius: 0.5rem !important;
+    }
+    
+    /* Main content area */
+    .flex-grow.flex.overflow-hidden {
+        flex-direction: column !important;
+    }
+    
+    /* Thumbnails panel - hide on mobile or make collapsible */
+    #thumbnails-panel {
+        display: none !important;
+    }
+    
+    /* Viewer panel */
+    #viewer-panel {
+        background-color: #374151 !important;
+        padding: 1rem !important;
+    }
+    
+    .dark\:bg-slate-700 {
+        background-color: #374151 !important;
+    }
+    
+    /* Upload prompt */
+    #upload-prompt .bg-white {
+        background-color: rgba(31, 41, 59, 0.8) !important;
+        border-color: #4b5563 !important;
+        backdrop-filter: blur(10px) !important;
+    }
+    
+    .dark\:bg-slate-800\/50 {
+        background-color: rgba(31, 41, 59, 0.8) !important;
+    }
+    
+    #upload-prompt h3 {
+        color: #ffffff !important;
+    }
+    
+    #upload-prompt p {
+        color: #d1d5db !important;
+    }
+    
+    #upload-prompt svg {
+        color: #9ca3af !important;
+    }
+    
+    /* Dividers */
+    .border-l.border-slate-300 {
+        border-color: #6b7280 !important;
+    }
+    
+    .dark\:border-slate-600 {
+        border-color: #6b7280 !important;
+    }
+    
+    /* Container adjustments */
+    .w-full.h-screen {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* Header responsive layout */
+    .p-2.flex.items-center.justify-between {
+        flex-wrap: wrap !important;
+        gap: 0.5rem !important;
+        padding: 0.75rem 1rem !important;
+    }
+    
+    /* Make toolbar scrollable horizontally */
+    .flex.items-center.justify-between {
+        width: 100% !important;
+        overflow-x: auto !important;
+    }
+}

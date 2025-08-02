@@ -7,25 +7,28 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
     <script>
-        // Default to light mode (white) - only use dark mode if explicitly set
-        if (localStorage.getItem('theme') === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-            // Set default to light if no preference is stored
-            if (!localStorage.getItem('theme')) {
+        // Theme initialization - ensure proper contrast in light mode
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+                if (!savedTheme) localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
                 localStorage.setItem('theme', 'light');
             }
-        }
+        })();
     </script>
 </head>
 <body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 antialiased flex flex-col min-h-screen">
 
     <header class="site-header bg-slate-800/90 dark:bg-slate-800/90 backdrop-blur-sm sticky top-0 z-50 shadow-md">
-        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
-            <a href="/" class="cropio-logo flex items-center text-2xl font-bold text-primary-color">
+        <nav class="container mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
+            <a href="/" class="cropio-logo flex items-center text-xl sm:text-2xl font-bold text-primary-color">
                 <!-- 3D Cropio Logo SVG -->
-                <svg width="32" height="32" viewBox="0 0 32 32" class="mr-2" xmlns="http://www.w3.org/2000/svg">
+                <svg width="28" height="28" viewBox="0 0 32 32" class="mr-2 sm:w-8 sm:h-8" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient id="cropGradient1" x1="0%" y1="0%" x2="100%" y2="100%">
                             <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
@@ -95,20 +98,52 @@
         <div id="mobile-menu" class="md:hidden hidden bg-slate-800/95 backdrop-blur-sm">
             <div class="px-6 py-4 space-y-4">
                 <div class="border-b border-slate-700 pb-4">
-                    <p class="text-white font-semibold mb-2">Converters</p>
-                    <div class="pl-4 space-y-2">
-                        <a href="/image-converter" class="block text-slate-300 hover:text-white transition-colors">Image Converter</a>
-                        <a href="/pdf-converter" class="block text-slate-300 hover:text-white transition-colors">PDF Converter</a>
-                        <a href="/document-converter" class="block text-slate-300 hover:text-white transition-colors">Doc Converter</a>
-                        <a href="/excel-converter" class="block text-slate-300 hover:text-white transition-colors">Excel Converter</a>
+                    <p class="text-white font-semibold mb-3 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"></path>
+                        </svg>
+                        Converters
+                    </p>
+                    <div class="pl-4 space-y-1">
+                        <a href="/image-converter" class="block text-slate-300 hover:text-white transition-colors flex items-center py-2">
+                            <span class="text-blue-400 mr-3">📷</span>
+                            Image Converter
+                        </a>
+                        <a href="/pdf-converter" class="block text-slate-300 hover:text-white transition-colors flex items-center py-2">
+                            <span class="text-red-400 mr-3">📄</span>
+                            PDF Converter
+                        </a>
+                        <a href="/document-converter" class="block text-slate-300 hover:text-white transition-colors flex items-center py-2">
+                            <span class="text-green-400 mr-3">📝</span>
+                            Doc Converter
+                        </a>
+                        <a href="/excel-converter" class="block text-slate-300 hover:text-white transition-colors flex items-center py-2">
+                            <span class="text-yellow-400 mr-3">📊</span>
+                            Excel Converter
+                        </a>
                     </div>
                 </div>
-                <div class="space-y-2">
-                    <a href="/compressor" class="block text-white font-semibold hover:text-gray-300 transition-colors">Compressor</a>
-                    <a href="/image-cropper" class="block text-white font-semibold hover:text-gray-300 transition-colors">Image Cropper</a>
-                    <a href="/pdf-editor" class="block text-white font-semibold hover:text-gray-300 transition-colors">PDF Editor</a>
-                    <a href="/text-ocr" class="block text-white font-semibold hover:text-gray-300 transition-colors">Text & OCR</a>
-                    <a href="/secure-pdf" class="block text-white font-semibold hover:text-gray-300 transition-colors">Secure PDF</a>
+                <div class="space-y-1">
+                    <a href="/compressor" class="block text-white font-semibold hover:text-gray-300 transition-colors flex items-center py-3 px-2 rounded-lg hover:bg-slate-700">
+                        <span class="text-purple-400 mr-3 text-lg">🗜️</span>
+                        Compressor
+                    </a>
+                    <a href="/image-cropper" class="block text-white font-semibold hover:text-gray-300 transition-colors flex items-center py-3 px-2 rounded-lg hover:bg-slate-700">
+                        <span class="text-cyan-400 mr-3 text-lg">✂️</span>
+                        Image Cropper
+                    </a>
+                    <a href="/pdf-editor" class="block text-white font-semibold hover:text-gray-300 transition-colors flex items-center py-3 px-2 rounded-lg hover:bg-slate-700">
+                        <span class="text-orange-400 mr-3 text-lg">✏️</span>
+                        PDF Editor
+                    </a>
+                    <a href="/text-ocr" class="block text-white font-semibold hover:text-gray-300 transition-colors flex items-center py-3 px-2 rounded-lg hover:bg-slate-700">
+                        <span class="text-pink-400 mr-3 text-lg">🔍</span>
+                        Text & OCR
+                    </a>
+                    <a href="/secure-pdf" class="block text-white font-semibold hover:text-gray-300 transition-colors flex items-center py-3 px-2 rounded-lg hover:bg-slate-700">
+                        <span class="text-emerald-400 mr-3 text-lg">🔒</span>
+                        Secure PDF
+                    </a>
                 </div>
             </div>
         </div>

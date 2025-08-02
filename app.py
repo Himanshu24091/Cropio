@@ -60,4 +60,5 @@ scheduler.add_job(cleanup_files, 'interval', minutes=30)
 scheduler.start()
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Bind to all network interfaces to allow mobile access
+    app.run(host='0.0.0.0', port=5000, debug=True)

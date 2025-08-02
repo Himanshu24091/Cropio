@@ -146,6 +146,45 @@ html.dark .nav-link.font-semibold {
     display: block !important;
 }
 
+/* Fix dropdown hover issue for desktop/laptop */
+@media (min-width: 769px) {
+    .group {
+        position: relative;
+    }
+    
+    .group .absolute {
+        margin-top: 0 !important;
+        top: 100% !important;
+        left: 0 !important;
+    }
+    
+    /* Add invisible bridge between button and dropdown */
+    .group::before {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        height: 0.5rem;
+        background: transparent;
+        z-index: 45;
+    }
+    
+    .group:hover::before {
+        display: block;
+    }
+    
+    /* Ensure dropdown appears on both button and dropdown hover */
+    .group .absolute:hover {
+        display: block !important;
+    }
+    
+    /* Extend hover area */
+    .group:hover .absolute {
+        display: block !important;
+    }
+}
+
 .dropdown-menu {
     background-color: white;
     border: 1px solid var(--border-light);
@@ -178,6 +217,95 @@ html.dark .dropdown-menu a {
 /* Mobile menu styles */
 #mobile-menu {
     transition: all 0.3s ease;
+    background-color: #1e293b !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 0.5rem;
+}
+
+#mobile-menu .block {
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: #cbd5e1;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    border-radius: 0.375rem;
+}
+
+#mobile-menu .block:hover {
+    background-color: #374151;
+    color: #ffffff;
+}
+
+#mobile-menu p {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #e5e7eb;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid #374151;
+}
+
+#mobile-menu .space-y-2 {
+    margin-top: 1rem;
+}
+
+#mobile-menu a + a {
+    border-top: 1px solid #2d3748;
+}
+
+/* Enhanced mobile menu styling */
+#mobile-menu {
+    border-top: 1px solid #374151;
+    margin-top: 0.5rem;
+}
+
+#mobile-menu .px-6 {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+}
+
+/* Mobile menu items with better spacing and effects */
+#mobile-menu a {
+    margin: 0.25rem 0;
+    border-radius: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+#mobile-menu a:hover {
+    transform: translateX(4px);
+    background-color: #475569 !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Icon styling in mobile menu */
+#mobile-menu span {
+    font-size: 1.125rem;
+    line-height: 1;
+    display: inline-block;
+    width: 1.5rem;
+    text-align: center;
+}
+
+/* Converter section styling */
+#mobile-menu .border-b {
+    border-bottom: 2px solid #4a5568 !important;
+    padding-bottom: 1rem !important;
+    margin-bottom: 1rem !important;
+}
+
+/* Section headers with icons */
+#mobile-menu p svg {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* Subtle animation for menu items */
+#mobile-menu a {
+    transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+#mobile-menu a:active {
+    transform: translateX(2px) scale(0.98);
 }
 
 #mobile-menu.show {

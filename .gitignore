@@ -35,10 +35,21 @@ dist/
 app_backup.py
 app_new.py
 test_routes.py
-
-# Development files
-*.log
+*.bak
 *.tmp
+*.git/
+# Log files
+logs/
+*.log
+
+# Cache and temporary files
+cache/
+tmp/
+
+# Documentation and metadata
+*.md
+*.map
+docs/
 
 # OS specific
 .DS_Store

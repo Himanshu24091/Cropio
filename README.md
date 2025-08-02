@@ -130,20 +130,39 @@ converter1/
 
 ## ▶️ How to Run
 
-1. **Start the app**:
+1. **Set up the environment**:
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   pip install -r requirements.txt
+   ```
+
+2. **Start the app**:
    ```bash
    python app.py
    ```
 
-2. **Test all registered routes**:
+3. **Test all registered routes**:
    ```bash
    python test_routes.py
    ```
 
-3. **Restore original monolithic file** (if needed):
+4. **Restore original monolithic file** (if needed):
    ```bash
-   copy app_backup.py app.py
+   copy app_backup.py app.py  # On Unix use `cp app_backup.py app.py`
    ```
+
+## 🌟 Additional Tools
+
+### 5. Secure PDF
+- **Password Protection**: Add or remove password protection from PDFs.
+- **QR Code Unlock**: Unlock PDFs using QR codes for enhanced security.
+
+### 6. Text & OCR
+- **Extract Text**: Extract text from images and documents using OCR (Optical Character Recognition).
+
+### Reverse Converter
+- **Reverse Conversion**: Convert PDF back to images, retaining original quality.
 
 ---
 
@@ -184,6 +203,48 @@ from routes.new_converter_routes import new_converter_bp
 app.register_blueprint(new_converter_bp)
 ```
 
+## 🔧 Development & Contribution
+
+### Contributing to Cropio
+- Fork the repository
+- Create a feature branch
+- Commit your changes
+- Push the branch
+- Open a pull request
+
 ---
 
 Made with 💻 using Flask + Tailwind + PDF-lib.js
+
+---
+
+## 🗃️ File Structure
+
+### Routes:
+- **PDF Converter**: `pdf_converter_routes.py`
+- **Secure PDF**: `secure_pdf_routes.py`
+- **Text & OCR**: `text_ocr_routes.py`
+...
+
+### Static Assets:
+- **CSS**: Base styles in `base.css`, component-specific styles (`cropper.css`, `converter.css`)
+- **JavaScript**: Core functionality in `theme.js`, page-specific logic (`compressor.js`, `pdf_editor.js`)
+
+---
+
+## 🚀 Getting Started
+
+### Running the Application
+Follow the setup guide and start using Cropio on your local development server, ensuring all dependencies are in place. Develop and test various components as needed.
+
+---
+
+🔗 **License**: MIT License. See `LICENSE` for more information.
+
+---
+
+🏆 **Acknowledgments**
+- Open source projects
+- Community contributors
+
+---

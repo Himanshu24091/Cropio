@@ -2,8 +2,8 @@
 
 {% block page_content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='converter.css') }}">
-<div class="converter-body flex items-center justify-center w-full pt-16 pb-16">
-    <div class="container mx-auto p-4 max-w-lg w-full">
+<div class="converter-body flex items-center justify-center w-full px-4 sm:px-6 py-8 sm:py-16">
+    <div class="container mx-auto w-full max-w-lg">
         <div class="converter-container">
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
