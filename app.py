@@ -17,6 +17,10 @@ from routes.compressor_routes import compressor_bp
 from routes.cropper_routes import cropper_bp
 from routes.pdf_editor_routes import pdf_editor_bp
 from routes.file_serving_routes import file_serving_bp
+from routes.reverse_converter_routes import reverse_converter_bp
+from routes.text_ocr_routes import text_ocr_bp
+from routes.secure_pdf_routes import secure_pdf_bp
+# from routes.universal_converter_routes import universal_converter_bp  # Commented out due to missing dependencies
 
 def create_app():
     """Application factory function"""
@@ -41,6 +45,9 @@ def create_app():
     app.register_blueprint(cropper_bp)
     app.register_blueprint(pdf_editor_bp)
     app.register_blueprint(file_serving_bp)
+    app.register_blueprint(reverse_converter_bp)
+    app.register_blueprint(text_ocr_bp)
+    app.register_blueprint(secure_pdf_bp)
     
     return app
 

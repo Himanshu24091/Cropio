@@ -6,6 +6,21 @@ from PIL import Image
 from werkzeug.utils import secure_filename
 from utils.helpers import allowed_file
 
+# Optional imports for advanced features
+try:
+    from pillow_heif import register_heif_opener
+    register_heif_opener()
+    HEIF_AVAILABLE = True
+except ImportError:
+    HEIF_AVAILABLE = False
+
+try:
+    import rawpy
+    import numpy as np
+    RAW_AVAILABLE = True
+except ImportError:
+    RAW_AVAILABLE = False
+
 image_converter_bp = Blueprint('image_converter', __name__)
 
 @image_converter_bp.route('/image-converter', methods=['GET', 'POST'])
@@ -38,6 +53,21 @@ def image_converter():
                 
                 if output_format.lower() == 'ico':
                     img.save(output_buffer, format='ICO', sizes=[(32,32)])
+                elif output_format.lower() in ['heif', 'heic']:
+                    if HEIF_AVAILABLE:
+                        img.save(output_buffer, format='HEIF')
+                    else:
+                        flash('HEIF format not supported. Please install pillow-heif library.', 'error')
+                        return redirect(request.url)
+                elif output_format.lower() == 'raw':
+                    if RAW_AVAILABLE:
+                        raw = rawpy.imread(filepath)
+                        rgb = raw.postprocess()
+                        img = Image.fromarray(rgb)
+                        img.save(output_buffer, format='TIFF')
+                    else:
+                        flash('RAW format not supported. Please install rawpy library.', 'error')
+                        return redirect(request.url)
                 else:
                     img.save(output_buffer, format=output_format.upper())
                 

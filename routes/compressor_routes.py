@@ -1,8 +1,9 @@
 # routes/compressor_routes.py
 import os
 import uuid
-from flask import Blueprint, render_template, request, jsonify, current_app
-from utils.helpers import allowed_file, compress_image, compress_pdf
+import time
+from flask import Blueprint, render_template, request, jsonify, current_app, send_file
+from utils.helpers import allowed_file, compress_image, compress_pdf, batch_compress_files, create_zip_archive
 
 compressor_bp = Blueprint('compressor', __name__)
 

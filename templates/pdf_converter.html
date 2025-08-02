@@ -4,14 +4,13 @@
 
 {% block converter_form %}
 <h1 class="text-3xl font-bold text-center mb-2">PDF Converter</h1>
-<p class="text-center text-muted-light dark:text-muted-dark mb-8">Drag & drop a file or click to select.</p>
-
+<p class="text-center text-muted-light dark:text-muted-dark mb-8">Convert FROM PDF or TO PDF from various formats.</p>
 <form method="post" enctype="multipart/form-data">
     <div id="drop-zone" class="p-10 text-center rounded-lg cursor-pointer">
-        <p class="text-muted-light dark:text-muted-dark">Drop your PDF here</p>
+        <p class="text-muted-light dark:text-muted-dark">Drop your file here</p>
         <p class="text-sm my-2">or</p>
         <p class="text-primary-color font-semibold">Click to browse</p>
-        <input type="file" name="file" id="file" class="hidden" required accept=".pdf">
+        <input type="file" name="file" id="file" class="hidden" required accept=".pdf,.txt,.md,.html,.csv,.json,.xml,.yaml,.yml,.xlsx,.xls">
     </div>
 
     <div id="file-preview">
@@ -19,10 +18,32 @@
     </div>
 
     <div class="my-6">
+        <div class="bg-blue-50 dark:bg-blue-900 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+            <h3 class="font-semibold text-blue-800 dark:text-blue-200 mb-2">Supported Input Formats:</h3>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm text-blue-700 dark:text-blue-300">
+                <span>• PDF → Multiple formats</span>
+                <span>• TXT → PDF</span>
+                <span>• MD → PDF</span>
+                <span>• HTML → PDF</span>
+                <span>• CSV → PDF</span>
+                <span>• JSON → PDF</span>
+                <span>• XML → PDF</span>
+                <span>• YAML → PDF</span>
+                <span>• Excel → PDF</span>
+            </div>
+        </div>
         <label for="format" class="block text-sm font-bold mb-2">Convert to:</label>
         <select name="format" id="format" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-color focus:border-primary-color block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-color dark:focus:border-primary-color">
-            <option value="docx">DOCX</option>
-            <option value="csv">CSV (Experimental)</option>
+            <option value="docx">DOCX - Word Document</option>
+            <option value="txt">TXT - Plain Text</option>
+            <option value="csv">CSV - Comma Separated Values</option>
+            <option value="md">MD - Markdown</option>
+            <option value="html">HTML - Web Page</option>
+            <option value="json">JSON - JavaScript Object Notation</option>
+            <option value="xml">XML - Extensible Markup Language</option>
+            <option value="excel">XLSX - Excel Spreadsheet (Tables)</option>
+            <option value="images">ZIP - Extract All Images</option>
+            <option value="structured_text">JSON - Structured Text Analysis</option>
         </select>
     </div>
     <div class="flex items-center justify-center">

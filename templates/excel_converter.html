@@ -5,7 +5,6 @@
 {% block converter_form %}
 <h1 class="text-3xl font-bold text-center mb-2">Excel Converter</h1>
 <p class="text-center text-muted-light dark:text-muted-dark mb-8">Drag & drop a file or click to select.</p>
-
 <form method="post" enctype="multipart/form-data">
     <div id="drop-zone" class="p-10 text-center rounded-lg cursor-pointer">
         <p class="text-muted-light dark:text-muted-dark">Drop your Excel file here</p>
@@ -21,6 +20,12 @@
         <select name="format" id="format" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-color focus:border-primary-color block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-color dark:focus:border-primary-color">
             <option value="csv">CSV</option>
             <option value="json">JSON</option>
+            <option value="html">HTML</option>
+            <option value="md">Markdown</option>
+            <option value="xml">XML</option>
+            <option value="latex">LaTeX</option>
+            <option value="pdf">PDF</option>
+            <option value="docx">DOCX</option>
         </select>
     </div>
     <div class="flex items-center justify-center">

@@ -1,9 +1,319 @@
-/* Home Page Styles - Hero Section and Cards */
+/* Modernized Home Page Styles - Hero Section and Cards */
 
+/* Hero Section Enhancements */
 .hero-bg {
     background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
     position: relative;
     overflow: hidden;
+    min-height: 35vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0rem 0;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 10;
+    width: 100%;
+    max-width: 1200px;
+    text-align: center;
+}
+
+.hero-badge {
+    margin-bottom: 1.5rem;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+}
+
+.gradient-text {
+    background: linear-gradient(45deg, #ffffff, #e0e7ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-subtitle {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1.125rem;
+    line-height: 1.5;
+    margin-bottom: 2rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    max-width: 500px;
+    margin: 0 auto 2rem auto;
+    text-align: center;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.hero-cta {
+    margin-top: 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero-bg {
+        min-height: 30vh;
+        padding: 3rem 0;
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .hero-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stat-number {
+        font-size: 1.25rem;
+    }
+    
+    .stat-label {
+        font-size: 0.75rem;
+    }
+}
+
+.hero-decorations {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.hero-decoration {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    animation: pulse 8s ease-in-out infinite;
+}
+
+.hero-decoration-1 {
+    width: 450px;
+    height: 450px;
+    top: -150px;
+    left: -200px;
+    background: rgba(255, 255, 255, 0.1);
+    filter: blur(100px);
+}
+
+.hero-decoration-2 {
+    width: 350px;
+    height: 350px;
+    bottom: -150px;
+    right: -150px;
+    background: rgba(255, 255, 255, 0.15);
+    filter: blur(80px);
+}
+
+.hero-decoration-3 {
+    width: 300px;
+    height: 300px;
+    top: 100px;
+    right: 200px;
+    background: rgba(255, 255, 255, 0.2);
+    filter: blur(60px);
+}
+
+/* Call To Action */
+.cta-button {
+    background-color: #4f46e5;
+    border-radius: 9999px;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.cta-button:hover {
+    background-color: #4338ca;
+}
+
+/* Tools Section */
+.tools-section {
+    padding: 0px 0;
+}
+
+.section-header {
+    margin-bottom: 3rem;
+}
+
+.section-title {
+    color: #ffffff;
+}
+
+.section-subtitle {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+}
+
+/* Individual Card Styles */
+.tool-card {
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    box-shadow: var(--shadow-xl);
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    background-color: var(--card-light);
+    color: var(--text-light);
+}
+html.dark .tool-card {
+    background-color: var(--card-dark);
+    color: var(--text-dark);
+}
+
+.tool-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md);
+}
+
+.card-header {
+    margin-bottom: 1.25rem;
+}
+
+.card-icon-wrapper {
+    width: 5rem;
+    height: 5rem;
+    margin: 0 auto 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 9999px;
+    background-color: var(--card-bg-image-light);
+}
+html.dark .card-icon-wrapper {
+    background-color: var(--card-bg-image-dark);
+}
+
+.card-icon {
+    width: 3rem;
+    height: 3rem;
+    color: var(--primary-color);
+}
+html.dark .card-icon {
+    color: #a5b4fc;
+}
+
+.card-body {
+    color: inherit;
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: inherit;
+}
+
+.card-description {
+    font-size: 0.875rem;
+    color: var(--text-muted-light);
+    margin-bottom: 1rem;
+}
+html.dark .card-description {
+    color: var(--text-muted-dark);
+}
+
+.card-features {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.feature-tag {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 9999px;
+    color: var(--primary-color);
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+}
+html.dark .feature-tag {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #a5b4fc;
+}
+
+/* Card Category Styles */
+.card-category {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: inherit;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Hero Badge Styles */
+.hero-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.badge-text {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 9999px;
+    color: #ffffff;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* Gradient Text */
+.gradient-text {
+    background: linear-gradient(45deg, #ffffff, #a5b4fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .hero-bg::before,

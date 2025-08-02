@@ -1,0 +1,239 @@
+{% extends "layout.html" %}
+
+{% block title %}Text & OCR Processor{% endblock %}
+
+{% block converter_form %}
+<h1 class="text-3xl font-bold text-center mb-2">Text & OCR Processor</h1>
+<p class="text-center text-muted-light dark:text-muted-dark mb-8">Extract text from images or convert text to various formats.</p>
+
+<!-- Tab Navigation -->
+<div class="flex mb-6 border-b border-gray-200 dark:border-gray-700">
+    <button id="ocr-tab" class="tab-button active px-6 py-3 text-sm font-medium border-b-2 border-primary-color text-primary-color">
+        OCR (Image to Text)
+    </button>
+    <button id="text-tab" class="tab-button px-6 py-3 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
+        Text Converter
+    </button>
+</div>
+
+<!-- OCR Tab Content -->
+<div id="ocr-content" class="tab-content">
+    <form id="ocr-form" method="post" enctype="multipart/form-data">
+        <input type="hidden" name="processing_type" value="ocr">
+        
+        <div id="drop-zone-ocr" class="p-10 text-center rounded-lg cursor-pointer border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-primary-color dark:hover:border-primary-color transition-colors">
+            <p class="text-muted-light dark:text-muted-dark">Drop your image here</p>
+            <p class="text-sm my-2">or</p>
+            <p class="text-primary-color font-semibold">Click to browse</p>
+            <input type="file" name="file" id="file-ocr" class="hidden" required accept=".png, .jpg, .jpeg, .gif, .webp, .bmp, .tiff, .tif">
+        </div>
+        
+        <div id="file-preview-ocr">
+            <p id="file-name-ocr" class="mt-2 text-sm text-center"></p>
+        </div>
+        
+        <!-- Preview Button -->
+        <div class="my-4 text-center">
+            <button type="button" id="preview-btn" class="btn-secondary text-gray-700 dark:text-gray-300 font-bold py-2 px-4 rounded-lg" style="display:none;">
+                Preview Text
+            </button>
+        </div>
+        
+        <!-- Text Preview Area -->
+        <div id="text-preview" class="hidden my-4">
+            <label class="block text-sm font-bold mb-2">Extracted Text Preview:</label>
+            <textarea id="preview-text" readonly class="w-full h-32 p-3 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-sm"></textarea>
+            <div id="text-stats" class="text-xs text-gray-500 dark:text-gray-400 mt-1"></div>
+        </div>
+        
+        <div class="my-6">
+            <label for="ocr_format" class="block text-sm font-bold mb-2">Save extracted text as:</label>
+            <select name="ocr_format" id="ocr_format" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-color focus:border-primary-color block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-color dark:focus:border-primary-color">
+                <option value="txt">Plain Text (.txt)</option>
+                <option value="pdf">PDF Document (.pdf)</option>
+                <option value="docx">Word Document (.docx)</option>
+                <option value="json">JSON Data (.json)</option>
+            </select>
+        </div>
+        
+        <div class="flex items-center justify-center">
+            <button type="submit" class="btn-primary text-white font-bold py-3 px-6 rounded-full w-full">
+                Extract & Convert Text
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Text Converter Tab Content -->
+<div id="text-content" class="tab-content hidden">
+    <form method="post" enctype="multipart/form-data">
+        <input type="hidden" name="processing_type" value="text_convert">
+        
+        <div class="my-6">
+            <label for="text_input" class="block text-sm font-bold mb-2">Enter your text:</label>
+            <textarea name="text_input" id="text_input" rows="8" placeholder="Type or paste your text here..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-primary-color focus:border-primary-color dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-color dark:focus:border-primary-color"></textarea>
+            <div id="text-input-stats" class="text-xs text-gray-500 dark:text-gray-400 mt-1"></div>
+        </div>
+        
+        <div class="my-6">
+            <label for="text_format" class="block text-sm font-bold mb-2">Convert to:</label>
+            <select name="text_format" id="text_format" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-color focus:border-primary-color block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-color dark:focus:border-primary-color">
+                <option value="pdf">PDF Document (.pdf)</option>
+                <option value="docx">Word Document (.docx)</option>
+                <option value="txt">Text File (.txt)</option>
+                <option value="json">JSON Data (.json)</option>
+            </select>
+        </div>
+        
+        <div class="flex items-center justify-center">
+            <button type="submit" class="btn-primary text-white font-bold py-3 px-6 rounded-full w-full">
+                Convert Text
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+// Tab switching functionality
+document.getElementById('ocr-tab').addEventListener('click', function() {
+    switchTab('ocr');
+});
+
+document.getElementById('text-tab').addEventListener('click', function() {
+    switchTab('text');
+});
+
+function switchTab(tab) {
+    // Update tab buttons
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active', 'border-primary-color', 'text-primary-color');
+        btn.classList.add('border-transparent', 'text-gray-500');
+    });
+    
+    // Update tab content
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    
+    if (tab === 'ocr') {
+        document.getElementById('ocr-tab').classList.add('active', 'border-primary-color', 'text-primary-color');
+        document.getElementById('ocr-tab').classList.remove('border-transparent', 'text-gray-500');
+        document.getElementById('ocr-content').classList.remove('hidden');
+    } else {
+        document.getElementById('text-tab').classList.add('active', 'border-primary-color', 'text-primary-color');
+        document.getElementById('text-tab').classList.remove('border-transparent', 'text-gray-500');
+        document.getElementById('text-content').classList.remove('hidden');
+    }
+}
+
+// File upload handling for OCR
+document.getElementById('drop-zone-ocr').addEventListener('click', function() {
+    document.getElementById('file-ocr').click();
+});
+
+document.getElementById('file-ocr').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        document.getElementById('file-name-ocr').textContent = `Selected: ${file.name}`;
+        document.getElementById('preview-btn').style.display = 'inline-block';
+    }
+});
+
+// Drag and drop for OCR
+document.getElementById('drop-zone-ocr').addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.classList.add('border-primary-color', 'bg-blue-50');
+});
+
+document.getElementById('drop-zone-ocr').addEventListener('dragleave', function(e) {
+    e.preventDefault();
+    this.classList.remove('border-primary-color', 'bg-blue-50');
+});
+
+document.getElementById('drop-zone-ocr').addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.classList.remove('border-primary-color', 'bg-blue-50');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        document.getElementById('file-ocr').files = files;
+        document.getElementById('file-name-ocr').textContent = `Selected: ${files[0].name}`;
+        document.getElementById('preview-btn').style.display = 'inline-block';
+    }
+});
+
+// Preview functionality
+document.getElementById('preview-btn').addEventListener('click', function() {
+    const fileInput = document.getElementById('file-ocr');
+    if (!fileInput.files.length) return;
+    
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+    
+    // Show loading state
+    this.textContent = 'Processing...';
+    this.disabled = true;
+    
+    fetch('/text-preview', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('preview-text').value = data.text;
+            document.getElementById('text-stats').textContent = 
+                `Words: ${data.word_count} | Characters: ${data.character_count}`;
+            document.getElementById('text-preview').classList.remove('hidden');
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error processing image: ' + error);
+    })
+    .finally(() => {
+        this.textContent = 'Preview Text';
+        this.disabled = false;
+    });
+});
+
+// Text input stats
+document.getElementById('text_input').addEventListener('input', function() {
+    const text = this.value;
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    const chars = text.length;
+    const lines = text.split('\n').length;
+    
+    document.getElementById('text-input-stats').textContent = 
+        `Words: ${words} | Characters: ${chars} | Lines: ${lines}`;
+});
+</script>
+
+<style>
+.tab-button.active {
+    border-bottom-color: var(--primary-color) !important;
+    color: var(--primary-color) !important;
+}
+
+.btn-secondary {
+    background-color: #6b7280;
+    border: 1px solid #6b7280;
+}
+
+.btn-secondary:hover {
+    background-color: #4b5563;
+    border-color: #4b5563;
+}
+
+.dark .btn-secondary {
+    background-color: #4b5563;
+    border-color: #4b5563;
+}
+
+.dark .btn-secondary:hover {
+    background-color: #374151;
+    border-color: #374151;
+}
+</style>
+{% endblock %}

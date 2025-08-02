@@ -5,7 +5,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('file');
     const filePreview = document.getElementById('file-preview');
     
-    if (converterForm && dropZone && fileInput && filePreview) {
+    // Check if event listeners have already been added (to prevent duplicate listeners from index.js)
+    if (converterForm && dropZone && fileInput && filePreview && !dropZone.hasAttribute('data-listeners-added')) {
         const handleFileSelect = (file) => {
             if (!file) return;
 
@@ -70,5 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 handleFileSelect(files[0]);
             }
         });
+        
+        // Mark that listeners have been added
+        dropZone.setAttribute('data-listeners-added', 'true');
     }
 });

@@ -1,9 +1,28 @@
-Flask
-Pillow
-PyMuPDF
-pdf2docx
-pandas
-python-docx
-openpyxl
-APScheduler
-gunicorn
+# Core Dependencies (Required)
+Flask>=2.0.0
+Pillow>=9.0.0
+PyMuPDF>=1.20.0
+pdf2docx>=0.5.0
+pandas>=1.5.0
+python-docx>=0.8.11
+openpyxl>=3.0.0
+APScheduler>=3.9.0
+gunicorn>=20.0.0
+Werkzeug>=2.0.0
+
+# Enhanced converter libraries (Optional - install as needed)
+reportlab>=3.6.0          # For Excel/DOCX to PDF conversion
+markdown>=3.4.0           # For Markdown processing
+pytesseract>=0.3.10       # For OCR text extraction from images
+PyPDF2>=3.0.0             # For PDF password protection and manipulation
+qrcode>=7.4.0             # For QR code generation
+Pillow>=9.0.0             # For QR code image generation (already included but needed for qrcode)
+# pillow-heif>=0.10.0       # For HEIF/HEIC image support
+# rawpy>=0.18.0             # For RAW image processing
+# numpy>=1.21.0             # For image processing
+# opencv-python>=4.5.0      # For advanced image operations
+# filetype>=1.0.0           # For file type detection
+# chardet>=4.0.0            # For character encoding detection
+# python-pptx>=0.6.0        # For PowerPoint support
+# xlsxwriter>=3.0.0         # For advanced Excel writing
+# xlrd>=2.0.0               # For reading older Excel formats
