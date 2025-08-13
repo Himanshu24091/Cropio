@@ -1,0 +1,383 @@
+/* PDF Page Delete Styles */
+.pdf-delete-container {
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+.section-card {
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid #e2e8f0;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.dark .section-card {
+    background-color: rgba(30, 41, 59, 0.5);
+    border-color: #475569;
+}
+
+.upload-zone {
+    border: 4px dashed #cbd5e1;
+    border-radius: 0.75rem;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.dark .upload-zone {
+    border-color: #475569;
+}
+
+.upload-zone:hover,
+.upload-zone.dragover {
+    border-color: #6366f1;
+    background-color: #eef2ff;
+}
+
+.dark .upload-zone:hover,
+.dark .upload-zone.dragover {
+    border-color: #818cf8;
+    background-color: rgba(67, 56, 202, 0.2);
+}
+
+.upload-zone.processing {
+    border-color: #f97316;
+    background-color: #fff7ed;
+    cursor: not-allowed;
+}
+
+.dark .upload-zone.processing {
+    background-color: rgba(234, 88, 12, 0.2);
+}
+
+.upload-icon {
+    width: 4rem;
+    height: 4rem;
+    color: #94a3b8;
+    margin: 0 auto 1rem;
+}
+
+.dark .upload-icon {
+    color: #64748b;
+}
+
+.upload-button {
+    display: inline-block;
+    background-color: #4f46e5;
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.upload-button:hover {
+    background-color: #4338ca;
+}
+
+.upload-button.processing {
+    background-color: #ea580c;
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+
+/* Page Grid Styles */
+.pages-grid {
+    @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mt-6;
+}
+
+.page-item {
+    @apply relative bg-white dark:bg-slate-700 rounded-lg shadow-md border border-slate-200 dark:border-slate-600 cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105;
+}
+
+.page-item.selected {
+    @apply border-2 border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 shadow-lg scale-105;
+}
+
+.page-item.to-delete {
+    @apply border-2 border-red-500 bg-red-50 dark:bg-red-900/30;
+}
+
+.page-item.to-keep {
+    @apply border-2 border-green-500 bg-green-50 dark:bg-green-900/30;
+}
+
+.page-thumbnail {
+    @apply w-full h-32 object-contain rounded-t-lg bg-gray-50 dark:bg-slate-600;
+}
+
+.page-info {
+    @apply p-3 text-center;
+}
+
+.page-number {
+    @apply text-sm font-semibold text-slate-700 dark:text-slate-300;
+}
+
+.page-size {
+    @apply text-xs text-slate-500 dark:text-slate-400 mt-1;
+}
+
+.page-checkbox {
+    @apply absolute top-2 left-2 w-5 h-5 text-indigo-600 bg-white rounded border border-gray-300 focus:ring-indigo-500;
+}
+
+.page-status-badge {
+    @apply absolute top-2 right-2 px-2 py-1 text-xs font-medium rounded-full;
+}
+
+.status-delete {
+    @apply bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200;
+}
+
+.status-keep {
+    @apply bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200;
+}
+
+/* Selection Controls */
+.selection-controls {
+    @apply flex flex-wrap gap-4 items-center justify-between mb-6 p-4 bg-slate-50 dark:bg-slate-700/50 rounded-lg;
+}
+
+.control-group {
+    @apply flex items-center gap-2;
+}
+
+.control-button {
+    @apply px-4 py-2 text-sm font-medium rounded-lg border transition-colors;
+}
+
+.btn-select {
+    @apply border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600;
+}
+
+.btn-primary {
+    @apply bg-indigo-600 hover:bg-indigo-700 text-white border-indigo-600;
+}
+
+.btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white border-red-600;
+}
+
+.btn-success {
+    @apply bg-green-600 hover:bg-green-700 text-white border-green-600;
+}
+
+.btn-secondary {
+    @apply bg-slate-600 hover:bg-slate-700 text-white border-slate-600;
+}
+
+.btn-disabled {
+    @apply opacity-50 cursor-not-allowed hover:bg-current;
+}
+
+/* Operation Mode Toggle */
+.operation-toggle {
+    @apply flex bg-slate-100 dark:bg-slate-700 rounded-lg p-1;
+}
+
+.toggle-option {
+    @apply flex-1 px-4 py-2 text-sm font-medium text-center rounded-md cursor-pointer transition-colors;
+}
+
+.toggle-option.active {
+    @apply bg-white dark:bg-slate-600 text-indigo-600 dark:text-indigo-400 shadow-sm;
+}
+
+.toggle-option:not(.active) {
+    @apply text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200;
+}
+
+/* Info Panel */
+.info-panel {
+    @apply bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-4 mb-6;
+}
+
+.info-text {
+    @apply text-sm text-blue-800 dark:text-blue-200;
+}
+
+/* Progress Indicators */
+.progress-bar {
+    @apply w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2;
+}
+
+.progress-fill {
+    @apply bg-indigo-600 h-2 rounded-full transition-all duration-300;
+}
+
+.processing-overlay {
+    @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50;
+}
+
+.processing-spinner {
+    @apply bg-white dark:bg-slate-800 rounded-lg p-8 text-center shadow-2xl;
+}
+
+.spinner {
+    @apply animate-spin h-8 w-8 text-indigo-600 mx-auto mb-4;
+}
+
+/* Batch Operations */
+.batch-section {
+    @apply border-t border-slate-200 dark:border-slate-600 pt-6 mt-6;
+}
+
+.batch-options {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6;
+}
+
+.batch-option {
+    @apply flex items-center p-3 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer;
+}
+
+.batch-option input[type="radio"] {
+    @apply mr-3;
+}
+
+.page-range-input {
+    @apply w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100;
+}
+
+/* Results Display */
+.results-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6;
+}
+
+.result-card {
+    @apply bg-white dark:bg-slate-700 rounded-lg p-4 border border-slate-200 dark:border-slate-600;
+}
+
+.result-success {
+    @apply border-l-4 border-green-500;
+}
+
+.result-error {
+    @apply border-l-4 border-red-500;
+}
+
+.result-filename {
+    @apply font-semibold text-slate-800 dark:text-slate-200 mb-2;
+}
+
+.result-stats {
+    @apply text-sm text-slate-600 dark:text-slate-400 mb-3;
+}
+
+.download-link {
+    @apply inline-block bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium py-2 px-4 rounded transition-colors;
+}
+
+/* Mobile Responsive */
+@media (max-width: 640px) {
+    .pages-grid {
+        @apply grid-cols-2 gap-3;
+    }
+    
+    .selection-controls {
+        @apply flex-col items-stretch gap-3;
+    }
+    
+    .control-group {
+        @apply justify-center;
+    }
+    
+    .batch-options {
+        @apply grid-cols-1;
+    }
+}
+
+/* Loading States */
+.loading-skeleton {
+    @apply animate-pulse bg-slate-200 dark:bg-slate-700 rounded;
+}
+
+.skeleton-thumbnail {
+    @apply h-32 mb-3;
+}
+
+.skeleton-text {
+    @apply h-4 mb-2;
+}
+
+.skeleton-text-sm {
+    @apply h-3;
+}
+
+/* Tooltips */
+.tooltip {
+    @apply relative;
+}
+
+.tooltip:hover .tooltip-text {
+    @apply visible opacity-100;
+}
+
+.tooltip-text {
+    @apply invisible absolute z-10 w-32 px-2 py-1 text-xs text-white bg-gray-900 rounded-lg opacity-0 transition-opacity duration-300;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -64px;
+}
+
+.tooltip-text::after {
+    content: "";
+    @apply absolute top-full left-1/2 ml-[-5px] border-l-[5px] border-r-[5px] border-t-[5px] border-l-transparent border-r-transparent border-t-gray-900;
+}
+
+/* Animation Classes */
+.fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.slide-up {
+    animation: slideUp 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(99 102 241) rgb(241 245 249);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-slate-100 dark:bg-slate-800;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-indigo-500 dark:bg-indigo-600 rounded-full;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-indigo-600 dark:bg-indigo-500;
+}

@@ -11,7 +11,7 @@ def download_file(filename):
 @file_serving_bp.route('/preview/<filename>')
 def preview_file(filename):
     """Serves temporary preview images from the uploads folder."""
-    if 'preview_' in filename:
+    if 'preview_' in filename or 'thumb_' in filename:
         return send_from_directory(current_app.config['UPLOAD_FOLDER'], filename)
     else:
         return send_from_directory(current_app.config['COMPRESSED_FOLDER'], filename)
