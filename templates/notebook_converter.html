@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+
+{% block title %}Notebook Converter{% endblock %}
+
+{% block converter_form %}
+<link rel="stylesheet" href="{{ url_for('static', filename='notebook_converter.css') }}">
+<h1 class="text-3xl font-bold text-center mb-2">Notebook Converter</h1>
+<p class="text-center text-muted-light dark:text-muted-dark mb-8">Convert your Jupyter notebooks to multiple formats.</p>
+
+<form method="post" action="{{ url_for('notebook_converter.convert_notebook') }}" enctype="multipart/form-data">
+    <div id="drop-zone" class="p-10 text-center rounded-lg cursor-pointer">
+        <p class="text-muted-light dark:text-muted-dark">Drop your .ipynb file here</p>
+        <p class="text-sm my-2">or</p>
+        <p class="text-primary-color font-semibold">Click to browse</p>
+        <input type="file" name="notebook_file" id="file" class="hidden" required accept=".ipynb">
+    </div>
+
+    <div id="file-preview" class="mt-4">
+        <p id="file-name" class="mt-2 text-sm text-center"></p>
+    </div>
+    
+    <div class="my-6">
+        <div class="format-info-box">
+            <h3 class="format-info-title">Supported Output Formats:</h3>
+            <div class="format-info-grid">
+                <span>• HTML - Web format <span class="format-status-icon">✓</span></span>
+                <span>• Markdown - Text <span class="format-status-icon">✓</span></span>
+                <span>• DOCX - Word <span class="format-status-icon">✓</span></span>
+                <span>• LaTeX - Academic <span class="format-status-icon">✓</span></span>
+                <span>• TXT - Plain text <span class="format-status-icon">✓</span></span>
+                <span>• RST - ReStructured <span class="format-status-icon">✓</span></span>
+                <span>• PDF - <span class="format-requires-note">Requires TeX</span></span>
+            </div>
+        </div>
+        <div class="pdf-note-box">
+            <div class="pdf-note-content">
+                <svg class="pdf-note-icon" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+                <div>
+                    <p class="pdf-note-title">PDF Conversion Note:</p>
+                    <p class="pdf-note-text">PDF requires XeLaTeX. If not installed, try HTML format first for best results.</p>
+                </div>
+            </div>
+        </div>
+        <label for="format" class="block text-sm font-bold mb-2">Convert to:</label>
+        <select name="output_format" id="format" class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-color focus:border-primary-color block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-color dark:focus:border-primary-color">
+            {% for format_key, format_info in formats.items() %}
+            <option value="{{ format_key }}" {% if format_key == 'html' %}selected{% endif %}>{{ format_key.upper() }} - {{ format_info.extension }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="flex items-center justify-center">
+        <button type="submit" class="btn-primary text-white font-bold py-3 px-6 rounded-full w-full">
+            Convert Notebook
+        </button>
+    </div>
+</form>
+
+<!-- Download Section -->
+{% if download_file %}
+<div class="download-success-box">
+    <div class="text-center">
+        <div class="download-icon-container">
+            <svg class="download-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+        <h3 class="download-title">
+            Conversion Successful!
+        </h3>
+        <p class="download-text">
+            Your notebook has been converted to <strong>{{ download_format.upper() }}</strong> format.
+        </p>
+        <a href="{{ url_for('notebook_converter.download_file', filename=download_file) }}" class="download-button">
+            <svg class="download-button-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            Download {{ download_format.upper() }} File
+        </a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block converter_scripts %}
+<script src="{{ url_for('static', filename='js/converter.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/notebook_converter.js') }}" defer></script>
+{% endblock %}

@@ -23,6 +23,7 @@ from routes.secure_pdf_routes import secure_pdf_bp
 from routes.pdf_merge_routes import pdf_merge_bp
 from routes.pdf_signature_routes import pdf_signature_bp
 from routes.pdf_page_delete_routes import pdf_page_delete_bp
+from routes.notebook_converter import notebook_converter_bp
 # from routes.universal_converter_routes import universal_converter_bp  # Commented out due to missing dependencies
 
 def create_app():
@@ -54,6 +55,7 @@ def create_app():
     app.register_blueprint(pdf_merge_bp)
     app.register_blueprint(pdf_signature_bp)
     app.register_blueprint(pdf_page_delete_bp)
+    app.register_blueprint(notebook_converter_bp)
     
     return app
 

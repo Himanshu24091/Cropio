@@ -1,9 +1,46 @@
 #!/usr/bin/env bash
-# exit on error
-set -o errexit
+# Build script for Cropio deployment with Notebook Converter support
+set -o errexit  # Exit on error
 
-# Install the system dependencies required by PyMuPDF
-apt-get update && apt-get install -y libgl1-mesa-glx
+echo "🚀 Starting Cropio build process..."
 
-# Run your standard build command
+# Update system packages
+echo "📦 Updating system packages..."
+apt-get update
+
+# Install system dependencies required by PyMuPDF
+echo "🖼️ Installing PyMuPDF dependencies..."
+apt-get install -y libgl1-mesa-glx
+
+# Install TeX Live for PDF conversion (nbconvert requirement)
+echo "📄 Installing TeX Live for PDF support..."
+apt-get install -y texlive-xetex texlive-fonts-recommended texlive-latex-extra
+
+# Install Pandoc for document conversion
+echo "📝 Installing Pandoc for document conversion..."
+apt-get install -y pandoc
+
+# Install Tesseract for OCR functionality
+echo "🔍 Installing Tesseract OCR..."
+apt-get install -y tesseract-ocr tesseract-ocr-eng
+
+# Install additional image processing libraries
+echo "🖼️ Installing image processing libraries..."
+apt-get install -y libjpeg-dev libpng-dev libtiff-dev libwebp-dev
+
+# Install Python dependencies
+echo "🐍 Installing Python dependencies..."
+pip install --upgrade pip
 pip install -r requirements.txt
+
+# Create necessary directories for file processing
+echo "📁 Creating application directories..."
+mkdir -p uploads outputs compressed
+
+# Verify critical installations
+echo "✅ Verifying installations..."
+echo "XeLaTeX: $(which xelatex || echo 'Not found')"
+echo "Pandoc: $(which pandoc || echo 'Not found')"
+echo "Tesseract: $(which tesseract || echo 'Not found')"
+
+echo "🎉 Cropio build completed successfully!"

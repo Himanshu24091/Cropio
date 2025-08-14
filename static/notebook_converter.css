@@ -1,0 +1,204 @@
+/* Notebook Converter Specific Styles */
+
+/* Format info boxes */
+.format-info-box {
+    background: rgba(251, 146, 60, 0.1);
+    border: 1px solid rgba(251, 146, 60, 0.2);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.dark .format-info-box {
+    background: rgba(251, 146, 60, 0.15);
+    border-color: rgba(251, 146, 60, 0.3);
+}
+
+.format-info-title {
+    font-weight: 600;
+    color: rgb(154, 52, 18);
+    margin-bottom: 0.5rem;
+}
+
+.dark .format-info-title {
+    color: rgb(251, 146, 60);
+}
+
+.format-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    color: rgb(180, 83, 9);
+}
+
+.dark .format-info-grid {
+    color: rgb(253, 186, 116);
+}
+
+@media (min-width: 768px) {
+    .format-info-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* PDF requirement note */
+.pdf-note-box {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 0.75rem;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.dark .pdf-note-box {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.pdf-note-content {
+    display: flex;
+    align-items: flex-start;
+}
+
+.pdf-note-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: rgb(59, 130, 246);
+    margin-top: 0.125rem;
+    margin-right: 0.5rem;
+    flex-shrink: 0;
+}
+
+.pdf-note-title {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgb(30, 64, 175);
+}
+
+.dark .pdf-note-title {
+    color: rgb(147, 197, 253);
+}
+
+.pdf-note-text {
+    font-size: 0.75rem;
+    color: rgb(29, 78, 216);
+    margin-top: 0.25rem;
+}
+
+.dark .pdf-note-text {
+    color: rgb(147, 197, 253);
+}
+
+/* Success download section */
+.download-success-box {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 0.75rem;
+}
+
+.dark .download-success-box {
+    background: rgba(34, 197, 94, 0.15);
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.download-icon-container {
+    width: 4rem;
+    height: 4rem;
+    margin: 0 auto 1rem;
+    background: rgba(34, 197, 94, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dark .download-icon-container {
+    background: rgba(34, 197, 94, 0.3);
+}
+
+.download-icon {
+    width: 2rem;
+    height: 2rem;
+    color: rgb(22, 163, 74);
+}
+
+.dark .download-icon {
+    color: rgb(74, 222, 128);
+}
+
+.download-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: rgb(22, 101, 52);
+    margin-bottom: 0.5rem;
+}
+
+.dark .download-title {
+    color: rgb(134, 239, 172);
+}
+
+.download-text {
+    color: rgb(21, 128, 61);
+    margin-bottom: 1rem;
+}
+
+.dark .download-text {
+    color: rgb(134, 239, 172);
+}
+
+.download-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: rgb(22, 163, 74);
+    color: white;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.download-button:hover {
+    background: rgb(21, 128, 61);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    color: white;
+    text-decoration: none;
+}
+
+.download-button-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.5rem;
+}
+
+/* Format indicator icons */
+.format-status-icon {
+    color: rgb(34, 197, 94);
+    margin-left: 0.25rem;
+}
+
+.format-requires-note {
+    color: rgb(245, 158, 11);
+    font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .format-info-grid {
+        grid-template-columns: 1fr;
+        gap: 0.25rem;
+    }
+    
+    .pdf-note-content {
+        flex-direction: column;
+    }
+    
+    .pdf-note-icon {
+        margin-bottom: 0.5rem;
+        margin-right: 0;
+    }
+}

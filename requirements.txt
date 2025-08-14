@@ -18,6 +18,26 @@ PyPDF2>=3.0.0             # For PDF password protection and manipulation
 pypdf>=5.0.0               # For enhanced PDF merging and manipulation (PdfWriter)
 qrcode>=7.4.0             # For QR code generation
 Pillow>=9.0.0             # For QR code image generation (already included but needed for qrcode)
+# Jupyter Notebook processing (Production Ready)
+nbformat==5.9.2
+nbconvert==7.16.6
+jupyter-client==8.6.0
+pypandoc==1.13
+
+# Notebook converter dependencies
+jupyter-core>=5.3.0
+traitlets>=5.7.0
+jinja2>=3.0.0
+markupsafe>=2.1.0
+mistune>=3.0.0
+pygments>=2.14.0
+bleach>=6.0.0
+defusedxml>=0.7.0
+entrypoints>=0.4
+packaging>=21.3
+
+# Pandoc integration (for DOCX, TXT, RST conversion)
+pypandoc-binary==1.13
 # pillow-heif>=0.10.0       # For HEIF/HEIC image support
 # rawpy>=0.18.0             # For RAW image processing
 # numpy>=1.21.0             # For image processing

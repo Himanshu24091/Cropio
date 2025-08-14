@@ -31,7 +31,9 @@ def setup_directories(app):
     base_dir = get_base_dir()
     app.config['UPLOAD_FOLDER'] = os.path.join(base_dir, 'uploads')
     app.config['COMPRESSED_FOLDER'] = os.path.join(base_dir, 'compressed')
+    app.config['OUTPUT_FOLDER'] = os.path.join(base_dir, 'outputs')
     app.config['ALLOWED_CROP_EXTENSIONS'] = ALLOWED_CROP_EXTENSIONS
     
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     os.makedirs(app.config['COMPRESSED_FOLDER'], exist_ok=True)
+    os.makedirs(app.config['OUTPUT_FOLDER'], exist_ok=True)

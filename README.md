@@ -34,7 +34,7 @@
 ## 🧭 Navigation Structure
 
 ### Desktop Navigation
-- **Converters** dropdown: Image, PDF, Document, Excel converters
+- **Converters** dropdown: Image, PDF, Document, Excel, Notebook converters
 - **Compressor**: File compression tool
 - **Image Cropper**: Image and PDF cropping
 - **PDF Tools** dropdown: PDF Editor, PDF Merge, PDF Signature, Secure PDF, PDF Page Delete
@@ -54,6 +54,7 @@
 - **PDF Converter**: Convert PDF files into editable DOCX documents or CSV spreadsheets.
 - **Document Converter**: Convert DOCX files into PDF or plain TXT files.
 - **Excel Converter**: Convert XLSX or XLS spreadsheets into CSV or JSON format.
+- **Notebook Converter**: Convert Jupyter notebooks (.ipynb) to HTML, PDF, DOCX, Markdown, LaTeX, TXT, and RST formats.
 
 ### 2. File Compressor
 - **Supported Formats**: PNG, JPG, WEBP, and PDF.
@@ -100,9 +101,11 @@
 
 ## ⚙️ Tech Stack
 
-- **Backend**: Flask, Pillow, PyMuPDF, pdf2docx, pandas, APScheduler
+- **Backend**: Flask, Pillow, PyMuPDF, pdf2docx, pandas, APScheduler, nbconvert, pypandoc
 - **Frontend**: HTML5, Tailwind CSS, JavaScript
-- **Libraries**: Cropper.js, PDF.js, PDF-lib.js
+- **Libraries**: Cropper.js, PDF.js, PDF-lib.js, nbformat, jupyter-core
+- **Dependencies**: XeLaTeX, Pandoc, Tesseract OCR
+- **Production**: Gunicorn, TeX Live, system libraries for image processing
 
 ---
 
@@ -117,7 +120,8 @@ converter/
 ├── runtime.txt                     # Python version specification
 ├── README.md                       # Project documentation
 ├── TESSERACT_SETUP.md              # OCR setup instructions
-├── render-build.sh                 # Build script
+├── PDF_SETUP_GUIDE.md              # PDF conversion setup guide
+├── render-build.sh                 # Enhanced build script with TeX Live
 ├── .gitignore                      # Git ignore file
 ├── routes/                         # Route modules
 │   ├── __init__.py
@@ -136,6 +140,7 @@ converter/
 │   ├── secure_pdf_routes.py        # PDF security routes
 │   ├── reverse_converter_routes.py # PDF to image routes
 │   ├── text_ocr_routes.py          # OCR text extraction routes
+│   ├── notebook_converter.py       # Jupyter notebook conversion routes
 │   └── file_serving_routes.py      # File serving routes
 ├── static/                         # Static assets
 │   ├── base.css                    # Base styling
@@ -143,6 +148,7 @@ converter/
 │   ├── converter.css               # Converter styles
 │   ├── cropper.css                 # Cropper styles
 │   ├── home.css                    # Homepage styles
+│   ├── notebook_converter.css      # Notebook converter styles
 │   ├── pdf_editor.css              # PDF editor styles
 │   ├── pdf_merge.css               # PDF merge styles
 │   ├── pdf_page_delete.css         # PDF page deletion styles
@@ -163,6 +169,7 @@ converter/
 │       ├── pdf_page_delete.js      # PDF page deletion logic
 │       ├── pdf_signature.js        # PDF signature logic
 │       ├── secure_pdf.js           # PDF security logic
+│       ├── notebook_converter.js   # Notebook converter logic
 ├── templates/                      # HTML templates
 │   ├── base.html                   # Base template with navigation
 │   ├── layout.html                 # Layout template
@@ -180,7 +187,8 @@ converter/
 │   ├── pdf_page_delete.html        # PDF page deletion page
 │   ├── pdf_signature.html          # PDF signature page
 │   ├── secure_pdf.html             # Secure PDF page
-│   └── text_ocr.html               # OCR text extraction page
+│   ├── text_ocr.html               # OCR text extraction page
+│   └── notebook_converter.html     # Notebook converter page
 └── utils/                          # Utility modules
     ├── __init__.py
     └── helpers.py                  # Helper functions
@@ -202,6 +210,7 @@ converter/
 - `secure_pdf_routes.py` → PDF password protection
 - `text_ocr_routes.py` → OCR text extraction
 - `reverse_converter_routes.py` → PDF to image conversion
+- `notebook_converter.py` → Jupyter notebook conversion
 - `file_serving_routes.py` → Downloads & previews
 
 ### JavaScript Modules
@@ -218,6 +227,7 @@ converter/
 - `pdf_page_delete.js` — PDF page deletion functionality
 - `pdf_signature.js` — PDF signature tools
 - `secure_pdf.js` — PDF security and encryption
+- `notebook_converter.js` — Notebook conversion and validation
 
 ### Configuration (config.py)
 - Constants, path setup, file extension rules
@@ -261,6 +271,14 @@ converter/
 
 ### 6. Text & OCR
 - **Extract Text**: Extract text from images and documents using OCR (Optical Character Recognition).
+
+### 7. Jupyter Notebook Converter
+- **Multiple Output Formats**: Convert .ipynb files to HTML, PDF, DOCX, Markdown, LaTeX, TXT, and RST.
+- **Smart Validation**: Automatic notebook validation and format recommendations.
+- **Enhanced Error Handling**: Clear error messages with helpful troubleshooting guidance.
+- **Production Ready**: Full deployment support with automatic dependency installation.
+- **PDF Requirements**: Intelligent PDF conversion with XeLaTeX dependency management.
+- **Interactive Features**: Real-time format selection and file validation.
 
 ### Reverse Converter
 - **Reverse Conversion**: Convert PDF back to images, retaining original quality.
