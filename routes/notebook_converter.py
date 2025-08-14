@@ -49,7 +49,7 @@ def convert_notebook_nbconvert(notebook_path, output_format, output_path):
             # Check if XeLaTeX is available before attempting PDF conversion
             import shutil
             if not shutil.which('xelatex'):
-                return False, "PDF conversion requires XeLaTeX. Please install a TeX distribution like MiKTeX or TeX Live. Alternatively, try converting to HTML first."
+                return False, "PDF conversion requires XeLaTeX (not available in this environment). Try converting to HTML or Markdown instead, then use an external tool to convert to PDF."
             exporter = PDFExporter()
         elif output_format == 'latex':
             from nbconvert import LatexExporter
@@ -67,10 +67,10 @@ def convert_notebook_nbconvert(notebook_path, output_format, output_path):
     except Exception as e:
         # Provide more helpful error messages for common issues
         error_msg = str(e)
-        if 'xelatex not found' in error_msg.lower():
-            return False, "PDF conversion requires XeLaTeX. Please install MiKTeX or TeX Live for Windows. Alternatively, try converting to HTML first."
+        if 'xelatex not found' in error_msg.lower() or 'latex' in error_msg.lower():
+            return False, "PDF conversion requires LaTeX (not available in this environment). Try converting to HTML or Markdown instead."
         elif 'pandoc' in error_msg.lower():
-            return False, "Pandoc is required for this conversion. Please install Pandoc from https://pandoc.org/installing.html"
+            return False, "System Pandoc not available. Using built-in conversion tools instead."
         else:
             return False, f"Conversion error: {error_msg}"
 

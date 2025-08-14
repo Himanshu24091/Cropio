@@ -4,29 +4,34 @@ set -o errexit  # Exit on error
 
 echo "🚀 Starting Cropio build process..."
 
-# Update system packages
-echo "📦 Updating system packages..."
-apt-get update
-
-# Install system dependencies required by PyMuPDF
-echo "🖼️ Installing PyMuPDF dependencies..."
-apt-get install -y libgl1-mesa-glx
-
-# Install TeX Live for PDF conversion (nbconvert requirement)
-echo "📄 Installing TeX Live for PDF support..."
-apt-get install -y texlive-xetex texlive-fonts-recommended texlive-latex-extra
-
-# Install Pandoc for document conversion
-echo "📝 Installing Pandoc for document conversion..."
-apt-get install -y pandoc
-
-# Install Tesseract for OCR functionality
-echo "🔍 Installing Tesseract OCR..."
-apt-get install -y tesseract-ocr tesseract-ocr-eng
-
-# Install additional image processing libraries
-echo "🖼️ Installing image processing libraries..."
-apt-get install -y libjpeg-dev libpng-dev libtiff-dev libwebp-dev
+# Check if we can write to apt lists (for local development)
+if [ -w "/var/lib/apt/lists" ] 2>/dev/null; then
+    echo "📦 Updating system packages..."
+    apt-get update
+    
+    # Install system dependencies
+    echo "🖼️ Installing system dependencies..."
+    apt-get install -y libgl1-mesa-glx
+    
+    # Install TeX Live for PDF conversion (nbconvert requirement)
+    echo "📄 Installing TeX Live for PDF support..."
+    apt-get install -y texlive-xetex texlive-fonts-recommended texlive-latex-extra
+    
+    # Install Pandoc for document conversion
+    echo "📝 Installing Pandoc for document conversion..."
+    apt-get install -y pandoc
+    
+    # Install Tesseract for OCR functionality
+    echo "🔍 Installing Tesseract OCR..."
+    apt-get install -y tesseract-ocr tesseract-ocr-eng
+    
+    # Install additional image processing libraries
+    echo "🖼️ Installing image processing libraries..."
+    apt-get install -y libjpeg-dev libpng-dev libtiff-dev libwebp-dev
+else
+    echo "⚠️ Read-only filesystem detected (likely Render environment)"
+    echo "📦 Skipping apt-get operations - relying on Python packages"
+fi
 
 # Install Python dependencies
 echo "🐍 Installing Python dependencies..."
