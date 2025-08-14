@@ -55,3 +55,8 @@ docs/
 .DS_Store
 Thumbs.db
 MODULAR_STRUCTURE.md
+TESSERACT_SETUP.md
+
+# UML Diagrams sql
+*.puml
+database_schema.sql
