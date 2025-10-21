@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - {{ current_user.username }}{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='auth/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Profile Header -->
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-avatar">
+                {{ current_user.username[0].upper() }}
+            </div>
+            <div class="profile-info">
+                <h1>{{ current_user.username }}</h1>
+                <p>{{ current_user.email }}</p>
+                <p>Member since {{ current_user.created_at.strftime('%B %Y') }}</p>
+                {% if current_user.last_login %}
+                    <p>Last login: {{ current_user.last_login.strftime('%Y-%m-%d %H:%M') }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Subscription Status -->
+        <div class="section">
+            <h2>Subscription Status</h2>
+            <div class="subscription-status">
+                <span class="status-badge {{ 'status-premium' if current_user.is_premium() else 'status-free' }}">
+                    {{ 'Premium' if current_user.is_premium() else 'Free' }}
+                </span>
+                {% if current_user.is_premium() %}
+                    <span class="text-gray-600 dark:text-gray-400">
+                        Valid until {{ current_user.subscription_end.strftime('%B %d, %Y') }}
+                    </span>
+                {% endif %}
+            </div>
+
+            {% if not current_user.is_premium() %}
+                <div class="alert alert-info">
+                    <strong>Upgrade to Premium</strong> for unlimited conversions, larger files, and AI-powered tools!
+                    <a href="#" class="btn btn-primary" style="margin-left: 1rem;">Upgrade Now</a>
+                </div>
+            {% else %}
+                <div class="alert alert-success">
+                    <strong>Premium Active!</strong> You have access to all features and unlimited conversions.
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Usage Statistics -->
+        <div class="section">
+            <h2>Usage Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">{{ current_user.conversions|length }}</div>
+                    <div class="stat-label">Total Conversions</div>
+                </div>
+                <div class="stat-card">
+                    {% set today_usage = current_user.get_daily_usage() %}
+                    <div class="stat-number">{{ today_usage.conversions_count if today_usage else 0 }}</div>
+                    <div class="stat-label">Today's Conversions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ current_user.usage_records|length }}</div>
+                    <div class="stat-label">Active Days</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">
+                        {% if current_user.is_premium() %}
+                            ∞
+                        {% else %}
+                            {{ 5 - (today_usage.conversions_count if today_usage else 0) }}
+                        {% endif %}
+                    </div>
+                    <div class="stat-label">Remaining Today</div>
+                </div>
+            </div>
+
+            <!-- Daily Usage Bar -->
+            {% if not current_user.is_premium() %}
+                {% set usage_count = today_usage.conversions_count if today_usage else 0 %}
+                {% set usage_percent = (usage_count / 5 * 100) | round(1) %}
+                <div>
+                    <div class="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                        <span>Daily Usage</span>
+                        <span>{{ usage_count }}/5 ({{ usage_percent }}%)</span>
+                    </div>
+                    <div class="usage-bar">
+                        <div class="usage-fill {{ 'danger' if usage_count >= 4 else '' }}" 
+                             style="width: {{ usage_percent }}%"></div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Account Actions -->
+        <div class="section">
+            <h2>Account Actions</h2>
+            <div class="action-buttons">
+                <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-primary">
+                    Edit Profile
+                </a>
+                <a href="#" class="btn btn-secondary">
+                    Download Data
+                </a>
+                <a href="{{ url_for('auth.delete_account') }}" class="btn btn-danger"
+                   onclick="return confirm('Are you sure you want to delete your account? This action cannot be undone.')">
+                    Delete Account
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        {% if current_user.conversions %}
+            <div class="section">
+                <h2>Recent Conversions</h2>
+                <div class="space-y-2">
+                    {% for conversion in current_user.conversions[:5] %}
+                        <div class="flex justify-between items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                            <div>
+                                <span class="font-medium">{{ conversion.original_filename }}</span>
+                                <span class="text-gray-600 dark:text-gray-400">
+                                    → {{ conversion.target_format.upper() }}
+                                </span>
+                            </div>
+                            <div class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ conversion.created_at.strftime('%m/%d %H:%M') }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    {% if current_user.conversions|length > 5 %}
+                        <div class="text-center">
+                            <a href="#" class="text-blue-600 hover:underline">View all conversions</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/profile.js') }}" defer></script>
+{% endblock %}

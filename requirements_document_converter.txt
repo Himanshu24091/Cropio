@@ -1,0 +1,56 @@
+# Document Converter Dependencies
+# Core document processing libraries
+
+# Pandoc wrapper for universal document conversion
+pypandoc>=1.11
+
+# PDF processing libraries
+PyPDF2>=3.0.1
+PyMuPDF>=1.23.0  # Also known as 'fitz'
+
+# Microsoft Office document processing
+python-docx>=0.8.11
+docx2txt>=0.8
+
+# OCR capabilities
+pytesseract>=0.3.10
+Pillow>=9.5.0  # Required for image processing in OCR
+
+# Additional document format support
+python-rtf>=0.1.0  # RTF file support
+odfpy>=1.4.1  # ODT file support
+ebooklib>=0.18  # EPUB file support
+
+# HTML processing
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# Markdown processing
+markdown>=3.4.0
+markdown-extensions>=0.1.0
+
+# Text processing utilities
+chardet>=5.1.0  # Character encoding detection
+python-magic>=0.4.27  # File type detection (optional, platform-specific)
+
+# For better PDF text extraction
+pdfplumber>=0.9.0  # Alternative PDF text extraction
+pymupdf-fonts>=1.0.5  # Additional fonts for PyMuPDF
+
+# Installation Notes:
+# 1. Pandoc must be installed separately on the system
+#    - Windows: Download from https://pandoc.org/installing.html
+#    - Ubuntu/Debian: sudo apt-get install pandoc
+#    - macOS: brew install pandoc
+#
+# 2. Tesseract OCR must be installed for OCR functionality
+#    - Windows: Download from https://github.com/UB-Mannheim/tesseract/wiki
+#    - Ubuntu/Debian: sudo apt-get install tesseract-ocr
+#    - macOS: brew install tesseract
+#
+# 3. Additional Tesseract language packs may be needed
+#    - Ubuntu/Debian: sudo apt-get install tesseract-ocr-[lang]
+#    - Windows: Download language packs from GitHub
+#
+# 4. LibreOffice may be required for advanced ODT support
+#    - This provides better compatibility with OpenDocument formats

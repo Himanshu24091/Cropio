@@ -17,6 +17,21 @@ def allowed_file(filename, allowed_extensions):
     """Check if file has allowed extension"""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
 
+def get_file_size(file):
+    """Get the size of an uploaded file object"""
+    try:
+        # Save current position
+        current_position = file.tell()
+        # Move to end
+        file.seek(0, 2)
+        size = file.tell()
+        # Return to original position
+        file.seek(current_position)
+        return size
+    except Exception as e:
+        current_app.logger.error(f"Error getting file size: {e}")
+        return 0
+
 def get_optimal_dimensions(img: Image.Image, max_size: int = 1920) -> Tuple[int, int]:
     """Calculate optimal dimensions for image compression"""
     width, height = img.size
@@ -231,18 +246,50 @@ def create_zip_archive(file_paths: List[str], zip_path: str, base_names: List[st
         current_app.logger.error(f"Error creating ZIP archive: {e}")
         return False
 
+def cleanup_old_files(max_age_hours=1):
+    """Cleanup old files from upload directories"""
+    try:
+        now = time.time()
+        cutoff = now - (max_age_hours * 3600)  # Convert hours to seconds
+        
+        # Common upload directories
+        upload_dirs = ['uploads', 'outputs', 'compressed']
+        
+        for upload_dir in upload_dirs:
+            if os.path.exists(upload_dir):
+                try:
+                    for filename in os.listdir(upload_dir):
+                        file_path = os.path.join(upload_dir, filename)
+                        if os.path.isfile(file_path) and os.path.getmtime(file_path) < cutoff:
+                            os.remove(file_path)
+                            current_app.logger.info(f"Cleaned up old file: {filename}")
+                except Exception as e:
+                    current_app.logger.error(f"Error during cleanup in {upload_dir}: {e}")
+                    
+    except Exception as e:
+        current_app.logger.error(f"Error during file cleanup: {e}")
+
 def cleanup_files():
-    """Background cleanup function for old files"""
-    with current_app.app_context():
+    """Background cleanup function for old files - Fixed for APScheduler"""
+    try:
         now = time.time()
         cutoff = now - 3600  # 1 hour
-        for folder_key in ['UPLOAD_FOLDER', 'COMPRESSED_FOLDER']:
-            folder = current_app.config[folder_key]
-            try:
-                for filename in os.listdir(folder):
-                    file_path = os.path.join(folder, filename)
-                    if os.path.isfile(file_path) and os.path.getmtime(file_path) < cutoff:
-                        os.remove(file_path)
-                        print(f"Deleted old file: {filename}")
-            except Exception as e:
-                current_app.logger.error(f"Error during cleanup in {folder}: {e}")
+        
+        # Define cleanup directories relative to current working directory
+        cleanup_dirs = ['uploads', 'compressed', 'outputs']
+        
+        for dir_name in cleanup_dirs:
+            if os.path.exists(dir_name):
+                try:
+                    for filename in os.listdir(dir_name):
+                        file_path = os.path.join(dir_name, filename)
+                        if os.path.isfile(file_path):
+                            file_age = now - os.path.getmtime(file_path)
+                            if file_age > 3600:  # Older than 1 hour
+                                os.remove(file_path)
+                                print(f"APScheduler: Cleaned up old file: {filename} from {dir_name}")
+                except Exception as e:
+                    print(f"APScheduler: Error during cleanup in {dir_name}: {e}")
+                    
+    except Exception as e:
+        print(f"APScheduler: Error during file cleanup: {e}")

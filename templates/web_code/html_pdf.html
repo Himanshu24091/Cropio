@@ -1,0 +1,894 @@
+{% extends "base.html" %}
+
+{% block title %}HTML ⇄ PDF Snapshot - Cropio{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/converter.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/phase-1-5.css') }}">
+<style>
+.conversion-modes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.mode-card {
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.mode-card.active {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.mode-card:hover {
+    border-color: #60a5fa;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.mode-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.html-editor {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    margin-top: 1.5rem;
+    overflow: hidden;
+}
+
+.editor-header {
+    background: #f8fafc;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: between;
+    align-items: center;
+}
+
+.editor-tabs {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.editor-tab {
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    background: #e2e8f0;
+    color: #6b7280;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.editor-tab.active {
+    background: #3b82f6;
+    color: white;
+}
+
+.editor-content {
+    padding: 0;
+}
+
+.html-textarea {
+    width: 100%;
+    height: 400px;
+    border: none;
+    padding: 1.5rem;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+    resize: vertical;
+    background: #fafafa;
+}
+
+.html-textarea:focus {
+    outline: none;
+    background: white;
+}
+
+.url-input-section {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.url-input-group {
+    display: flex;
+    gap: 1rem;
+    align-items: end;
+}
+
+.url-input-field {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.url-input-field label {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.875rem;
+}
+
+.url-input-field input {
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    transition: border-color 0.3s ease;
+}
+
+.url-input-field input:focus {
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.url-preview {
+    background: #f0f9ff;
+    border: 1px solid #0ea5e9;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    display: none;
+}
+
+.preview-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.preview-status {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.preview-status.success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.preview-status.error {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.conversion-options {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.option-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.option-group label {
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.option-group select {
+    padding: 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    transition: border-color 0.3s ease;
+}
+
+.option-group select:focus {
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.file-upload-section {
+    background: white;
+    border-radius: 12px;
+    border: 2px dashed #d1d5db;
+    padding: 2rem;
+    margin-top: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.file-upload-section:hover {
+    border-color: #3b82f6;
+    background: #fafbff;
+}
+
+.file-upload-section.dragover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+
+.upload-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.7;
+}
+
+.pdf-preview {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.preview-thumbnail {
+    width: 200px;
+    height: 280px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: white;
+    font-size: 1.125rem;
+    font-weight: 500;
+}
+
+.template-examples {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.template-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.template-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.template-card:hover {
+    border-color: #3b82f6;
+    transform: translateY(-2px);
+}
+
+.template-name {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.template-description {
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.advanced-options {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="converter-container">
+    <div class="converter-header">
+        <h1 class="converter-title">
+            <span class="title-icon">📄</span>
+            HTML ⇄ PDF Snapshot Converter
+        </h1>
+        <p class="converter-description">
+            Convert HTML content, web pages, and files to professional PDF documents with custom styling
+        </p>
+    </div>
+
+    <!-- Conversion Mode Selection -->
+    <div class="conversion-modes">
+        <div class="mode-card active" data-mode="html_content">
+            <div class="mode-icon">💻</div>
+            <h3>HTML Content</h3>
+            <p>Convert HTML code directly to PDF</p>
+        </div>
+        <div class="mode-card" data-mode="url_capture">
+            <div class="mode-icon">🌐</div>
+            <h3>Web Page URL</h3>
+            <p>Capture any website as PDF</p>
+        </div>
+        <div class="mode-card" data-mode="file_upload">
+            <div class="mode-icon">📁</div>
+            <h3>HTML File</h3>
+            <p>Upload HTML file to convert</p>
+        </div>
+    </div>
+
+    <!-- HTML Content Mode -->
+    <div id="html-content-mode" class="conversion-section">
+        <div class="html-editor">
+            <div class="editor-header">
+                <div class="editor-tabs">
+                    <div class="editor-tab active" data-tab="code">✏️ Code</div>
+                    <div class="editor-tab" data-tab="preview">👁️ Preview</div>
+                </div>
+                <div class="editor-actions">
+                    <button class="btn btn-sm btn-secondary" id="clear-editor">Clear</button>
+                    <button class="btn btn-sm btn-primary" id="load-template">Load Template</button>
+                </div>
+            </div>
+            <div class="editor-content">
+                <textarea class="html-textarea" id="html-content" placeholder="Enter your HTML content here...
+Example:
+<html>
+<head>
+    <title>My Document</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        h1 { color: #333; }
+    </style>
+</head>
+<body>
+    <h1>Hello World</h1>
+    <p>This is a sample PDF document generated from HTML.</p>
+</body>
+</html>"></textarea>
+                <div class="html-preview" id="html-preview" style="display: none;">
+                    <iframe style="width: 100%; height: 400px; border: none;"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <div class="template-examples">
+            <h4>📋 Quick Templates</h4>
+            <div class="template-grid">
+                <div class="template-card" data-template="invoice">
+                    <div class="template-name">Invoice Template</div>
+                    <div class="template-description">Professional invoice with table layout</div>
+                </div>
+                <div class="template-card" data-template="resume">
+                    <div class="template-name">Resume Template</div>
+                    <div class="template-description">Clean resume format with sections</div>
+                </div>
+                <div class="template-card" data-template="report">
+                    <div class="template-name">Report Template</div>
+                    <div class="template-description">Business report with headers and charts</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- URL Capture Mode -->
+    <div id="url-capture-mode" class="conversion-section" style="display: none;">
+        <div class="url-input-section">
+            <h3>🌐 Web Page Capture</h3>
+            <div class="url-input-group">
+                <div class="url-input-field">
+                    <label>Website URL</label>
+                    <input type="url" id="webpage-url" placeholder="https://example.com" />
+                </div>
+                <button class="btn btn-primary" id="preview-url">Preview</button>
+            </div>
+        </div>
+
+        <div class="url-preview" id="url-preview">
+            <div class="preview-info">
+                <div class="preview-status success" id="preview-status">✅ Page loaded successfully</div>
+                <div class="preview-details">
+                    <span id="preview-title">Loading...</span>
+                    <span class="text-gray-500 ml-2" id="preview-size">- KB</span>
+                </div>
+            </div>
+            <p class="text-sm text-gray-600">The page is ready to be converted to PDF. Adjust settings below if needed.</p>
+        </div>
+
+        <div class="advanced-options">
+            <h4>⚙️ Advanced Capture Options</h4>
+            <div class="checkbox-group">
+                <input type="checkbox" id="full-page-capture" checked>
+                <label for="full-page-capture">Capture full page (not just visible area)</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="wait-for-load">
+                <label for="wait-for-load">Wait extra time for page to fully load</label>
+            </div>
+        </div>
+    </div>
+
+    <!-- File Upload Mode -->
+    <div id="file-upload-mode" class="conversion-section" style="display: none;">
+        <div class="file-upload-section" id="html-file-upload">
+            <input type="file" id="html-file-input" accept=".html,.htm" hidden>
+            <div class="upload-icon">📄</div>
+            <h3>Upload HTML File</h3>
+            <p>Drag and drop your HTML file here, or click to browse</p>
+            <button class="btn btn-primary" onclick="document.getElementById('html-file-input').click()">
+                Browse Files
+            </button>
+        </div>
+        
+        <div class="file-info" id="file-info" style="display: none;">
+            <h4>📁 File Information</h4>
+            <div class="file-details">
+                <div><strong>Name:</strong> <span id="file-name">-</span></div>
+                <div><strong>Size:</strong> <span id="file-size">-</span></div>
+                <div><strong>Last Modified:</strong> <span id="file-modified">-</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Configuration -->
+    <div class="conversion-options" id="pdf-options" style="display: none;">
+        <h3>📋 PDF Settings</h3>
+        <div class="options-grid">
+            <div class="option-group">
+                <label>Page Size</label>
+                <select id="page-size">
+                    <option value="A4" selected>A4 (210 × 297 mm)</option>
+                    <option value="Letter">Letter (216 × 279 mm)</option>
+                    <option value="Legal">Legal (216 × 356 mm)</option>
+                    <option value="A3">A3 (297 × 420 mm)</option>
+                </select>
+            </div>
+            <div class="option-group">
+                <label>Orientation</label>
+                <select id="orientation">
+                    <option value="portrait" selected>Portrait</option>
+                    <option value="landscape">Landscape</option>
+                </select>
+            </div>
+            <div class="option-group">
+                <label>Margins</label>
+                <select id="margins">
+                    <option value="minimal">Minimal (0.5cm)</option>
+                    <option value="normal" selected>Normal (2cm)</option>
+                    <option value="large">Large (3cm)</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="converter-actions">
+        <button class="btn btn-primary btn-lg" id="convert-btn" disabled>
+            <span class="btn-icon">🔄</span>
+            Convert to PDF
+        </button>
+        <button class="btn btn-secondary" id="reset-btn">
+            <span class="btn-icon">🔄</span>
+            Reset
+        </button>
+    </div>
+
+    <!-- Progress Section -->
+    <div class="progress-section" id="progress-section" style="display: none;">
+        <div class="progress-info">
+            <h3>Generating PDF...</h3>
+            <p id="progress-message">Processing your content...</p>
+        </div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-percent" id="progress-percent">0%</div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="results-section" id="results-section" style="display: none;">
+        <div class="results-header">
+            <h3>PDF Generated Successfully! 📄</h3>
+            <div class="pdf-preview">
+                <div class="preview-thumbnail">
+                    <div>PDF Preview</div>
+                </div>
+                <div class="pdf-info">
+                    <div><strong>File Size:</strong> <span id="result-size">-</span></div>
+                    <div><strong>Pages:</strong> <span id="result-pages">-</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="results-actions">
+            <button class="btn btn-success btn-lg" id="download-btn">
+                <span class="btn-icon">⬇️</span>
+                Download PDF
+            </button>
+            <button class="btn btn-secondary" onclick="location.reload()">
+                Convert Another
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let currentMode = 'html_content';
+    let selectedFile = null;
+    let conversionResult = null;
+
+    // Template data
+    const templates = {
+        invoice: `<!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .header { text-align: center; margin-bottom: 40px; }
+        .invoice-details { margin-bottom: 30px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        .total { font-weight: bold; font-size: 1.2em; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>INVOICE</h1>
+        <p>Invoice #INV-2024-001</p>
+    </div>
+    <div class="invoice-details">
+        <p><strong>Date:</strong> January 15, 2024</p>
+        <p><strong>Due Date:</strong> February 15, 2024</p>
+    </div>
+    <table>
+        <thead>
+            <tr><th>Description</th><th>Quantity</th><th>Price</th><th>Total</th></tr>
+        </thead>
+        <tbody>
+            <tr><td>Web Development</td><td>40 hrs</td><td>$100</td><td>$4,000</td></tr>
+            <tr><td>Consultation</td><td>5 hrs</td><td>$150</td><td>$750</td></tr>
+        </tbody>
+        <tfoot>
+            <tr class="total"><td colspan="3">TOTAL</td><td>$4,750</td></tr>
+        </tfoot>
+    </table>
+</body>
+</html>`,
+        resume: `<!DOCTYPE html>
+<html>
+<head>
+    <title>Resume</title>
+    <style>
+        body { font-family: 'Georgia', serif; margin: 40px; line-height: 1.6; }
+        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; }
+        .name { font-size: 2.5em; margin-bottom: 10px; color: #333; }
+        .contact { margin-bottom: 30px; }
+        .section { margin-bottom: 30px; }
+        .section-title { font-size: 1.3em; color: #333; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+        .job { margin-bottom: 20px; }
+        .job-title { font-weight: bold; }
+        .company { font-style: italic; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="name">John Doe</div>
+        <div class="contact">
+            <p>Email: john.doe@example.com | Phone: (555) 123-4567</p>
+        </div>
+    </div>
+    <div class="section">
+        <h2 class="section-title">Experience</h2>
+        <div class="job">
+            <div class="job-title">Senior Web Developer</div>
+            <div class="company">Tech Company Inc. (2020-Present)</div>
+            <p>Developed and maintained web applications using modern frameworks.</p>
+        </div>
+    </div>
+</body>
+</html>`,
+        report: `<!DOCTYPE html>
+<html>
+<head>
+    <title>Business Report</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; margin: 40px; }
+        .title-page { text-align: center; margin-bottom: 50px; }
+        .report-title { font-size: 2.5em; color: #2c3e50; margin-bottom: 20px; }
+        .subtitle { font-size: 1.2em; color: #7f8c8d; }
+        .section { margin-bottom: 40px; }
+        .section h2 { color: #34495e; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+        .chart-placeholder { width: 100%; height: 200px; background: linear-gradient(45deg, #3498db, #2ecc71); 
+                           display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5em; }
+    </style>
+</head>
+<body>
+    <div class="title-page">
+        <h1 class="report-title">Quarterly Business Report</h1>
+        <p class="subtitle">Q4 2024 Performance Analysis</p>
+    </div>
+    <div class="section">
+        <h2>Executive Summary</h2>
+        <p>This report provides an overview of our business performance for Q4 2024...</p>
+    </div>
+    <div class="section">
+        <h2>Revenue Analysis</h2>
+        <div class="chart-placeholder">Revenue Chart Placeholder</div>
+    </div>
+</body>
+</html>`
+    };
+
+    // Mode switching
+    document.querySelectorAll('.mode-card').forEach(card => {
+        card.addEventListener('click', function() {
+            document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
+            this.classList.add('active');
+            currentMode = this.dataset.mode;
+            
+            document.getElementById('html-content-mode').style.display = 
+                currentMode === 'html_content' ? 'block' : 'none';
+            document.getElementById('url-capture-mode').style.display = 
+                currentMode === 'url_capture' ? 'block' : 'none';
+            document.getElementById('file-upload-mode').style.display = 
+                currentMode === 'file_upload' ? 'block' : 'none';
+            
+            resetForm();
+        });
+    });
+
+    // Editor tabs
+    document.querySelectorAll('.editor-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            
+            if (this.dataset.tab === 'preview') {
+                showPreview();
+            } else {
+                showEditor();
+            }
+        });
+    });
+
+    // Template loading
+    document.querySelectorAll('.template-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const template = this.dataset.template;
+            document.getElementById('html-content').value = templates[template];
+            checkContentReady();
+        });
+    });
+
+    // HTML content change
+    document.getElementById('html-content').addEventListener('input', checkContentReady);
+
+    // URL preview
+    document.getElementById('preview-url').addEventListener('click', previewUrl);
+    document.getElementById('webpage-url').addEventListener('input', function() {
+        document.getElementById('url-preview').style.display = 'none';
+        document.getElementById('convert-btn').disabled = !this.value.trim();
+    });
+
+    // File upload
+    document.getElementById('html-file-input').addEventListener('change', handleFileUpload);
+
+    // Convert button
+    document.getElementById('convert-btn').addEventListener('click', performConversion);
+    document.getElementById('reset-btn').addEventListener('click', resetForm);
+
+    // Clear editor
+    document.getElementById('clear-editor').addEventListener('click', function() {
+        document.getElementById('html-content').value = '';
+        checkContentReady();
+    });
+
+    function showPreview() {
+        const content = document.getElementById('html-content').value;
+        const preview = document.getElementById('html-preview');
+        const textarea = document.getElementById('html-content');
+        
+        textarea.style.display = 'none';
+        preview.style.display = 'block';
+        
+        const iframe = preview.querySelector('iframe');
+        iframe.srcdoc = content;
+    }
+
+    function showEditor() {
+        document.getElementById('html-content').style.display = 'block';
+        document.getElementById('html-preview').style.display = 'none';
+    }
+
+    function checkContentReady() {
+        const content = document.getElementById('html-content').value.trim();
+        document.getElementById('convert-btn').disabled = !content;
+        document.getElementById('pdf-options').style.display = content ? 'block' : 'none';
+    }
+
+    function previewUrl() {
+        const url = document.getElementById('webpage-url').value.trim();
+        if (!url) {
+            alert('Please enter a valid URL');
+            return;
+        }
+
+        document.getElementById('url-preview').style.display = 'block';
+        document.getElementById('preview-status').textContent = '🔄 Loading page...';
+        document.getElementById('preview-title').textContent = 'Loading...';
+
+        // Simulate URL validation (in real implementation, you'd validate via backend)
+        setTimeout(() => {
+            document.getElementById('preview-status').textContent = '✅ Page loaded successfully';
+            document.getElementById('preview-title').textContent = url;
+            document.getElementById('preview-size').textContent = '~245 KB';
+            document.getElementById('convert-btn').disabled = false;
+            document.getElementById('pdf-options').style.display = 'block';
+        }, 1500);
+    }
+
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        selectedFile = file;
+        document.getElementById('file-info').style.display = 'block';
+        document.getElementById('file-name').textContent = file.name;
+        document.getElementById('file-size').textContent = formatFileSize(file.size);
+        document.getElementById('file-modified').textContent = new Date(file.lastModified).toLocaleString();
+        document.getElementById('convert-btn').disabled = false;
+        document.getElementById('pdf-options').style.display = 'block';
+    }
+
+    function performConversion() {
+        document.getElementById('progress-section').style.display = 'block';
+        document.getElementById('convert-btn').disabled = true;
+
+        const formData = new FormData();
+        
+        if (currentMode === 'html_content') {
+            formData.append('conversion_type', 'html_to_pdf');
+            formData.append('html_content', document.getElementById('html-content').value);
+        } else if (currentMode === 'url_capture') {
+            formData.append('conversion_type', 'url_to_pdf');
+            formData.append('url', document.getElementById('webpage-url').value);
+            formData.append('wait_time', document.getElementById('wait-for-load').checked ? '5' : '2');
+            formData.append('full_page', document.getElementById('full-page-capture').checked);
+        } else if (currentMode === 'file_upload') {
+            formData.append('conversion_type', 'file_to_pdf');
+            formData.append('file', selectedFile);
+        }
+
+        // Add PDF options
+        formData.append('page_size', document.getElementById('page-size').value);
+        formData.append('orientation', document.getElementById('orientation').value);
+        formData.append('margin', document.getElementById('margins').value);
+
+        simulateProgress();
+
+        fetch('/html-pdf-snapshot/convert', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('progress-section').style.display = 'none';
+            
+            if (data.success) {
+                showResults(data);
+            } else {
+                alert('Conversion failed: ' + (data.error || 'Unknown error'));
+                document.getElementById('convert-btn').disabled = false;
+            }
+        })
+        .catch(error => {
+            document.getElementById('progress-section').style.display = 'none';
+            alert('Conversion failed: ' + error.message);
+            document.getElementById('convert-btn').disabled = false;
+        });
+    }
+
+    function simulateProgress() {
+        let progress = 0;
+        const progressFill = document.getElementById('progress-fill');
+        const progressPercent = document.getElementById('progress-percent');
+        const progressMessage = document.getElementById('progress-message');
+        
+        const messages = [
+            'Analyzing content...',
+            'Rendering HTML...',
+            'Generating PDF...',
+            'Finalizing document...'
+        ];
+        
+        const interval = setInterval(() => {
+            progress += Math.random() * 20;
+            if (progress > 90) progress = 90;
+            
+            progressFill.style.width = progress + '%';
+            progressPercent.textContent = Math.round(progress) + '%';
+            
+            const messageIndex = Math.floor(progress / 25);
+            if (messageIndex < messages.length) {
+                progressMessage.textContent = messages[messageIndex];
+            }
+        }, 400);
+        
+        setTimeout(() => clearInterval(interval), 25000);
+    }
+
+    function showResults(data) {
+        conversionResult = data;
+        document.getElementById('results-section').style.display = 'block';
+        
+        if (data.pdf_size) {
+            document.getElementById('result-size').textContent = formatFileSize(data.pdf_size);
+        }
+        document.getElementById('result-pages').textContent = '1'; // Default, could be dynamic
+
+        document.getElementById('download-btn').onclick = function() {
+            window.location.href = data.download_url;
+        };
+    }
+
+    function resetForm() {
+        selectedFile = null;
+        document.getElementById('convert-btn').disabled = true;
+        document.getElementById('pdf-options').style.display = 'none';
+        document.getElementById('url-preview').style.display = 'none';
+        document.getElementById('file-info').style.display = 'none';
+        document.getElementById('progress-section').style.display = 'none';
+        document.getElementById('results-section').style.display = 'none';
+        
+        document.getElementById('html-content').value = '';
+        document.getElementById('webpage-url').value = '';
+        document.getElementById('html-file-input').value = '';
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Initialize
+    checkContentReady();
+});
+</script>
+{% endblock %}

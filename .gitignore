@@ -1,62 +1,528 @@
-# Python
+# ================================================================
+# CROPIO - PROFESSIONAL .GITIGNORE
+# Multi-Format File Conversion & Processing Platform
+# ================================================================
+
+# === PYTHON ENVIRONMENT ===
+# Byte-compiled / optimized / DLL files
 __pycache__/
+*.py[cod]
+*$py.class
 *.pyc
 *.pyo
 *.pyd
+
+# C extensions
+*.so
+
+# Distribution / packaging
 .Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Virtual environments
 env/
 venv/
+ENV/
+env.bak/
+venv.bak/
 .venv/
+pyvenv.cfg
+pip-selfcheck.json
 
-# Flask
+# === FLASK APPLICATION ===
+# Flask instance folder (contains sensitive data)
 instance/
+!instance/.gitkeep
+
+# Flask session data
 .webassets-cache
+.flask_session
+flask_session/
+sessions/
 
-# Temporary application files
+# Cache files
+cache/
+.cache/
+*.cache
+
+# === CROPIO APPLICATION FILES ===
+# File processing directories (temporary uploads and outputs)
 uploads/
+!uploads/.gitkeep
 compressed/
+!compressed/.gitkeep
+converted/
+output/
+outputs/
+!outputs/.gitkeep
+processed/
+temp/
+!temp/.gitkeep
+temporary/
 
-# IDE / Editor specific
+# Image processing artifacts
+*.thumbnail
+*.preview
+*.processed
+image_cache/
+thumbnails/
+previews/
+
+# RAW image processing
+raw_cache/
+raw_temp/
+*.rawpy_cache
+
+# HEIC processing
+heic_cache/
+heic_temp/
+
+# Video conversion artifacts
+video_temp/
+video_cache/
+*.ffmpeg_temp
+*.mp4_temp
+*.webm_temp
+
+# GIF processing
+gif_temp/
+gif_cache/
+
+# Document conversion artifacts
+doc_temp/
+pdf_temp/
+latex/
+latex_portable/
+*.docx_temp
+*.pdf_temp
+
+# PowerBI converter temp files
+powerbi_temp/
+*.pbix_temp
+
+# Presentation converter temp files
+pptx_temp/
+presentation_temp/
+
+# Compression artifacts
+compression_temp/
+*.zip_temp
+*.7z_temp
+
+# Notebook conversion artifacts
+notebook_temp/
+*.ipynb_checkpoints
+
+# OCR processing
+ocr_temp/
+tesseract_temp/
+
+# === SECURITY AND SECRETS ===
+# Environment variables and configuration
+.env
+.env.*
+!.env.example
+.flaskenv
+secrets.json
+secrets.yaml
+config/secrets/
+
+# Cryptographic keys and certificates
+keys/
+*.key
+*.pem
+*.crt
+*.cer
+*.p12
+*.pfx
+*.csr
+
+# SSL/TLS certificates
+ssl/
+certs/
+certificates/
+
+# Authentication tokens
+*.token
+auth_tokens/
+
+# === DATABASE ===
+# SQLite databases (development)
+*.db
+*.sqlite
+*.sqlite3
+database.db
+app.db
+cropio.db
+
+# Database backups
+backups/
+db_backups/
+*.sql.gz
+*.sql.bak
+
+# PostgreSQL
+*.postgresql
+
+# Redis dumps
+dump.rdb
+*.rdb
+
+# Session storage
+session_data/
+redis_data/
+
+# === LOGGING AND MONITORING ===
+# Log files
+logs/
+!logs/.gitkeep
+*.log
+*.log.*
+log/
+app.log
+error.log
+access.log
+celery.log
+gunicorn.log
+nginx.log
+uwsgi.log
+supervisor.log
+
+# Application-specific logs (but keep empty logs directory)
+logs/cropio.log
+logs/errors.log
+logs/security_audit.log
+logs/performance.log
+app_error.log
+app_output.log
+security.log
+
+# Monitoring and metrics
+metrics/
+stats/
+health_checks/
+monitoring/
+
+# === DEVELOPMENT AND IDE ===
+# VSCode
 .vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# PyCharm / IntelliJ IDEA
 .idea/
+*.iml
+*.iws
+.idea_modules/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Atom
+.atom/
+
+# Vim
 *.swp
 *.swo
+*~
+.*.swp
+.*.swo
 
-# Environment variables
-.env
-.flaskenv
+# Emacs
+*~
+\#*\#
+.\#*
 
-# Build artifacts
-build/
-dist/
-*.egg-info/
+# Eclipse
+.project
+.pydevproject
+.settings/
 
-# Backup and temporary files
+# Other editors
+.spyderproject
+.spyproject
+.ropeproject
+
+# === TESTING ===
+# Testing artifacts
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest/
+
+# Test databases
+test_*.db
+test_*.sqlite
+*.test.db
+
+# Test output
+test_output/
+test_results/
+
+# === OPERATING SYSTEM ===
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# === BACKUPS AND TEMPORARY FILES ===
+# Application backups (but keep current structure)
+backup_before_security_migration_*/
 app_backup.py
+app_old.py
 app_new.py
 test_routes.py
 *.bak
+*.backup
+*.old
+*.orig
 *.tmp
-*.git/
-# Log files
-logs/
-*.log
+*.temp
+~$*
 
-# Cache and temporary files
-cache/
-tmp/
+# Editor backups
+*~
 
-# Documentation and metadata
-*.md
-*.map
-docs/
+# === BUILD AND DISTRIBUTION ===
+# Wheel files
+*.whl
 
-# OS specific
-.DS_Store
-Thumbs.db
-MODULAR_STRUCTURE.md
-TESSERACT_SETUP.md
+# Packaging files
+MANIFEST
+MANIFEST.in
 
-# UML Diagrams sql
-*.puml
-database_schema.sql
+# === DEPENDENCIES ===
+# Dependency management (keep requirements.txt but ignore locks)
+Pipfile.lock
+poetry.lock
+yarn.lock
+package-lock.json
+pnpm-lock.yaml
+pdm.lock
+
+# Node modules (if using any frontend build tools)
+node_modules/
+bower_components/
+
+# === PRODUCTION DEPLOYMENT ===
+# WSGI and server files
+*.pid
+*.sock
+*.socket
+gunicorn.conf.py
+uwsgi.ini
+supervisor.conf
+nginx.conf.local
+
+# Process files
+celerybeat-schedule
+celerybeat.pid
+celerybeat-schedule.db
+
+# Static files collected for production
+staticfiles/
+static_collected/
+
+# Media files uploaded by users (in production)
+media/
+
+# === CLOUD AND EXTERNAL SERVICES ===
+# AWS
+.aws/
+aws_credentials
+.elasticbeanstalk/
+
+# Google Cloud
+gcp_credentials.json
+.gcloud/
+
+# Azure
+azure_credentials.json
+.azure/
+
+# Heroku
+.heroku/
+
+# Docker (keep Dockerfile but ignore runtime files)
+docker-compose.override.yml
+.dockerignore.local
+
+# === PERFORMANCE AND PROFILING ===
+# Profiling data
+*.prof
+*.profile
+profile_data/
+benchmarks/
+.prof/
+
+# Memory dumps
+*.hprof
+*.heap
+*.dump
+
+# === DOCUMENTATION ===
+# Build documentation (keep source docs)
+docs/_build/
+docs/.doctrees/
+docs/_static/
+docs/_templates/
+site/
+
+# Specific temporary documentation files (but keep main README.md and docs)
+*_draft.md
+*_temp.md
+*_backup.md
+
+# PlantUML outputs (keep source .puml files)
+puml/*.png
+puml/*.svg
+
+# === JUPYTER NOTEBOOKS ===
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Jupyter runtime
+.jupyter/
+
+# === SECURITY SCANNING ===
+# Security scan results
+.security/
+security_scan_results/
+vulnerability_reports/
+
+# === CROPIO-SPECIFIC ===
+# FFmpeg binaries (large files, should be installed separately)
+# Note: Keeping bin/ folder structure but users should install FFmpeg separately
+# bin/ffmpeg.exe
+# bin/ffplay.exe
+# bin/ffprobe.exe
+
+# LaTeX installations (users should install separately)
+# latex/
+# latex_portable/
+
+# Application-specific temporary processing
+converter_temp/
+processing_queue/
+failed_conversions/
+user_sessions/
+quarantine/
+
+# PowerBI processing
+powerbi_converter/
+
+# Celery
+celerybeat-schedule.*
+
+# Redis
+*.rdb
+redis.conf.local
+
+# === KEEP IMPORTANT FILES ===
+# Ensure these are NOT ignored
+!.gitignore
+!.gitattributes
+!README.md
+!LICENSE
+!requirements.txt
+!runtime.txt
+!Dockerfile
+!docker-compose.yml
+!.env.example
+
+# Keep documentation structure
+!docs/
+!md files/
+
+# Keep database schema structure (but not actual data)
+!database/
+!database/schemas/
+!database/migrations/
+!database/scripts/
+
+# Keep static assets and templates
+!static/
+!templates/
+
+# Keep source code structure
+!app.py
+!config.py
+!models.py
+!forms.py
+!*.py
+
+# Keep configuration files
+!config/
+!*.json
+!*.yaml
+!*.yml
+
+# === DEVELOPMENT NOTES (Keep these patterns) ===
+# Runtime commands (kept as comments for reference)
+# C:/Users/himan/Desktop/converter/venv/Scripts/python.exe app.py
+# to run the flask app
+# python -m venv venv
+# to create a virtual environment
+# .\venv\Scripts\python.exe app.py
+# .\venv\Scripts\python.exe -m pip install

@@ -1,0 +1,422 @@
+{% extends "admin/dashboard.html" %}
+
+{% block title %}User Management - Admin{% endblock %}
+
+{% block content %}
+<div class="min-h-screen bg-gray-50">
+    <div class="flex">
+        <!-- Admin Sidebar -->
+        <div class="w-64 admin-sidebar text-white p-6 min-h-screen">
+            <div class="mb-8">
+                <h2 class="text-2xl font-bold">Admin Panel</h2>
+                <p class="text-sm text-white/70">System Management</p>
+            </div>
+            
+            <nav class="space-y-2">
+                <a href="{{ url_for('admin.dashboard') }}" class="admin-nav-item flex items-center px-4 py-3 rounded-lg">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m8 5l4-4 4 4"/>
+                    </svg>
+                    Dashboard
+                </a>
+                
+                <a href="{{ url_for('admin.users') }}" class="admin-nav-item active flex items-center px-4 py-3 rounded-lg">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5 0a2.25 2.25 0 00-2.25-2.25H3a2.25 2.25 0 00-2.25 2.25v12a2.25 2.25 0 002.25 2.25h16.5a2.25 2.25 0 002.25-2.25V6z"/>
+                    </svg>
+                    Users
+                </a>
+                
+                <a href="{{ url_for('admin.analytics') }}" class="admin-nav-item flex items-center px-4 py-3 rounded-lg">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    Analytics
+                </a>
+                
+                <a href="{{ url_for('admin.system') }}" class="admin-nav-item flex items-center px-4 py-3 rounded-lg">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    System
+                </a>
+                
+                <a href="{{ url_for('admin.cleanup') }}" class="admin-nav-item flex items-center px-4 py-3 rounded-lg">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    Cleanup
+                </a>
+                
+                <div class="border-t border-white/20 my-4"></div>
+                
+                <a href="{{ url_for('main.index') }}" class="admin-nav-item flex items-center px-4 py-3 rounded-lg">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                    </svg>
+                    Back to Site
+                </a>
+            </nav>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 p-8">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-900">User Management</h1>
+                <p class="text-gray-600">Manage and oversee all user accounts</p>
+            </div>
+            
+            <!-- Filters and Search -->
+            <div class="chart-container p-6 mb-6">
+                <form method="GET" class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search Users</label>
+                        <input type="text" id="search" name="search" value="{{ search }}" 
+                               placeholder="Search by username or email..." 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    
+                    <div class="md:w-48">
+                        <label for="filter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Status</label>
+                        <select id="filter" name="filter" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="all" {% if filter_type == 'all' %}selected{% endif %}>All Users</option>
+                            <option value="active" {% if filter_type == 'active' %}selected{% endif %}>Active</option>
+                            <option value="inactive" {% if filter_type == 'inactive' %}selected{% endif %}>Inactive</option>
+                            <option value="premium" {% if filter_type == 'premium' %}selected{% endif %}>Premium</option>
+                            <option value="banned" {% if filter_type == 'banned' %}selected{% endif %}>Banned</option>
+                        </select>
+                    </div>
+                    
+                    <div class="flex items-end">
+                        <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                            Filter
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Users Table -->
+            <div class="chart-container">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    User
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Subscription
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Joined
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Actions
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {% for user in users %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
+                                            <span class="text-white font-semibold">{{ user.username[0].upper() }}</span>
+                                        </div>
+                                        <div class="ml-4">
+                                            <div class="text-sm font-medium text-gray-900">{{ user.username }}</div>
+                                            <div class="text-sm text-gray-500">{{ user.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex flex-col space-y-1">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                            {% if user.is_verified %}bg-green-100 text-green-800{% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                            {% if user.is_verified %}Verified{% else %}Pending{% endif %}
+                                        </span>
+                                        
+                                        {% if user.is_banned %}
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                            Banned
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                        {% if user.subscription_type == 'premium' %}bg-purple-100 text-purple-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                        {{ user.subscription_type.title() }}
+                                    </span>
+                                    
+                                    {% if user.subscription_end %}
+                                    <div class="text-xs text-gray-500 mt-1">
+                                        Expires: {{ user.subscription_end.strftime('%Y-%m-%d') }}
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ user.created_at.strftime('%Y-%m-%d') }}
+                                </td>
+                                
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <div class="flex space-x-2">
+                                        <a href="{{ url_for('admin.user_detail', user_id=user.id) }}" 
+                                           class="text-indigo-600 hover:text-indigo-900">View</a>
+                                        
+                                        {% if not user.is_banned %}
+                                        <button onclick="banUser({{ user.id }}, 'ban')" 
+                                                class="text-red-600 hover:text-red-900">Ban</button>
+                                        {% else %}
+                                        <button onclick="banUser({{ user.id }}, 'unban')" 
+                                                class="text-green-600 hover:text-green-900">Unban</button>
+                                        {% endif %}
+                                        
+                                        <div class="relative inline-block text-left">
+                                            <button type="button" onclick="toggleDropdown({{ user.id }})" 
+                                                    class="text-gray-600 hover:text-gray-900">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01"/>
+                                                </svg>
+                                            </button>
+                                            
+                                            <div id="dropdown-{{ user.id }}" class="hidden absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                                                <div class="py-1">
+                                                    {% if user.subscription_type != 'premium' %}
+                                                    <button onclick="manageSubscription({{ user.id }}, 'upgrade_premium')" 
+                                                            class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                        Upgrade to Premium
+                                                    </button>
+                                                    {% else %}
+                                                    <button onclick="manageSubscription({{ user.id }}, 'downgrade_free')" 
+                                                            class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                        Downgrade to Free
+                                                    </button>
+                                                    {% endif %}
+                                                    
+                                                    <button onclick="manageSubscription({{ user.id }}, 'extend_subscription')" 
+                                                            class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                                        Extend Subscription
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                {% if pagination.pages > 1 %}
+                <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+                    <div class="flex-1 flex justify-between sm:hidden">
+                        {% if pagination.has_prev %}
+                        <a href="{{ url_for('admin.users', page=pagination.prev_num, search=search, filter=filter_type) }}" 
+                           class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            Previous
+                        </a>
+                        {% endif %}
+                        {% if pagination.has_next %}
+                        <a href="{{ url_for('admin.users', page=pagination.next_num, search=search, filter=filter_type) }}" 
+                           class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                            Next
+                        </a>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-sm text-gray-700">
+                                Showing <span class="font-medium">{{ (pagination.page - 1) * pagination.per_page + 1 }}</span>
+                                to <span class="font-medium">{{ min(pagination.page * pagination.per_page, pagination.total) }}</span>
+                                of <span class="font-medium">{{ pagination.total }}</span> results
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                                {% for page_num in pagination.iter_pages() %}
+                                    {% if page_num %}
+                                        {% if page_num != pagination.page %}
+                                            <a href="{{ url_for('admin.users', page=page_num, search=search, filter=filter_type) }}" 
+                                               class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                                                {{ page_num }}
+                                            </a>
+                                        {% else %}
+                                            <span class="relative inline-flex items-center px-4 py-2 border border-indigo-500 bg-indigo-50 text-sm font-medium text-indigo-600">
+                                                {{ page_num }}
+                                            </span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                                            ...
+                                        </span>
+                                    {% endif %}
+                                {% endfor %}
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ban Confirmation Modal -->
+<div id="ban-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div class="mt-3 text-center">
+            <h3 class="text-lg font-medium text-gray-900" id="modal-title">Ban User</h3>
+            <div class="mt-2 px-7 py-3">
+                <p class="text-sm text-gray-500" id="modal-message">
+                    Are you sure you want to ban this user?
+                </p>
+                <textarea id="ban-reason" placeholder="Reason for ban (optional)" 
+                          class="mt-3 w-full px-3 py-2 border border-gray-300 rounded-md text-sm" 
+                          rows="3"></textarea>
+            </div>
+            <div class="flex px-4 py-3 space-x-3">
+                <button id="cancel-ban" class="flex-1 px-4 py-2 bg-gray-300 text-gray-800 text-sm font-medium rounded-md hover:bg-gray-400">
+                    Cancel
+                </button>
+                <button id="confirm-ban" class="flex-1 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentUserId = null;
+let currentAction = null;
+
+// Toggle dropdown menu
+function toggleDropdown(userId) {
+    const dropdown = document.getElementById(`dropdown-${userId}`);
+    // Close all other dropdowns
+    document.querySelectorAll('[id^="dropdown-"]').forEach(d => {
+        if (d.id !== `dropdown-${userId}`) {
+            d.classList.add('hidden');
+        }
+    });
+    dropdown.classList.toggle('hidden');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('[onclick*="toggleDropdown"]')) {
+        document.querySelectorAll('[id^="dropdown-"]').forEach(dropdown => {
+            dropdown.classList.add('hidden');
+        });
+    }
+});
+
+// Ban/Unban user
+function banUser(userId, action) {
+    currentUserId = userId;
+    currentAction = action;
+    
+    const modal = document.getElementById('ban-modal');
+    const title = document.getElementById('modal-title');
+    const message = document.getElementById('modal-message');
+    const reasonField = document.getElementById('ban-reason');
+    const confirmBtn = document.getElementById('confirm-ban');
+    
+    if (action === 'ban') {
+        title.textContent = 'Ban User';
+        message.textContent = 'Are you sure you want to ban this user?';
+        confirmBtn.textContent = 'Ban User';
+        confirmBtn.className = 'flex-1 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700';
+        reasonField.style.display = 'block';
+    } else {
+        title.textContent = 'Unban User';
+        message.textContent = 'Are you sure you want to unban this user?';
+        confirmBtn.textContent = 'Unban User';
+        confirmBtn.className = 'flex-1 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700';
+        reasonField.style.display = 'none';
+    }
+    
+    modal.classList.remove('hidden');
+}
+
+// Confirm ban action
+document.getElementById('confirm-ban').addEventListener('click', function() {
+    const reason = document.getElementById('ban-reason').value;
+    
+    fetch(`/admin/users/${currentUserId}/ban`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: currentAction,
+            reason: reason
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error);
+    });
+    
+    document.getElementById('ban-modal').classList.add('hidden');
+});
+
+// Cancel ban
+document.getElementById('cancel-ban').addEventListener('click', function() {
+    document.getElementById('ban-modal').classList.add('hidden');
+});
+
+// Manage subscription
+function manageSubscription(userId, action) {
+    if (confirm('Are you sure you want to modify this user\'s subscription?')) {
+        const data = { action: action };
+        
+        if (action === 'extend_subscription') {
+            const days = prompt('Enter number of days to extend:', '30');
+            if (days === null) return;
+            data.days = parseInt(days);
+        }
+        
+        fetch(`/admin/users/${userId}/subscription`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Error: ' + error);
+        });
+    }
+}
+</script>
+{% endblock %}

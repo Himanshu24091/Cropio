@@ -1,0 +1,61 @@
+# HTML PDF Snapshot Converter Dependencies
+# Core PDF generation libraries (install at least one)
+
+# WeasyPrint - Best CSS support and styling
+weasyprint>=60.0
+cffi>=1.15.0
+
+# pdfkit - Fast processing with wkhtmltopdf 
+# Note: Also requires wkhtmltopdf binary to be installed separately
+pdfkit>=1.0.0
+
+# Selenium - Modern browser with full JavaScript support
+# Note: Also requires ChromeDriver to be installed and in PATH
+selenium>=4.15.0
+
+# PDF Analysis and Thumbnails
+PyMuPDF>=1.23.0  # For PDF analysis and thumbnail generation
+
+# HTML Processing and Validation
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# HTTP Requests and URL handling
+requests>=2.31.0
+urllib3>=2.0.0
+
+# Image Processing
+Pillow>=10.0.0
+
+# Security and Validation
+Werkzeug>=2.3.0
+
+# Optional: Enhanced font support for WeasyPrint
+fonttools>=4.40.0
+
+# Optional: Better HTML parsing
+html5lib>=1.1
+
+# Development and Testing (optional)
+pytest>=7.4.0
+pytest-cov>=4.1.0
+black>=23.0.0
+flake8>=6.0.0
+
+# Note: Installation Instructions
+# 
+# For WeasyPrint:
+# - Windows: pip install weasyprint
+# - Linux: sudo apt-get install python3-dev python3-cffi libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
+# - macOS: brew install cairo pango gdk-pixbuf libffi
+#
+# For pdfkit:
+# - Install wkhtmltopdf binary from: https://wkhtmltopdf.org/downloads.html
+# - Windows: Download installer and add to PATH
+# - Linux: sudo apt-get install wkhtmltopdf
+# - macOS: brew install wkhtmltopdf
+#
+# For Selenium:
+# - Install ChromeDriver from: https://chromedriver.chromium.org/
+# - Add ChromeDriver to PATH
+# - Or use: pip install webdriver-manager (for automatic management)

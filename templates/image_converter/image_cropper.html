@@ -1,0 +1,514 @@
+{% extends "base.html" %}
+
+{% block title %}Image Cropper - Cropio{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='converter.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='image_converter/image_cropper.css') }}">
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                <svg class="w-12 h-12 mx-auto mb-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                Image Cropper
+            </h1>
+            <p class="text-xl text-gray-600 dark:text-gray-300">
+                Crop your images with precision using various crop modes and custom dimensions
+            </p>
+        </div>
+
+        <!-- Main Converter Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                <svg class="w-6 h-6 inline mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2z"></path>
+                </svg>
+                Crop Images
+            </h2>
+            <p class="text-gray-600 dark:text-gray-300 mb-6">
+                Upload your images and crop them using our advanced cropping tools with multiple crop modes and customization options.
+            </p>
+            
+            <form method="POST" enctype="multipart/form-data" class="space-y-6" id="image-cropper-form">
+                <input type="hidden" name="conversion_type" value="image_cropper">
+                
+                <div class="upload-area" id="image-upload-area">
+                    <input type="file" name="files" id="image-files" accept="image/*" class="file-input" multiple>
+                    <label for="image-files" class="upload-label">
+                        <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2z"></path>
+                        </svg>
+                        <span class="upload-text">Drop your images here or click to browse</span>
+                        <span class="upload-subtext">Image files only (JPG, PNG, BMP, TIFF, WEBP, GIF) • Max 25MB per file • Up to 10 images</span>
+                    </label>
+                </div>
+
+                <!-- Crop Mode Selection -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Crop Mode
+                    </h3>
+                    
+                    <!-- Crop Mode Selection -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="flex items-center space-x-3">
+                            <input type="radio" name="crop_mode" value="free" id="mode-free" class="mt-1" checked>
+                            <div class="flex-1">
+                                <label for="mode-free" class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+                                    <span class="flex items-center">
+                                        <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4a2 2 0 012-2h2M4 16v4a2 2 0 002 2h2m8-20h2a2 2 0 012 2v4m-4 12h2a2 2 0 002-2v-4"></path>
+                                        </svg>
+                                        Free Crop
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3">
+                            <input type="radio" name="crop_mode" value="aspect" id="mode-aspect" class="mt-1">
+                            <div class="flex-1">
+                                <label for="mode-aspect" class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+                                    <span class="flex items-center">
+                                        <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h2a2 2 0 002-2z"></path>
+                                        </svg>
+                                        Fixed Aspect
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3">
+                            <input type="radio" name="crop_mode" value="shape" id="mode-shape" class="mt-1">
+                            <div class="flex-1">
+                                <label for="mode-shape" class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+                                    <span class="flex items-center">
+                                        <svg class="w-4 h-4 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        Shape Crop
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aspect Ratio Options (shown when Fixed Aspect is selected) -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4" id="aspect-options" style="display: none;">
+                    <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Aspect Ratio</h4>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <label class="flex items-center">
+                            <input type="radio" name="aspect_ratio" value="1:1" class="mr-2">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Square (1:1)</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="aspect_ratio" value="4:3" class="mr-2">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Standard (4:3)</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="aspect_ratio" value="16:9" class="mr-2">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Widescreen (16:9)</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="aspect_ratio" value="3:2" class="mr-2">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Photo (3:2)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Shape Options (shown when Shape Crop is selected) -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4" id="shape-options" style="display: none;">
+                    <h4 class="text-md font-semibold text-gray-900 dark:text-white mb-3">Shape Type</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <label class="flex items-center">
+                            <input type="radio" name="crop_shape" value="rectangle" class="mr-2" checked>
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Rectangle</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="crop_shape" value="circle" class="mr-2">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Circle</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="radio" name="crop_shape" value="rounded" class="mr-2">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">Rounded Corners</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Crop Options -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        Crop Options
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-3">
+                            <div class="flex items-center">
+                                <label for="custom-width" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mr-3 w-20">Width:</label>
+                                <input type="number" name="custom_width" id="custom-width" placeholder="Auto" class="form-input flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                                <span class="text-sm text-gray-500 ml-2">px</span>
+                            </div>
+                            <div class="flex items-center">
+                                <label for="custom-height" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mr-3 w-20">Height:</label>
+                                <input type="number" name="custom_height" id="custom-height" placeholder="Auto" class="form-input flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                                <span class="text-sm text-gray-500 ml-2">px</span>
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="flex items-center">
+                                <input type="checkbox" name="maintain_aspect" id="maintain-aspect" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                <label for="maintain-aspect" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Maintain aspect ratio</label>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" name="center_crop" id="center-crop" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked>
+                                <label for="center-crop" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Center crop automatically</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Crop Features -->
+                <div class="crop-mode-enhanced">
+                    <h4>
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+                        </svg>
+                        Interactive Crop Features
+                    </h4>
+                    
+                    <div class="crop-tools-grid">
+                        <div class="crop-tool-item">
+                            <input type="checkbox" name="show_grid" id="show-grid" class="crop-tool-checkbox" checked>
+                            <label for="show-grid" class="crop-tool-label">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+                                </svg>
+                                Show Grid Overlay (Rule of Thirds)
+                            </label>
+                        </div>
+                        
+                        <div class="crop-tool-item">
+                            <input type="checkbox" name="snap_to_grid" id="snap-to-grid" class="crop-tool-checkbox">
+                            <label for="snap-to-grid" class="crop-tool-label">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                Snap to Grid Points
+                            </label>
+                        </div>
+                        
+                        <div class="crop-tool-item">
+                            <input type="checkbox" name="live_preview" id="live-preview" class="crop-tool-checkbox" checked>
+                            <label for="live-preview" class="crop-tool-label">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                Live Preview Updates
+                            </label>
+                        </div>
+                        
+                        <div class="crop-tool-item">
+                            <input type="checkbox" name="show_crop_info" id="show-crop-info" class="crop-tool-checkbox" checked>
+                            <label for="show-crop-info" class="crop-tool-label">
+                                <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Show Crop Information
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="quick-crop-buttons">
+                        <button type="button" class="quick-crop-btn" onclick="applyCropMode('rule-of-thirds')">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+                            </svg>
+                            Rule of Thirds
+                        </button>
+                        
+                        <button type="button" class="quick-crop-btn" onclick="applyCropMode('center')">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                            </svg>
+                            Center Crop
+                        </button>
+                        
+                        <button type="button" class="quick-crop-btn" onclick="applyCropMode('golden-ratio')">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            Golden Ratio
+                        </button>
+                    </div>
+                    
+                    <!-- Interactive Crop Preview -->
+                    <div class="interactive-crop-preview" id="interactive-crop-preview">
+                        <h5 class="text-md font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2z"></path>
+                            </svg>
+                            Interactive Crop Preview
+                        </h5>
+                        
+                        <div id="inline-cropper-container" class="inline-cropper-container">
+                            <div class="no-image-placeholder" id="no-image-placeholder">
+                                <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-gray-500 dark:text-gray-400 text-center">
+                                    Upload an image to see the interactive crop preview
+                                </p>
+                            </div>
+                            <!-- Cropper will be initialized here when image is uploaded -->
+                        </div>
+                        
+                        <!-- Crop Action Buttons -->
+                        <div class="crop-action-buttons" id="crop-action-buttons" style="display: none;">
+                            <button type="button" class="btn btn-secondary" id="reset-inline-crop">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                </svg>
+                                Reset Crop
+                            </button>
+                            <button type="button" class="btn btn-primary" id="apply-inline-crop">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Apply Crop
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Output Format & Quality -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Output Settings
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="output-format" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Output Format</label>
+                            <select name="output_format" id="output-format" class="form-select w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                                <option value="jpg">JPEG</option>
+                                <option value="png">PNG</option>
+                                <option value="webp">WebP</option>
+                                <option value="bmp">BMP</option>
+                                <option value="tiff">TIFF</option>
+                                <option value="gif">GIF</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="quality" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Quality</label>
+                            <select name="quality" id="quality" class="form-select w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100">
+                                <option value="95">High (95%)</option>
+                                <option value="85" selected>Medium (85%)</option>
+                                <option value="75">Standard (75%)</option>
+                                <option value="60">Low (60%)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button type="submit" class="btn btn-primary px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2z"></path>
+                        </svg>
+                        Crop Images
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Features Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <div class="feature-card bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                <div class="flex items-center mb-4">
+                    <svg class="w-8 h-8 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 002 2z"></path>
+                    </svg>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Multiple Crop Modes</h3>
+                </div>
+                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                    <li class="flex items-center">
+                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Interactive grid overlay (Rule of Thirds)
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Free-form cropping with visual guides
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Fixed aspect ratios & golden ratio
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Shape cropping with live preview
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="feature-card bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                <div class="flex items-center mb-4">
+                    <svg class="w-8 h-8 text-purple-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">High Precision</h3>
+                </div>
+                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                    <li class="flex items-center">
+                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Real-time crop information display
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Snap-to-grid alignment helpers
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Keyboard shortcuts for fine-tuning
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Enhanced visual crop box controls
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Image Preview Modal -->
+<div id="preview-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl mx-4 max-h-screen overflow-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Image Preview & Cropping</h3>
+            <button id="close-preview" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        <div id="cropper-container" class="mb-4 cropper-container-enhanced">
+            <!-- Live Preview Indicator -->
+            <div class="live-preview-indicator">
+                Live Preview
+            </div>
+            <!-- Cropper will be initialized here -->
+        </div>
+        <div class="flex justify-end space-x-3">
+            <button id="reset-crop" class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                Reset
+            </button>
+            <button id="apply-crop" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                Apply Crop
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Processing Modal -->
+<div id="processing-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm mx-4 text-center">
+        <div class="mb-4">
+            <div class="spinner mx-auto"></div>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Cropping Images</h3>
+        <p id="processing-message" class="text-gray-600 dark:text-gray-300 mb-4">
+            Please wait while we crop your images...
+        </p>
+        <div id="progress-container" class="mb-4">
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <p id="progress-text" class="text-sm text-gray-500 dark:text-gray-400 mt-2">0% complete</p>
+        </div>
+        <p class="text-xs text-gray-400 dark:text-gray-500">
+            Processing time depends on image size and number of images.
+        </p>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-4">
+        <div class="flex items-center space-x-3 mb-4">
+            <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Cropping Complete!</h3>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            Your images have been successfully cropped. The download will start automatically.
+        </p>
+        <div class="flex justify-end space-x-3">
+            <button id="close-success" class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-4">
+        <div class="flex items-center space-x-3 mb-4">
+            <div class="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Cropping Failed</h3>
+        </div>
+        <p id="error-message" class="text-gray-600 dark:text-gray-300 mb-6"></p>
+        <div class="flex justify-end">
+            <button id="close-error" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
+<script src="{{ url_for('static', filename='js/image_converter/image_cropper.js') }}" defer></script>
+{% endblock %}

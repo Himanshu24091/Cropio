@@ -1,0 +1,666 @@
+/* PDF Editor Pro - Professional Styling */
+
+/* CSS Variables for Theme Consistency */
+:root {
+    --primary-color: #4f46e5;
+    --primary-dark: #3730a3;
+    --secondary-color: #7c3aed;
+    --success-color: #059669;
+    --error-color: #dc2626;
+    --warning-color: #d97706;
+    --info-color: #0891b2;
+    
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8fafc;
+    --bg-tertiary: #e2e8f0;
+    
+    --border-light: #e2e8f0;
+    --border-medium: #cbd5e1;
+    --border-dark: #94a3b8;
+    
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+}
+
+/* Dark Mode Variables */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --text-primary: #f1f5f9;
+        --text-secondary: #cbd5e1;
+        --text-muted: #94a3b8;
+        
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --bg-tertiary: #334155;
+        
+        --border-light: #334155;
+        --border-medium: #475569;
+        --border-dark: #64748b;
+    }
+}
+
+/* Base Styles */
+* {
+    box-sizing: border-box;
+}
+
+#pdf-editor-app {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* Toolbar Button Styles */
+.tool-btn {
+    @apply flex items-center justify-center w-10 h-10 rounded-lg border-2 border-transparent;
+    @apply text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200;
+    @apply hover:bg-slate-200 dark:hover:bg-slate-600 transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1;
+}
+
+.tool-btn.active {
+    @apply bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400;
+    @apply border-indigo-200 dark:border-indigo-800 shadow-sm;
+}
+
+.tool-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.action-btn {
+    @apply flex items-center justify-center w-8 h-8 rounded-md;
+    @apply text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200;
+    @apply hover:bg-slate-200 dark:hover:bg-slate-600 transition-all duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1;
+}
+
+/* PDF Canvas Styles */
+.pdf-page-container {
+    @apply relative bg-white dark:bg-slate-800 rounded-lg shadow-lg overflow-hidden;
+    @apply border border-slate-200 dark:border-slate-700 mb-6;
+    margin: 0 auto;
+    transition: none; /* Remove transition to prevent visual glitches */
+    max-width: calc(100% - 2rem);
+    contain: layout style;
+    transform-origin: center center;
+    will-change: transform;
+}
+
+.pdf-page-container:hover {
+    @apply shadow-xl;
+    transform: translateY(-2px);
+}
+
+.pdf-page {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.annotation-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    cursor: crosshair;
+    pointer-events: auto;
+    z-index: 10;
+}
+
+.annotation-overlay.select-mode {
+    cursor: default;
+}
+
+.annotation-overlay.eraser-mode {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="%23ff0000" stroke-width="2"/><line x1="6" y1="6" x2="14" y2="14" stroke="%23ff0000" stroke-width="2"/><line x1="14" y1="6" x2="6" y2="14" stroke="%23ff0000" stroke-width="2"/></svg>') 10 10, auto;
+}
+
+/* Page Thumbnail Styles */
+.page-thumbnail {
+    @apply relative rounded-lg border-2 border-transparent;
+    @apply hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer transition-all duration-200;
+    padding: 0.5rem;
+}
+
+.page-thumbnail.active {
+    @apply bg-indigo-50 dark:bg-indigo-900/50 border-indigo-200 dark:border-indigo-800;
+}
+
+.page-thumbnail img {
+    @apply w-12 h-16 rounded border border-slate-200 dark:border-slate-600 object-cover;
+    box-shadow: var(--shadow-sm);
+}
+
+.page-thumbnail .page-info {
+    @apply ml-3;
+}
+
+.page-thumbnail .page-number {
+    @apply text-sm font-medium text-slate-600 dark:text-slate-300;
+}
+
+.page-thumbnail .page-size {
+    @apply text-xs text-slate-400 dark:text-slate-500;
+}
+
+/* Thumbnail Image Container */
+.thumbnail-image-container {
+    @apply relative;
+}
+
+.thumbnail-image-container img {
+    @apply w-16 h-20 rounded border border-slate-200 dark:border-slate-600 object-cover;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease;
+}
+
+/* Page Actions Overlay */
+.page-actions {
+    @apply absolute inset-0 bg-black bg-opacity-60 rounded flex items-center justify-center space-x-1;
+    @apply opacity-0 transition-opacity duration-200;
+}
+
+.thumbnail-image-container:hover .page-actions {
+    @apply opacity-100;
+}
+
+/* Page Action Buttons */
+.page-action-btn {
+    @apply w-6 h-6 bg-white dark:bg-slate-800 rounded border border-slate-200 dark:border-slate-600;
+    @apply flex items-center justify-center text-slate-600 dark:text-slate-400;
+    @apply hover:bg-slate-50 dark:hover:bg-slate-700 hover:text-slate-800 dark:hover:text-slate-200;
+    @apply transition-all duration-150 transform hover:scale-110;
+}
+
+.page-action-btn:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.duplicate-page-btn:hover {
+    @apply text-blue-600 dark:text-blue-400;
+}
+
+.rotate-page-btn:hover {
+    @apply text-green-600 dark:text-green-400;
+}
+
+.delete-page-btn:hover {
+    @apply text-red-600 dark:text-red-400;
+}
+
+/* Page Info Styling */
+.page-info {
+    @apply mt-2 text-center;
+}
+
+.page-number {
+    @apply text-xs font-medium text-slate-600 dark:text-slate-300;
+}
+
+/* Add New Page Button */
+#add-new-page-btn {
+    @apply transform transition-all duration-200;
+}
+
+#add-new-page-btn:hover {
+    @apply scale-105;
+    box-shadow: var(--shadow-md);
+}
+
+#add-new-page-btn:active {
+    @apply scale-95;
+}
+
+/* Page Rotation Styles */
+.pdf-page-container[data-rotation] .pdf-page,
+.pdf-page-container[data-rotation] .annotation-overlay {
+    transition: transform 0.3s ease;
+}
+
+/* Rotated page container adjustments */
+.pdf-page-container[data-rotation="90"] .pdf-page,
+.pdf-page-container[data-rotation="90"] .annotation-overlay,
+.pdf-page-container[data-rotation="270"] .pdf-page,
+.pdf-page-container[data-rotation="270"] .annotation-overlay {
+    /* Adjust container to accommodate rotated content */
+    margin: 2rem auto;
+}
+
+/* Rotated thumbnail adjustments */
+.page-thumbnail img {
+    transition: transform 0.3s ease;
+}
+
+/* Upload Zone Enhancements */
+#upload-zone {
+    position: relative;
+    overflow: hidden;
+}
+
+#upload-zone::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s ease;
+}
+
+#upload-zone:hover::before {
+    left: 100%;
+}
+
+#upload-zone.drag-over {
+    @apply border-indigo-400 dark:border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20;
+    transform: scale(1.02);
+}
+
+/* Progress Bar Animation */
+@keyframes progress-shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: calc(200px + 100%) 0; }
+}
+
+#progress-bar {
+    background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.2) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    background-size: 200px 100%;
+    background-repeat: no-repeat;
+    animation: progress-shimmer 2s infinite;
+}
+
+/* Modal Animations */
+.modal-enter {
+    animation: modalEnter 0.3s ease-out forwards;
+}
+
+.modal-exit {
+    animation: modalExit 0.2s ease-in forwards;
+}
+
+@keyframes modalEnter {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes modalExit {
+    from {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+    }
+}
+
+/* Loading Animation */
+@keyframes pulse-glow {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.7);
+    }
+    50% {
+        opacity: 0.8;
+        box-shadow: 0 0 0 10px rgba(79, 70, 229, 0);
+    }
+}
+
+.pulse-glow {
+    animation: pulse-glow 2s infinite;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    @apply bg-slate-100 dark:bg-slate-800 rounded-full;
+}
+
+::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 dark:bg-slate-600 rounded-full;
+    transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    @apply bg-slate-400 dark:bg-slate-500;
+}
+
+/* PDF Info Styling */
+.pdf-metadata-item {
+    @apply flex justify-between items-start py-2 border-b border-slate-100 dark:border-slate-700;
+}
+
+.pdf-metadata-label {
+    @apply text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide;
+    min-width: 60px;
+}
+
+.pdf-metadata-value {
+    @apply text-sm text-slate-700 dark:text-slate-300 text-right flex-1;
+    word-break: break-word;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    /* Mobile Header Adjustments */
+    header .container {
+        @apply px-2;
+    }
+    
+    header h1 {
+        @apply text-lg;
+    }
+    
+    /* Mobile Toolbar */
+    #toolbar {
+        @apply flex-wrap gap-1 p-2;
+    }
+    
+    .tool-btn {
+        @apply w-8 h-8;
+    }
+    
+    .tool-btn svg {
+        @apply w-4 h-4;
+    }
+    
+    /* Mobile Tool Properties */
+    #tool-properties {
+        @apply flex-col space-x-0 space-y-2 items-start;
+    }
+    
+    #tool-properties > div {
+        @apply flex items-center space-x-2;
+    }
+    
+    /* Hide sidebar on mobile */
+    #sidebar {
+        @apply hidden;
+    }
+    
+    /* Mobile PDF Container */
+    #pdf-container {
+        @apply p-4;
+    }
+    
+    .pdf-page-container {
+        @apply mb-4;
+        max-width: calc(100vw - 2rem);
+    }
+    
+    /* Mobile Upload Zone */
+    #upload-zone {
+        @apply p-8;
+    }
+    
+    #upload-zone h3 {
+        @apply text-lg;
+    }
+    
+    /* Mobile Modals */
+    .modal-content {
+        @apply m-2 max-w-sm;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Extra small devices */
+    header .flex {
+        @apply flex-col space-y-2 items-start;
+    }
+    
+    #toolbar {
+        @apply w-full justify-center;
+    }
+    
+    #tool-properties {
+        @apply w-full;
+    }
+    
+    #download-btn {
+        @apply w-full justify-center;
+    }
+    
+    #upload-zone {
+        @apply p-6;
+    }
+}
+
+/* High DPI Display Support */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .pdf-page {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+/* Print Styles */
+@media print {
+    header,
+    #sidebar,
+    .modal-overlay,
+    #toolbar,
+    #tool-properties,
+    #download-btn {
+        display: none !important;
+    }
+    
+    #pdf-viewer {
+        @apply block;
+    }
+    
+    .pdf-page-container {
+        @apply shadow-none border-0 mb-4;
+        break-inside: avoid;
+    }
+}
+
+/* Focus Styles for Accessibility */
+.focus-visible {
+    @apply outline-none ring-2 ring-indigo-500 ring-offset-2;
+}
+
+/* Animation Performance */
+* {
+    will-change: auto;
+}
+
+.tool-btn,
+.action-btn,
+.pdf-page-container,
+#upload-zone,
+.page-thumbnail {
+    will-change: transform, box-shadow, background-color;
+}
+
+/* PDF Viewer Container */
+#pdf-container {
+    width: 100%;
+    height: 100%;
+    contain: layout size;
+    position: relative;
+}
+
+#pdf-viewer {
+    overflow: hidden;
+    contain: layout;
+}
+
+/* Ensure pages don't overflow */
+.pdf-page {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+.annotation-overlay {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Custom Properties for Dynamic Styling */
+.annotation-overlay {
+    --stroke-color: #ff0000;
+    --stroke-width: 3;
+    --fill-opacity: 0.1;
+}
+
+/* Text Selection */
+::selection {
+    @apply bg-indigo-100 text-indigo-800;
+}
+
+::-moz-selection {
+    @apply bg-indigo-100 text-indigo-800;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    #upload-zone::before {
+        display: none;
+    }
+    
+    .tool-btn:hover,
+    .pdf-page-container:hover {
+        transform: none;
+    }
+}
+
+/* Stamp Modal Styles */
+.stamp-option {
+    transition: all 0.2s ease;
+}
+
+.stamp-option:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stamp-option.selected {
+    border-color: #6366f1 !important;
+    background-color: #f0f9ff;
+    --tw-border-opacity: 1;
+}
+
+/* Signature Modal Styles */
+.tabs {
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 1rem;
+}
+
+.tab-btn {
+    transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+    border-bottom-color: #6366f1 !important;
+    color: #6366f1 !important;
+}
+
+.tab-btn:not(.active):hover {
+    color: #374151;
+    border-bottom-color: #9ca3af;
+}
+
+#signature-canvas {
+    display: block;
+    margin: 0 auto;
+    touch-action: none;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Layer Panel Styles */
+.layer-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    margin-bottom: 0.25rem;
+    transition: background-color 0.2s ease;
+}
+
+.layer-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.layer-item.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.layer-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.layer-visibility-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s ease;
+}
+
+.layer-visibility-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Signature font preview */
+#signature-text {
+    transition: font-family 0.2s ease;
+}
+
+/* Dark mode adjustments for new elements */
+@media (prefers-color-scheme: dark) {
+    .stamp-option.selected {
+        background-color: #1e293b;
+    }
+    
+    .tabs {
+        border-bottom-color: #475569;
+    }
+    
+    .layer-item:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .layer-visibility-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+}

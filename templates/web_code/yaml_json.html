@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+
+{% block title %}YAML ⇄ JSON Converter{% endblock %}
+
+{% block head %}
+    <!-- Common converter CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/converter.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/phase-1-5.css') }}">
+    <!-- Code editor CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/material-darker.min.css">
+    <!-- Custom CSS for YAML/JSON converter -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='web_code/yaml_json.css') }}">
+    <!-- Theme CSS for dark/light mode -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='themes/css/yaml_json_theme.css') }}">
+{% endblock %}
+
+{% block page_content %}
+    <div class="converter-wrapper">
+        <div class="page-header">
+            <div class="container">
+                <h1><i class="fas fa-exchange-alt"></i> YAML ⇄ JSON Converter</h1>
+                <p class="subtitle">Convert between YAML and JSON formats with validation and formatting</p>
+                {% if current_user.is_authenticated %}
+                <div class="user-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Conversions:</span>
+                        <span class="stat-value">{{ stats.total_conversions }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Success Rate:</span>
+                        <span class="stat-value">{{ stats.success_rate }}%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Avg File Size:</span>
+                        <span class="stat-value">{{ stats.avg_file_size }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="container">
+            <div class="yaml-json-converter">
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <!-- Conversion Mode Toggle -->
+            <div class="mode-selector">
+                <label class="mode-option">
+                    <input type="radio" name="conversion-mode" value="yaml-to-json" checked>
+                    <span class="mode-label">YAML → JSON</span>
+                </label>
+                <label class="mode-option">
+                    <input type="radio" name="conversion-mode" value="json-to-yaml">
+                    <span class="mode-label">JSON → YAML</span>
+                </label>
+            </div>
+
+            <!-- Conversion Options -->
+            <div class="options-panel">
+                <div class="options-group">
+                    <h4>Format Options</h4>
+                    <label class="option-checkbox">
+                        <input type="checkbox" id="pretty-format" checked>
+                        <span>Pretty Format</span>
+                    </label>
+                    <label class="option-checkbox">
+                        <input type="checkbox" id="sort-keys">
+                        <span>Sort Keys</span>
+                    </label>
+                    <label class="option-checkbox yaml-only">
+                        <input type="checkbox" id="flow-style">
+                        <span>Flow Style</span>
+                    </label>
+                </div>
+                
+                <div class="options-group">
+                    <h4>Indentation</h4>
+                    <select id="indent-size">
+                        <option value="2" selected>2 spaces</option>
+                        <option value="4">4 spaces</option>
+                        <option value="8">8 spaces</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button id="convert-btn" class="btn btn-primary">
+                    <i class="fas fa-exchange-alt"></i> Convert
+                </button>
+                <button id="validate-btn" class="btn btn-secondary">
+                    <i class="fas fa-check-circle"></i> Validate
+                </button>
+                <button id="format-btn" class="btn btn-secondary">
+                    <i class="fas fa-code"></i> Format
+                </button>
+                <button id="sample-btn" class="btn btn-outline">
+                    <i class="fas fa-file-alt"></i> Load Sample
+                </button>
+                <button id="clear-btn" class="btn btn-outline">
+                    <i class="fas fa-trash"></i> Clear
+                </button>
+            </div>
+
+            <!-- File Upload -->
+            <div class="upload-section">
+                <label for="file-upload" class="upload-label">
+                    <i class="fas fa-upload"></i>
+                    <span>Upload File</span>
+                    <input type="file" id="file-upload" accept=".yaml,.yml,.json,.txt" style="display: none;">
+                </label>
+                <div class="upload-info" id="upload-info" style="display: none;">
+                    <span class="filename"></span>
+                    <span class="filesize"></span>
+                    <button class="remove-file" id="remove-file">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversion Panels -->
+        <div class="conversion-panels">
+            <!-- Input Panel -->
+            <div class="panel input-panel">
+                <div class="panel-header">
+                    <h3 id="input-title">Input (YAML)</h3>
+                    <div class="panel-controls">
+                        <button class="panel-btn" id="input-download-btn" title="Download Input">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button class="panel-btn" id="input-copy-btn" title="Copy Input">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="panel-btn" id="input-fullscreen-btn" title="Fullscreen">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <textarea id="input-content" placeholder="Paste your YAML content here or upload a file..."></textarea>
+                    <div class="content-stats" id="input-stats">
+                        Lines: 0 | Words: 0 | Characters: 0
+                    </div>
+                </div>
+                <div class="validation-status" id="input-validation">
+                    <div class="validation-indicator" data-status="unknown">
+                        <i class="fas fa-question-circle"></i>
+                        <span>Not validated</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Panel -->
+            <div class="panel output-panel">
+                <div class="panel-header">
+                    <h3 id="output-title">Output (JSON)</h3>
+                    <div class="panel-controls">
+                        <button class="panel-btn" id="output-download-btn" title="Download Output">
+                            <i class="fas fa-download"></i>
+                        </button>
+                        <button class="panel-btn" id="output-copy-btn" title="Copy Output">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="panel-btn" id="output-fullscreen-btn" title="Fullscreen">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <textarea id="output-content" placeholder="Converted content will appear here..." readonly></textarea>
+                    <div class="content-stats" id="output-stats">
+                        Lines: 0 | Words: 0 | Characters: 0
+                    </div>
+                </div>
+                <div class="validation-status" id="output-validation">
+                    <div class="validation-indicator" data-status="unknown">
+                        <i class="fas fa-question-circle"></i>
+                        <span>Not validated</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Display -->
+        <div class="error-display" id="error-display" style="display: none;">
+            <div class="error-header">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Conversion Error</span>
+                <button class="error-close" id="error-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="error-content">
+                <div class="error-message" id="error-message"></div>
+                <details class="error-details" id="error-details" style="display: none;">
+                    <summary>Technical Details</summary>
+                    <div class="error-details-content"></div>
+                </details>
+            </div>
+        </div>
+
+        <!-- Success Display -->
+        <div class="success-display" id="success-display" style="display: none;">
+            <div class="success-header">
+                <i class="fas fa-check-circle"></i>
+                <span id="success-message">Conversion successful!</span>
+                <button class="success-close" id="success-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="success-stats" id="success-stats"></div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="loading-indicator" id="loading-indicator" style="display: none;">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Converting...</div>
+        </div>
+
+        <!-- Fullscreen Modal -->
+        <div class="fullscreen-modal" id="fullscreen-modal" style="display: none;">
+            <div class="fullscreen-content">
+                <div class="fullscreen-header">
+                    <h3 id="fullscreen-title">Content</h3>
+                    <button class="fullscreen-close" id="fullscreen-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="fullscreen-body">
+                    <textarea id="fullscreen-textarea"></textarea>
+                </div>
+                <div class="fullscreen-actions">
+                    <button class="btn btn-primary" id="fullscreen-save">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <button class="btn btn-secondary" id="fullscreen-copy">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+            </div>
+        </div>
+        </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="features-container">
+            <h2>Features</h2>
+            <div class="features-grid">
+                <div class="feature">
+                    <i class="fas fa-exchange-alt feature-icon"></i>
+                    <h3>Bidirectional Conversion</h3>
+                    <p>Convert seamlessly between YAML and JSON formats in both directions</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-check-circle feature-icon"></i>
+                    <h3>Real-time Validation</h3>
+                    <p>Instant validation feedback as you type or upload files</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-code feature-icon"></i>
+                    <h3>Smart Formatting</h3>
+                    <p>Automatic formatting with customizable indentation and style options</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-upload feature-icon"></i>
+                    <h3>File Upload</h3>
+                    <p>Support for .yaml, .yml, .json, and .txt file uploads up to 10MB</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-download feature-icon"></i>
+                    <h3>Easy Download</h3>
+                    <p>Download converted files with proper file extensions and formatting</p>
+                </div>
+                <div class="feature">
+                    <i class="fas fa-cogs feature-icon"></i>
+                    <h3>Advanced Options</h3>
+                    <p>Customize output with options like key sorting, flow style, and indentation</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Usage Guide -->
+    <section class="usage-guide">
+        <div class="guide-container">
+            <h2>How to Use</h2>
+            <div class="guide-steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h4>Choose Conversion Mode</h4>
+                        <p>Select whether you want to convert YAML to JSON or JSON to YAML</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h4>Input Your Content</h4>
+                        <p>Type or paste your content, or upload a file (.yaml, .yml, .json, .txt)</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h4>Configure Options</h4>
+                        <p>Set formatting preferences like indentation, key sorting, and style</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h4>Convert & Download</h4>
+                        <p>Click Convert to transform your data, then download the result</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block page_scripts %}
+    <!-- Code editor JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/yaml/yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/fold/foldcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/fold/foldgutter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/fold/brace-fold.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/addon/fold/indent-fold.min.js"></script>
+    
+    <!-- Custom JS for YAML/JSON converter -->
+    <script src="{{ url_for('static', filename='js/web_code/yaml_json.js') }}"></script>
+{% endblock %}

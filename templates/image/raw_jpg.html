@@ -1,0 +1,568 @@
+{% extends "base.html" %}
+
+{% block title %}RAW ⇄ JPG Converter - Professional Image Processing{% endblock %}
+
+{% block meta_description %}Convert RAW images to JPG, PNG, or TIFF with advanced processing options. Support for Canon, Nikon, Sony, and 15+ camera formats. Professional quality with metadata preservation.{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='image/raw_jpg.css') }}">
+
+    <!-- JSON data for JavaScript -->
+    <script type="application/json" id="app-config">
+    {
+        "maxFileSize": {{ max_file_size_mb if max_file_size_mb else 50 }},
+        "isPremium": {{ current_user.is_premium()|lower if current_user is defined and current_user.is_authenticated else 'false' }},
+        "quotaExceeded": {{ quota_exceeded|lower if quota_exceeded else 'false' }},
+        "rawUnavailable": {{ raw_unavailable|lower if raw_unavailable else 'false' }},
+        "supportedFormats": {{ supported_formats|tojson if supported_formats else '{}' }},
+        "apiUrls": {
+            "convert": "{{ url_for('raw_jpg.api_convert_raw') }}",
+            "analyze": "{{ url_for('raw_jpg.api_analyze_raw') }}",
+            "preview": "{{ url_for('raw_jpg.api_create_preview') }}",
+            "batchConvert": "{{ url_for('raw_jpg.api_batch_convert') }}",
+            "pngRawConvert": "{{ url_for('raw_jpg.api_convert_png_to_raw') }}",
+            "pngRawBatchConvert": "{{ url_for('raw_jpg.api_batch_convert_png_to_raw') }}",
+            "formats": "{{ url_for('raw_jpg.get_supported_formats') }}"
+        }
+    }
+    </script>
+{% endblock %}
+
+{% block page_content %}
+<div class="raw-jpg-converter">
+    <!-- Header Section -->
+    <div class="converter-header">
+        <div class="header-content">
+            <div class="icon-title-group">
+                <div class="tool-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21,15 16,10 5,21"/>
+                        <path d="M7 17L17 7"/>
+                    </svg>
+                </div>
+                <div class="title-group">
+                    <h1>RAW ⇄ JPG Converter</h1>
+                    <p class="subtitle">Professional bidirectional image processing with advanced controls</p>
+                </div>
+            </div>
+            
+            <!-- Usage Stats -->
+            {% if current_user is defined and current_user.is_authenticated %}
+            <div class="usage-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Today's Usage</span>
+                    <span class="stat-value">{{ usage.conversions_count if usage else 0 }}/{{ 'Unlimited' if current_user is defined and current_user.is_authenticated and current_user.is_premium() else '5' }}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Data Processed</span>
+                    <span class="stat-value">{{ "%.1f"|format((usage.data_processed or 0) / (1024*1024)) }} MB</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if raw_unavailable %}
+    <!-- RAW Processing Unavailable Alert -->
+    <div class="error-container">
+        <div class="error-content">
+            <div class="error-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/>
+                    <line x1="9" y1="9" x2="15" y2="15"/>
+                </svg>
+            </div>
+            <h3>RAW Processing Unavailable</h3>
+            <p>{{ error_message }}</p>
+            <div class="error-actions">
+                <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary">Return to Dashboard</a>
+                <a href="mailto:support@cropio.com" class="btn btn-primary">Contact Support</a>
+            </div>
+        </div>
+    </div>
+    {% elif quota_exceeded %}
+    <!-- Quota Exceeded Alert -->
+    <div class="quota-container">
+        <div class="quota-content">
+            <div class="quota-icon">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+            </div>
+            <h3>Daily Quota Exceeded</h3>
+            <p>You've reached your daily conversion limit of 5 files. Upgrade to premium for unlimited conversions.</p>
+            <div class="quota-actions">
+                <a href="{{ url_for('pricing') }}" class="btn btn-primary">Upgrade to Premium</a>
+                <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary">Return to Dashboard</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    
+    <!-- Main Converter Interface -->
+    <div class="converter-container">
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <!-- Conversion Direction Toggle -->            
+            <div class="conversion-direction-toggle">
+                <div class="direction-toggle-container">
+                    <label class="direction-toggle">
+                        <input type="radio" name="conversionDirection" value="raw_to_jpg" checked>
+                        <span class="direction-label">RAW to JPG/PNG</span>
+                    </label>
+                    <label class="direction-toggle">
+                        <input type="radio" name="conversionDirection" value="jpg_to_raw">
+                        <span class="direction-label">JPG/PNG to RAW</span>
+                    </label>
+                </div>
+                <p class="direction-description" id="directionDescription">
+                    Convert RAW camera files to standard image formats with professional quality.                
+                </p>
+            </div>
+
+            <!-- RAW to JPG Upload Zone -->
+            <div class="upload-zone" id="rawToJpgUploadZone">
+                <div class="upload-content">
+                    <div class="upload-icon">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17,8 12,3 7,8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                    </div>
+                    <h3>Drop RAW files here or click to browse</h3>
+                    <p>Support for Canon, Nikon, Sony, and 15+ camera brands</p>
+                    <div class="upload-info">
+                        <span class="info-item">Max: {{ max_file_size_mb }}MB per file</span>
+                        <span class="info-divider">•</span>
+                        <span class="info-item">Batch: {{ 'Up to 10' if current_user is defined and current_user.is_authenticated and current_user.is_premium() else 'Premium only' }}</span>
+                    </div>
+                    <input type="file" id="rawFileInput" accept=".cr2,.cr3,.nef,.arw,.dng,.raf,.rw2,.orf,.pef,.srw,.x3f,.3fr,.fff,.mef,.mos,.raw" multiple style="display: none;">
+                    <button type="button" class="btn btn-primary" id="selectRawFilesBtn">
+                        Select RAW Files
+                    </button>
+                </div>
+            </div>
+            
+            <!-- JPG to RAW Upload Zone (Initially Hidden) -->
+            <div class="upload-zone" id="jpgToRawUploadZone" style="display: none;">
+                <div class="upload-content">
+                    <div class="upload-icon">
+                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17,8 12,3 7,8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                    </div>
+                    <h3>Drop image files here or click to browse</h3>
+                    <p>Support for PNG, JPG, JPEG, TIFF and BMP formats</p>
+                    <div class="upload-info">
+                        <span class="info-item">Max: {{ max_file_size_mb }}MB per file</span>
+                        <span class="info-divider">•</span>
+                        <span class="info-item">Batch: {{ 'Up to 10' if current_user is defined and current_user.is_authenticated and current_user.is_premium() else 'Premium only' }}</span>
+                    </div>
+                    <input type="file" id="imageFileInput" accept=".png,.jpg,.jpeg,.tiff,.tif,.bmp" multiple style="display: none;">
+                    <button type="button" class="btn btn-primary" id="selectImageFilesBtn">
+                        Select Image Files
+                    </button>
+                </div>
+            </div>
+
+            <!-- File Preview Area -->
+            <div class="file-list" id="fileList" style="display: none;">
+                <h4>Selected Files</h4>
+                <div class="file-items" id="fileItems"></div>
+                <div class="file-actions">
+                    <button type="button" class="btn btn-secondary" id="clearFiles">Clear All</button>
+                    <button type="button" class="btn btn-outline" id="addMoreFiles">Add More Files</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Processing Options -->
+        <div class="options-section" id="optionsSection" style="display: none;">
+            <h3>Processing Options</h3>
+            
+            <div class="options-grid">
+                <!-- Output Format -->
+                <div class="option-group raw-to-jpg-option">
+                    <label for="outputFormatRawToJpg">Output Format</label>
+                    <select id="outputFormatRawToJpg" class="form-select">
+                        <option value="JPEG" selected>JPEG - Balanced size and quality</option>
+                        <option value="PNG">PNG - Lossless compression</option>
+                        <option value="TIFF">TIFF - Professional archival</option>
+                    </select>
+                </div>
+                
+                <div class="option-group jpg-to-raw-option" style="display: none;">
+                    <label for="outputFormatJpgToRaw">Output Format</label>
+                    <select id="outputFormatJpgToRaw" class="form-select">
+                        <option value="DNG" selected>DNG - Adobe Digital Negative (Most Compatible)</option>
+                        <option value="TIFF">TIFF - Tagged Image File Format (High Quality)</option>
+                    </select>
+                </div>
+
+                <!-- Quality Setting -->
+                <div class="option-group">
+                    <label for="quality">Quality <span class="quality-value">95%</span></label>
+                    <input type="range" id="quality" min="50" max="100" value="95" class="form-range">
+                    <div class="range-labels">
+                        <span>Web (50%)</span>
+                        <span>Professional (100%)</span>
+                    </div>
+                </div>
+
+                <!-- Processing Toggles for RAW to JPG -->
+                <div class="toggles-group raw-to-jpg-option">
+                    <div class="toggle-item">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="preserveMetadataRawToJpg" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <div class="toggle-info">
+                            <span class="toggle-label">Preserve Metadata</span>
+                            <span class="toggle-desc">Keep EXIF, camera settings, and GPS data</span>
+                        </div>
+                    </div>
+
+                    <div class="toggle-item">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="autoWhiteBalance" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <div class="toggle-info">
+                            <span class="toggle-label">Auto White Balance</span>
+                            <span class="toggle-desc">Automatic color temperature adjustment</span>
+                        </div>
+                    </div>
+
+                    <div class="toggle-item">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="autoBrightness" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <div class="toggle-info">
+                            <span class="toggle-label">Auto Brightness</span>
+                            <span class="toggle-desc">Automatic exposure optimization</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Processing Toggles for JPG to RAW -->
+                <div class="toggles-group jpg-to-raw-option" style="display: none;">
+                    <div class="toggle-item">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="preserveMetadataJpgToRaw" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <div class="toggle-info">
+                            <span class="toggle-label">Preserve Metadata</span>
+                            <span class="toggle-desc">Keep EXIF data when converting to RAW</span>
+                        </div>
+                    </div>
+                    
+                    <div class="toggle-item">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="highQualityRaw" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <div class="toggle-info">
+                            <span class="toggle-label">High Quality Conversion</span>
+                            <span class="toggle-desc">Maximum quality with larger file size</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Advanced Options (Collapsible) -->
+            <div class="advanced-options">
+                <button type="button" class="advanced-toggle" id="advancedToggle">
+                    <span>Advanced Processing Options</span>
+                    <svg class="chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6,9 12,15 18,9"></polyline>
+                    </svg>
+                </button>
+                
+                <div class="advanced-content" id="advancedContent" style="display: none;">
+                    <div class="advanced-grid">
+                        <!-- Brightness Adjustment -->
+                        <div class="slider-group">
+                            <label for="brightness">Brightness <span class="brightness-value">0</span></label>
+                            <input type="range" id="brightness" min="-2" max="2" step="0.1" value="0" class="form-range">
+                        </div>
+
+                        <!-- Contrast Adjustment -->
+                        <div class="slider-group">
+                            <label for="contrast">Contrast <span class="contrast-value">0</span></label>
+                            <input type="range" id="contrast" min="-2" max="2" step="0.1" value="0" class="form-range">
+                        </div>
+
+                        <!-- Saturation Adjustment -->
+                        <div class="slider-group">
+                            <label for="saturation">Saturation <span class="saturation-value">0</span></label>
+                            <input type="range" id="saturation" min="-2" max="2" step="0.1" value="0" class="form-range">
+                        </div>
+
+                        <!-- Sharpness Adjustment -->
+                        <div class="slider-group">
+                            <label for="sharpness">Sharpness <span class="sharpness-value">0</span></label>
+                            <input type="range" id="sharpness" min="-2" max="2" step="0.1" value="0" class="form-range">
+                        </div>
+
+                        <!-- Temperature Shift -->
+                        <div class="slider-group">
+                            <label for="temperatureShift">Color Temperature <span class="temperature-value">0K</span></label>
+                            <input type="range" id="temperatureShift" min="-1000" max="1000" step="100" value="0" class="form-range">
+                        </div>
+                    </div>
+
+                    <div class="preset-buttons">
+                        <button type="button" class="btn btn-sm btn-outline preset-btn" data-preset="reset">Reset All</button>
+                        <button type="button" class="btn btn-sm btn-outline preset-btn" data-preset="vivid">Vivid</button>
+                        <button type="button" class="btn btn-sm btn-outline preset-btn" data-preset="natural">Natural</button>
+                        <button type="button" class="btn btn-sm btn-outline preset-btn" data-preset="portrait">Portrait</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="action-section" id="actionSection" style="display: none;">
+            <div class="action-buttons">
+                <button type="button" class="btn btn-outline" id="analyzeBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/>
+                    </svg>
+                    Analyze File
+                </button>
+                
+                <button type="button" class="btn btn-outline" id="previewBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    Generate Preview
+                </button>
+
+                <button type="button" class="btn btn-primary" id="convertBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="16,18 22,12 16,6"/>
+                        <polyline points="8,6 2,12 8,18"/>
+                    </svg>
+                    Convert Files
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <!-- Progress indicator -->
+            <div class="progress-container" id="progressContainer" style="display: none;">
+                <div class="progress-header">
+                    <h4>Processing Files...</h4>
+                    <span class="progress-text" id="progressText">Initializing...</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-details" id="progressDetails"></div>
+            </div>
+
+            <!-- Success Results -->
+            <div class="success-results" id="successResults" style="display: none;">
+                <div class="success-header">
+                    <div class="success-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                            <polyline points="22,4 12,14.01 9,11.01"/>
+                        </svg>
+                    </div>
+                    <h3>Conversion Successful!</h3>
+                    <p class="success-message" id="successMessage"></p>
+                </div>
+
+                <div class="conversion-stats" id="conversionStats"></div>
+                
+                <div class="download-section" id="downloadSection"></div>
+
+                <div class="result-actions">
+                    <button type="button" class="btn btn-outline" id="convertMoreBtn">Convert More Files</button>
+                    <a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary">Return to Dashboard</a>
+                </div>
+            </div>
+
+            <!-- Error Results -->
+            <div class="error-results" id="errorResults" style="display: none;">
+                <div class="error-header">
+                    <div class="error-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                        </svg>
+                    </div>
+                    <h3>Conversion Failed</h3>
+                    <p class="error-message" id="errorMessage"></p>
+                </div>
+
+                <div class="error-actions">
+                    <button type="button" class="btn btn-primary" id="retryBtn">Try Again</button>
+                    <a href="mailto:support@cropio.com" class="btn btn-outline">Contact Support</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- File Analysis Modal -->
+        <div class="modal" id="analysisModal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>RAW File Analysis</h3>
+                    <button type="button" class="modal-close" id="analysisModalClose">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body" id="analysisContent"></div>
+            </div>
+        </div>
+
+        <!-- Preview Modal -->
+        <div class="modal" id="previewModal" style="display: none;">
+            <div class="modal-content preview-modal">
+                <div class="modal-header">
+                    <h3>RAW File Preview</h3>
+                    <button type="button" class="modal-close" id="previewModalClose">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="preview-container" id="previewContainer"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supported Formats Information -->
+    <div class="formats-section">
+        <div class="formats-container">
+            <h3>Supported RAW Formats</h3>
+            <div class="formats-grid">
+                <div class="format-brand">
+                    <h4>Canon</h4>
+                    <div class="format-list">
+                        <span class="format-tag">.CR2</span>
+                        <span class="format-tag">.CR3</span>
+                    </div>
+                </div>
+                <div class="format-brand">
+                    <h4>Nikon</h4>
+                    <div class="format-list">
+                        <span class="format-tag">.NEF</span>
+                    </div>
+                </div>
+                <div class="format-brand">
+                    <h4>Sony</h4>
+                    <div class="format-list">
+                        <span class="format-tag">.ARW</span>
+                    </div>
+                </div>
+                <div class="format-brand">
+                    <h4>Adobe</h4>
+                    <div class="format-list">
+                        <span class="format-tag">.DNG</span>
+                    </div>
+                </div>
+                <div class="format-brand">
+                    <h4>Fujifilm</h4>
+                    <div class="format-list">
+                        <span class="format-tag">.RAF</span>
+                    </div>
+                </div>
+                <div class="format-brand">
+                    <h4>Others</h4>
+                    <div class="format-list">
+                        <span class="format-tag">.RW2</span>
+                        <span class="format-tag">.ORF</span>
+                        <span class="format-tag">.PEF</span>
+                        <span class="format-tag">.SRW</span>
+                        <span class="format-tag">+more</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Highlights -->
+    <div class="features-section">
+        <div class="features-container">
+            <h3>Professional RAW Processing Features</h3>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/>
+                        </svg>
+                    </div>
+                    <h4>Advanced Processing</h4>
+                    <p>Professional-grade RAW processing with LibRaw engine for maximum quality</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/>
+                            <line x1="7" y1="2" x2="7" y2="22"/>
+                            <line x1="17" y1="2" x2="17" y2="22"/>
+                            <line x1="2" y1="12" x2="22" y2="12"/>
+                            <line x1="2" y1="7" x2="7" y2="7"/>
+                            <line x1="2" y1="17" x2="7" y2="17"/>
+                            <line x1="17" y1="17" x2="22" y2="17"/>
+                            <line x1="17" y1="7" x2="22" y2="7"/>
+                        </svg>
+                    </div>
+                    <h4>Batch Processing</h4>
+                    <p>Process multiple RAW files simultaneously with consistent settings</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14,2 14,8 20,8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10,9 9,9 8,9"/>
+                        </svg>
+                    </div>
+                    <h4>Metadata Preservation</h4>
+                    <p>Keep all EXIF data, camera settings, and GPS information intact</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
+                        </svg>
+                    </div>
+                    <h4>Real-time Preview</h4>
+                    <p>Generate instant previews to see results before processing</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+    <script src="{{ url_for('static', filename='js/image/raw_jpg.js') }}"></script>
+{% endblock %}

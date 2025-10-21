@@ -1,0 +1,422 @@
+{% extends "base.html" %}
+
+{% block title %}HTML ⇄ PDF Snapshot Converter - Cropio{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/converter.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/phase-1-5.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='web_code/html_pdf_snapshot.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="converter-wrapper">
+    <div class="page-header">
+        <div class="container">
+            <h1><i class="fas fa-globe-americas"></i> HTML ⇄ PDF Snapshot Converter</h1>
+            <p class="subtitle">Convert web pages, HTML files, or HTML content to professional PDF documents with advanced options</p>
+        </div>
+    </div>
+
+    <div class="container">
+        {% if backend_unavailable %}
+        <!-- PDF Backend Support Unavailable -->
+        <div class="alert alert-error">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>PDF Backend Unavailable</strong>
+            <p>PDF conversion support is not available on this system. Please contact the administrator for assistance.</p>
+        </div>
+        {% elif quota_exceeded %}
+        <!-- Quota Exceeded -->
+        <div class="alert alert-warning">
+            <i class="fas fa-hourglass-half"></i>
+            <strong>Daily Limit Reached</strong>
+            <p>You've used all {{ usage.conversions_count }} daily conversions. Upgrade to premium for unlimited access!</p>
+            <a href="{{ url_for('dashboard.subscription') }}" class="btn btn-primary">Upgrade Now</a>
+        </div>
+        {% else %}
+        
+        <!-- Usage Information -->
+        {% if usage %}
+        <div class="usage-info">
+            <strong>Daily Usage:</strong> {{ usage.conversions_used if usage.conversions_used else 0 }}/{{ usage.daily_limit if usage.daily_limit else 5 }} conversions used
+            <div class="usage-bar">
+                <div class="usage-fill" style="width: {{ usage.percentage if usage.percentage else 0 }}%"></div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Main Converter Card -->
+        <div class="converter-card">
+            <div class="card-header">
+                <h2><i class="fas fa-file-pdf"></i> HTML to PDF Conversion</h2>
+            </div>
+            <div class="card-body">
+                <!-- Conversion Type Selection -->
+                <div class="conversion-type-selector">
+                    <div class="type-option active" data-type="url">
+                        <i class="fas fa-globe"></i>
+                        <span>Website URL</span>
+                    </div>
+                    <div class="type-option" data-type="file">
+                        <i class="fas fa-file-code"></i>
+                        <span>HTML File</span>
+                    </div>
+                    <div class="type-option" data-type="content">
+                        <i class="fas fa-code"></i>
+                        <span>HTML Content</span>
+                    </div>
+                </div>
+
+                <!-- URL Input Section -->
+                <div class="input-section" id="url-section">
+                    <div class="input-group">
+                        <input type="url" id="urlInput" placeholder="https://example.com" class="form-input">
+                        <button type="button" class="preview-btn" id="previewBtn">
+                            <i class="fas fa-eye"></i> Preview
+                        </button>
+                    </div>
+                    <div id="url-validation" class="validation-message"></div>
+                    
+                    <!-- URL Preview -->
+                    <div id="url-preview" class="url-preview-container" style="display: none;">
+                        <div class="preview-content">
+                            <div class="preview-icon">
+                                <img id="preview-favicon" src="" alt="" style="display: none;">
+                                <i class="fas fa-globe default-icon"></i>
+                            </div>
+                            <div class="preview-details">
+                                <h4 id="preview-title"></h4>
+                                <p id="preview-description"></p>
+                                <small id="preview-meta"></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Input Section -->
+                <div class="input-section" id="file-section" style="display: none;">
+                    <div class="upload-zone" id="uploadZone">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="upload-text">Drop your HTML files here</div>
+                        <div class="upload-hint">or click to browse and upload</div>
+                        <input type="file" id="fileInput" multiple accept=".html,.htm" style="display: none;">
+                        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click();">
+                            <i class="fas fa-folder-open"></i> Choose Files
+                        </button>
+                    </div>
+                    
+                    <!-- File List -->
+                    <div class="file-list" id="fileList" style="display: none;">
+                        <!-- Files will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Content Input Section -->
+                <div class="input-section" id="content-section" style="display: none;">
+                    <div class="content-editor">
+                        <textarea id="contentInput" placeholder="Enter your HTML content here..." rows="12"></textarea>
+                        <div class="editor-footer">
+                            <div class="content-stats">
+                                <span id="char-count">0</span> characters, 
+                                <span id="word-count">0</span> words,
+                                <span id="estimated-pages">~0</span> pages
+                            </div>
+                            <div class="editor-actions">
+                                <button type="button" class="btn btn-secondary" id="validate-content">
+                                    <i class="fas fa-check-circle"></i> Validate
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="format-content">
+                                    <i class="fas fa-magic"></i> Format
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="content-validation" class="validation-results" style="display: none;"></div>
+                </div>
+
+                <!-- Backend Information -->
+                {% if backend_info %}
+                <div class="backend-info">
+                    <h4><i class="fas fa-cogs"></i> PDF Backend Status</h4>
+                    <div class="backend-grid">
+                        <div class="backend-item">
+                            <strong>Current Backend:</strong> {{ backend_info.current_backend or 'None' }}
+                        </div>
+                        <div class="backend-item">
+                            <strong>Status:</strong> 
+                            {% if backend_available %}
+                                <span class="status-active">Available</span>
+                            {% else %}
+                                <span class="status-inactive">Unavailable</span>
+                            {% endif %}
+                        </div>
+                        <div class="backend-item">
+                            <strong>Features:</strong> 
+                            {% if backend_info.supported_features %}
+                                {% for feature, supported in backend_info.supported_features.items() %}
+                                    {% if supported %}
+                                        <span class="feature-badge">{{ feature|replace('_', ' ')|title }}</span>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Conversion Settings -->
+                <div class="conversion-settings">
+                    <h4><i class="fas fa-cog"></i> PDF Settings</h4>
+                    
+                    <!-- Basic Settings -->
+                    <div class="settings-row">
+                        <div class="setting-group">
+                            <label for="pageSize">Page Size:</label>
+                            <select id="pageSize" name="page_size">
+                                <option value="A4" selected>A4</option>
+                                <option value="A3">A3</option>
+                                <option value="A5">A5</option>
+                                <option value="Letter">Letter</option>
+                                <option value="Legal">Legal</option>
+                            </select>
+                        </div>
+                        <div class="setting-group">
+                            <label for="orientation">Orientation:</label>
+                            <select id="orientation" name="orientation">
+                                <option value="portrait" selected>Portrait</option>
+                                <option value="landscape">Landscape</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Margin Settings -->
+                    <div class="settings-row">
+                        <div class="setting-group">
+                            <label for="marginTop">Top Margin (cm):</label>
+                            <input type="number" id="marginTop" name="margin_top" value="2" min="0" max="10" step="0.5">
+                        </div>
+                        <div class="setting-group">
+                            <label for="marginBottom">Bottom Margin (cm):</label>
+                            <input type="number" id="marginBottom" name="margin_bottom" value="2" min="0" max="10" step="0.5">
+                        </div>
+                        <div class="setting-group">
+                            <label for="marginLeft">Left Margin (cm):</label>
+                            <input type="number" id="marginLeft" name="margin_left" value="2" min="0" max="10" step="0.5">
+                        </div>
+                        <div class="setting-group">
+                            <label for="marginRight">Right Margin (cm):</label>
+                            <input type="number" id="marginRight" name="margin_right" value="2" min="0" max="10" step="0.5">
+                        </div>
+                    </div>
+
+                    <!-- Viewport Settings -->
+                    <div class="settings-row">
+                        <div class="setting-group">
+                            <label for="viewportWidth">Viewport Width (px):</label>
+                            <input type="number" id="viewportWidth" name="viewport_width" value="1366" min="320" max="3840">
+                        </div>
+                        <div class="setting-group">
+                            <label for="viewportHeight">Viewport Height (px):</label>
+                            <input type="number" id="viewportHeight" name="viewport_height" value="768" min="240" max="2160">
+                        </div>
+                        <div class="setting-group">
+                            <label for="scaleFactor">Scale Factor:</label>
+                            <input type="range" id="scaleFactor" name="scale_factor" min="0.1" max="2" step="0.1" value="1">
+                            <span id="scale-value">1.0x</span>
+                        </div>
+                    </div>
+
+                    <!-- Rendering Options -->
+                    <div class="settings-row">
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="fullPage" name="full_page" checked>
+                                <span class="checkmark"></span>
+                                Capture full page
+                            </label>
+                        </div>
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="backgroundGraphics" name="background_graphics" checked>
+                                <span class="checkmark"></span>
+                                Include backgrounds
+                            </label>
+                        </div>
+                        <div class="setting-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="waitForLoad" name="wait_for_load">
+                                <span class="checkmark"></span>
+                                Wait for page load
+                            </label>
+                        </div>
+                        <div class="setting-group" id="wait-time-group" style="display: none;">
+                            <label for="waitTime">Wait Time (seconds):</label>
+                            <input type="number" id="waitTime" name="wait_time" value="3" min="1" max="30">
+                        </div>
+                    </div>
+
+                    <!-- Advanced Settings (Collapsible) -->
+                    <div class="advanced-settings">
+                        <button type="button" class="advanced-toggle" id="advancedToggle">
+                            <i class="fas fa-chevron-down"></i>
+                            Advanced Settings
+                        </button>
+                        
+                        <div class="advanced-content" id="advancedContent" style="display: none;">
+                            <div class="setting-group">
+                                <label for="customCss">Custom CSS:</label>
+                                <textarea id="customCss" name="custom_css" rows="6" placeholder="/* Custom CSS for PDF styling */"></textarea>
+                            </div>
+                            
+                            {% if backend_info.supported_features.custom_headers_footers %}
+                            <div class="setting-group">
+                                <label for="headerHtml">Header HTML:</label>
+                                <textarea id="headerHtml" name="header_html" rows="3" placeholder="<div>Page header content</div>"></textarea>
+                            </div>
+                            
+                            <div class="setting-group">
+                                <label for="footerHtml">Footer HTML:</label>
+                                <textarea id="footerHtml" name="footer_html" rows="3" placeholder="<div>Page footer content</div>"></textarea>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div class="progress" style="display: none;" id="conversionProgress">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="progress-text" id="progressText"></div>
+
+                <!-- Convert Button -->
+                <div class="convert-action">
+                    <button type="button" class="btn btn-primary btn-convert" id="convertBtn">
+                        <i class="fas fa-file-pdf"></i>
+                        <span>Convert to PDF</span>
+                        <div class="spinner" style="display: none;"></div>
+                    </button>
+                </div>
+
+                <!-- Results Section -->
+                <div class="results-section" id="resultsSection" style="display: none;">
+                    <!-- Success Result -->
+                    <div id="success-result" class="result-card success" style="display: none;">
+                        <div class="result-header">
+                            <i class="fas fa-check-circle"></i>
+                            <h4>Conversion Successful!</h4>
+                        </div>
+                        <div class="result-content">
+                            <p>Your PDF has been generated successfully.</p>
+                            <div class="result-stats">
+                                <div class="stat-item">
+                                    <span class="stat-value" id="result-size">-</span>
+                                    <span class="stat-label">File Size</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value" id="result-time">-</span>
+                                    <span class="stat-label">Processing Time</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-value" id="result-backend">-</span>
+                                    <span class="stat-label">Backend</span>
+                                </div>
+                            </div>
+                            <div class="result-actions">
+                                <a href="#" id="download-link" class="btn btn-success download-btn" download>
+                                    <i class="fas fa-download"></i> Download PDF
+                                </a>
+                                <button type="button" class="btn btn-secondary" id="convert-another">
+                                    <i class="fas fa-redo"></i> Convert Another
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Error Result -->
+                    <div id="error-result" class="result-card error" style="display: none;">
+                        <div class="result-header">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h4>Conversion Failed</h4>
+                        </div>
+                        <div class="result-content">
+                            <div class="error-message">
+                                <strong>Error:</strong> <span id="error-text">Unknown error occurred</span>
+                            </div>
+                            <div class="result-actions">
+                                <button type="button" class="btn btn-primary" id="retry-conversion">
+                                    <i class="fas fa-redo"></i> Try Again
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-globe-americas"></i>
+                </div>
+                <h4>Web Page Capture</h4>
+                <p>Convert any public website into a PDF snapshot with full layout preservation</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-file-code"></i>
+                </div>
+                <h4>HTML File Support</h4>
+                <p>Upload and convert HTML files with embedded CSS and JavaScript support</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-cog"></i>
+                </div>
+                <h4>Advanced Options</h4>
+                <p>Customize page size, margins, headers, footers, and CSS styling</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h4>Fast Processing</h4>
+                <p>Quick conversion with multiple backend engines for optimal compatibility</p>
+            </div>
+        </div>
+
+        <!-- Information Section -->
+        <div class="info-section">
+            <div class="info-card">
+                <h3><i class="fas fa-question-circle"></i> About HTML to PDF</h3>
+                <p>HTML to PDF conversion allows you to create professional PDF documents from web content:</p>
+                <ul>
+                    <li>Perfect layout preservation from web pages</li>
+                    <li>Support for CSS styling and fonts</li>
+                    <li>Customizable page sizes and margins</li>
+                    <li>Headers and footers support</li>
+                    <li>Background graphics and images</li>
+                </ul>
+                <p><strong>Note:</strong> Some dynamic content and JavaScript may not render perfectly in PDF format.</p>
+            </div>
+            
+            <div class="info-card">
+                <h3><i class="fas fa-lightbulb"></i> Conversion Tips</h3>
+                <ul>
+                    <li>Use high-contrast colors for better PDF readability</li>
+                    <li>Test different viewport sizes for optimal layout</li>
+                    <li>Enable "Wait for load" for pages with dynamic content</li>
+                    <li>Use CSS media queries with @media print for print-specific styling</li>
+                    <li>Avoid complex animations and transitions</li>
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/web_code/html_pdf_snapshot.js') }}"></script>
+{% endblock %}

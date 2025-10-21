@@ -1,0 +1,463 @@
+{% extends "base.html" %}
+
+{% block title %}HEIC ⇄ JPG Converter - Cropio{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/converter.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/phase-1-5.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='image/heic_jpg.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="converter-wrapper">
+    <div class="page-header">
+        <div class="container">
+            <h1><i class="fas fa-mobile-alt"></i> HEIC ⇄ JPG Converter</h1>
+            <p class="subtitle">Convert Apple HEIC images to JPG and vice versa with full metadata support</p>
+        </div>
+    </div>
+
+    <div class="container">
+        {% if not heic_available %}
+        <!-- HEIC Support Unavailable -->
+        <div class="alert alert-error">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div class="alert-content">
+                <strong>HEIC Support Unavailable</strong>
+                <p>HEIC image format support is not available on this system. The pillow-heif library is required for HEIC processing.</p>
+            </div>
+        </div>
+        {% else %}
+        
+        <!-- Usage Information -->
+        {% if usage %}
+        <div class="usage-info">
+            <strong>Daily Usage:</strong> {{ usage.conversions_used if usage.conversions_used else 0 }}/{{ usage.daily_limit if usage.daily_limit else 5 }} conversions used
+            <div class="usage-bar">
+                <div class="usage-fill" style="width: {{ usage.percentage if usage.percentage else 0 }}%"></div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Main Converter Card -->
+        <div class="converter-card">
+            <div class="card-header">
+                <h2 class="card-title"><i class="fas fa-exchange-alt"></i> Apple HEIC Image Conversion</h2>
+            </div>
+            <div class="card-body">
+                <!-- Conversion Type Selection -->
+                <div class="mode-selector">
+                    <div class="mode-buttons">
+                        <div class="mode-btn active" data-mode="heic_to_jpg">
+                            <div class="mode-icon">
+                                <i class="fas fa-mobile-alt"></i> ➜ <i class="fas fa-image"></i>
+                            </div>
+                            <div class="mode-text">
+                                <h5>HEIC → JPG</h5>
+                                <p>Convert iPhone photos to standard JPEG</p>
+                            </div>
+                        </div>
+                        <div class="mode-btn" data-mode="jpg_to_heic">
+                            <div class="mode-icon">
+                                <i class="fas fa-image"></i> ➜ <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <div class="mode-text">
+                                <h5>JPG → HEIC</h5>
+                                <p>Convert standard images to Apple format</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload Zone -->
+                <div class="upload-zone-heic active" id="heicToJpgZone">
+                    <div class="upload-dropzone" id="uploadZoneHeic">
+                        <div class="upload-content">
+                            <i class="upload-icon fas fa-cloud-upload-alt"></i>
+                            <h4>Drop your HEIC files here</h4>
+                            <p>or click to browse and upload</p>
+                            <div class="upload-specs">
+                                <span class="badge">HEIC</span>
+                                <span class="badge">HEIF</span>
+                                <span class="badge">Max {{ max_file_size }}MB</span>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="file" id="fileInputHeic" class="file-input" multiple accept=".heic,.heif">
+                </div>
+
+                <div class="upload-zone-jpg" id="jpgToHeicZone" style="display: none;">
+                    <div class="upload-dropzone" id="uploadZoneJpg">
+                        <div class="upload-content">
+                            <i class="upload-icon fas fa-cloud-upload-alt"></i>
+                            <h4>Drop your JPG files here</h4>
+                            <p>or click to browse and upload</p>
+                            <div class="upload-specs">
+                                <span class="badge">JPG</span>
+                                <span class="badge">JPEG</span>
+                                <span class="badge">PNG</span>
+                                <span class="badge">Max {{ max_file_size }}MB</span>
+                            </div>
+                        </div>
+                    </div>
+                    <input type="file" id="fileInputJpg" class="file-input" multiple accept=".jpg,.jpeg,.png">
+                </div>
+
+                <!-- Conversion Settings -->
+                <div class="conversion-settings">
+                    <div class="settings-group">
+                        <h5>Quality Settings</h5>
+                        <div class="setting-row">
+                            <label for="quality">Quality Level:</label>
+                            <select id="quality" name="quality">
+                                <option value="100">Maximum (100%)</option>
+                                <option value="95" selected>High Quality (95%)</option>
+                                <option value="90">Good Quality (90%)</option>
+                                <option value="85">Standard (85%)</option>
+                                <option value="75">Balanced (75%)</option>
+                            </select>
+                        </div>
+                        <div class="setting-row">
+                            <label>
+                                <input type="checkbox" id="preserveMetadata" checked>
+                                <span class="form-check-label">Preserve EXIF metadata</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div class="progress-custom" style="display: none;" id="conversionProgress">
+                    <div class="progress-bar" id="progressBar">
+                        <span class="progress-text" id="progressText">0%</span>
+                    </div>
+                </div>
+                <div class="progress-status" id="progressStatus"></div>
+
+                <!-- File List -->
+                <div id="fileList" style="display: none;">
+                    <!-- Files will be populated here -->
+                </div>
+
+                <!-- Convert Button -->
+                <div class="text-center" style="margin-top: 2rem;">
+                    <button id="convertBtn" class="convert-btn" disabled>
+                        <i class="fas fa-sync-alt"></i> Convert Files
+                    </button>
+                </div>
+
+                <!-- Results Section -->
+                <div id="resultsSection" style="display: none;">
+                    <h4><i class="fas fa-check-circle"></i> Conversion Results</h4>
+                    <div id="resultsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h4>Apple HEIC Support</h4>
+                <p>Full support for HEIC and HEIF formats used by iPhone and iPad cameras</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-compress-alt"></i>
+                </div>
+                <h4>Optimized Compression</h4>
+                <p>Advanced algorithms to maintain image quality while reducing file size</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h4>Metadata Preservation</h4>
+                <p>Keep all EXIF data including location, camera settings, and timestamps</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h4>Fast Processing</h4>
+                <p>Quick conversion with support for batch processing of multiple images</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// HEIC ⇄ JPG Converter JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    let currentMode = 'heic_to_jpg';
+    let selectedFiles = [];
+
+    // Mode selection
+    const modeButtons = document.querySelectorAll('.mode-btn');
+    modeButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const mode = this.dataset.mode;
+            switchMode(mode);
+        });
+    });
+
+    function switchMode(mode) {
+        currentMode = mode;
+        
+        // Update button states
+        modeButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.mode === mode);
+        });
+
+        // Show/hide appropriate upload zones
+        const heicZone = document.getElementById('heicToJpgZone');
+        const jpgZone = document.getElementById('jpgToHeicZone');
+        
+        if (mode === 'heic_to_jpg') {
+            heicZone.style.display = 'block';
+            jpgZone.style.display = 'none';
+        } else {
+            heicZone.style.display = 'none';
+            jpgZone.style.display = 'block';
+        }
+
+        // Clear selected files
+        selectedFiles = [];
+        updateFileList();
+        updateConvertButton();
+    }
+
+    // File upload handling
+    const fileInputHeic = document.getElementById('fileInputHeic');
+    const fileInputJpg = document.getElementById('fileInputJpg');
+    const uploadZoneHeic = document.getElementById('uploadZoneHeic');
+    const uploadZoneJpg = document.getElementById('uploadZoneJpg');
+
+    // Upload zone click handlers
+    uploadZoneHeic.addEventListener('click', () => fileInputHeic.click());
+    uploadZoneJpg.addEventListener('click', () => fileInputJpg.click());
+
+    // File input change handlers
+    fileInputHeic.addEventListener('change', handleFileSelection);
+    fileInputJpg.addEventListener('change', handleFileSelection);
+
+    // Drag and drop
+    [uploadZoneHeic, uploadZoneJpg].forEach(zone => {
+        zone.addEventListener('dragover', handleDragOver);
+        zone.addEventListener('dragleave', handleDragLeave);
+        zone.addEventListener('drop', handleFileDrop);
+    });
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.currentTarget.classList.add('dragover');
+    }
+
+    function handleDragLeave(e) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('dragover');
+    }
+
+    function handleFileDrop(e) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('dragover');
+        
+        const files = Array.from(e.dataTransfer.files);
+        processFiles(files);
+    }
+
+    function handleFileSelection(e) {
+        const files = Array.from(e.target.files);
+        processFiles(files);
+    }
+
+    function processFiles(files) {
+        selectedFiles = files;
+        updateFileList();
+        updateConvertButton();
+    }
+
+    function updateFileList() {
+        const fileList = document.getElementById('fileList');
+        
+        if (selectedFiles.length === 0) {
+            fileList.style.display = 'none';
+            return;
+        }
+
+        fileList.style.display = 'block';
+        fileList.innerHTML = `
+            <h4><i class="fas fa-file-image"></i> Selected Files (${selectedFiles.length})</h4>
+            <div class="file-grid">
+                ${selectedFiles.map((file, index) => `
+                    <div class="file-item">
+                        <div class="file-info">
+                            <i class="file-icon fas fa-image"></i>
+                            <div class="file-details">
+                                <h6>${file.name}</h6>
+                                <p>${formatFileSize(file.size)}</p>
+                            </div>
+                        </div>
+                        <div class="file-actions">
+                            <button onclick="removeFile(${index})" title="Remove file">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    window.removeFile = function(index) {
+        selectedFiles.splice(index, 1);
+        updateFileList();
+        updateConvertButton();
+    };
+
+    function updateConvertButton() {
+        const convertBtn = document.getElementById('convertBtn');
+        convertBtn.disabled = selectedFiles.length === 0;
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Convert button handler
+    document.getElementById('convertBtn').addEventListener('click', function() {
+        if (selectedFiles.length === 0) return;
+
+        const formData = new FormData();
+        selectedFiles.forEach(file => {
+            formData.append('files', file);
+        });
+
+        formData.append('conversion_mode', currentMode);
+        formData.append('quality', document.getElementById('quality').value);
+        formData.append('preserve_metadata', document.getElementById('preserveMetadata').checked);
+
+        convertFiles(formData);
+    });
+
+    function convertFiles(formData) {
+        const progressDiv = document.getElementById('conversionProgress');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const progressStatus = document.getElementById('progressStatus');
+        const convertBtn = document.getElementById('convertBtn');
+
+        // Show progress
+        progressDiv.style.display = 'block';
+        progressStatus.textContent = 'Starting conversion...';
+        convertBtn.disabled = true;
+
+        // Simulate progress
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 90) progress = 90;
+            
+            progressBar.style.width = progress + '%';
+            progressText.textContent = Math.round(progress) + '%';
+        }, 200);
+
+        fetch('/heic-jpg/convert', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            clearInterval(progressInterval);
+            progressBar.style.width = '100%';
+            progressText.textContent = '100%';
+
+            if (data.success) {
+                progressStatus.textContent = 'Conversion completed successfully!';
+                showResults(data.results);
+            } else {
+                progressStatus.textContent = 'Conversion failed: ' + data.error;
+                showError(data.error);
+            }
+        })
+        .catch(error => {
+            clearInterval(progressInterval);
+            progressStatus.textContent = 'Conversion failed: ' + error.message;
+            showError(error.message);
+        })
+        .finally(() => {
+            convertBtn.disabled = false;
+        });
+    }
+
+    function showResults(results) {
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsList = document.getElementById('resultsList');
+
+        if (results.converted.length === 0) {
+            resultsList.innerHTML = '<p class="text-center text-muted">No files were converted successfully.</p>';
+            resultsSection.style.display = 'block';
+            return;
+        }
+
+        resultsList.innerHTML = `
+            <div class="results-grid">
+                ${results.converted.map(file => `
+                    <div class="result-item">
+                        <div class="result-info">
+                            <i class="fas fa-check-circle text-success"></i>
+                            <div class="result-details">
+                                <h6>${file.filename}</h6>
+                                <p>${file.conversion_type} • ${formatFileSize(file.size * 1024 * 1024)}</p>
+                            </div>
+                        </div>
+                        <div class="result-actions">
+                            <a href="/heic-jpg/download/${file.output_filename}" class="btn btn-success btn-sm" download>
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            ${results.failed.length > 0 ? `
+                <h5 class="text-warning"><i class="fas fa-exclamation-triangle"></i> Failed Conversions</h5>
+                <div class="failed-list">
+                    ${results.failed.map(file => `
+                        <div class="failed-item">
+                            <i class="fas fa-times-circle text-danger"></i>
+                            <span><strong>${file.filename}</strong>: ${file.error}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : ''}
+        `;
+
+        resultsSection.style.display = 'block';
+    }
+
+    function showError(error) {
+        const resultsSection = document.getElementById('resultsSection');
+        const resultsList = document.getElementById('resultsList');
+
+        resultsList.innerHTML = `
+            <div class="alert alert-error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div class="alert-content">
+                    <strong>Conversion Failed</strong>
+                    <p>${error}</p>
+                </div>
+            </div>
+        `;
+
+        resultsSection.style.display = 'block';
+    }
+});
+</script>
+{% endblock %}

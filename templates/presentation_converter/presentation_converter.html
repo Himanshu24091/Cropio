@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}Presentation Converter - Cropio{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='converter.css') }}">
+{% block page_head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/presentation_converter.css') }}">
+{% endblock %}
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                <svg class="w-12 h-12 mx-auto mb-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h2a2 2 0 002-2z"></path>
+                </svg>
+                Presentation Converter
+            </h1>
+            <p class="text-xl text-gray-600 dark:text-gray-300">
+                Convert your PowerPoint presentations to PDF format effortlessly
+            </p>
+        </div>
+
+
+        <!-- PPTX to PDF Converter -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                    <svg class="w-6 h-6 inline mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Convert PowerPoint to PDF
+                </h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">
+                    Convert your PowerPoint presentations to PDF format with perfect formatting preservation.
+                </p>
+                
+                <form method="POST" enctype="multipart/form-data" class="space-y-6" id="pptx-to-pdf-form">
+                    <input type="hidden" name="conversion_type" value="pptx_to_pdf">
+                    
+                    <div id="drop-zone" class="upload-area border-2 border-dashed border-gray-400 dark:border-gray-600 rounded-lg p-16 text-center bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 cursor-pointer">
+                        <input type="file" name="file" id="file" accept=".pptx,.ppt" class="hidden" required>
+                        
+                        <!-- Upload Icon -->
+                        <div class="mb-4">
+                            <svg class="w-12 h-12 mx-auto text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                        </div>
+                        
+                        <!-- Upload Text -->
+                        <p class="text-lg font-medium text-gray-600 dark:text-gray-300 mb-2">Drop your PowerPoint file here or click to browse</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">PPTX and PPT files only (Max 50MB)</p>
+                    </div>
+                    
+                    <!-- File Preview Area -->
+                    <div id="file-preview" class="mt-4 hidden">
+                        <p id="file-name" class="text-sm text-center text-gray-600 dark:text-gray-400"></p>
+                    </div>
+
+                    <!-- Quality Settings -->
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4"></path>
+                            </svg>
+                            Quality Settings
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">PDF Quality</label>
+                                <select name="quality" class="form-select w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                                    <option value="high">High Quality (Recommended)</option>
+                                    <option value="medium">Medium Quality</option>
+                                    <option value="low">Low Quality (Smaller file)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Page Range</label>
+                                <select name="page_range" class="form-select w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                                    <option value="all">All Slides</option>
+                                    <option value="custom">Custom Range</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="custom-range-input" class="mt-4 hidden">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Page Range (e.g., 1-5, 8, 10-12)</label>
+                            <input type="text" name="custom_range" placeholder="1-5, 8, 10-12" 
+                                   class="form-input w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button type="submit" class="btn btn-primary px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
+                            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                            </svg>
+                            Convert to PDF
+                        </button>
+                    </div>
+                </form>
+        </div>
+
+    </div>
+</div>
+
+<!-- Processing Modal -->
+<div id="processing-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm mx-4 text-center">
+        <div class="mb-4">
+            <div class="spinner mx-auto"></div>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Processing Conversion</h3>
+        <p id="processing-message" class="text-gray-600 dark:text-gray-300 mb-4">
+            Please wait while we convert your file...
+        </p>
+        <div id="progress-container" class="mb-4">
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <p id="progress-text" class="text-sm text-gray-500 dark:text-gray-400 mt-2">0% complete</p>
+        </div>
+        <p class="text-xs text-gray-400 dark:text-gray-500">
+            This may take a few minutes depending on file size and complexity.
+        </p>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-4">
+        <div class="flex items-center space-x-3 mb-4">
+            <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Conversion Complete!</h3>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            Your file has been successfully converted. The download will start automatically.
+        </p>
+        <div class="flex justify-end space-x-3">
+            <button id="close-success" class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                Close
+            </button>
+            <button id="download-again" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                Download Again
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-4">
+        <div class="flex items-center space-x-3 mb-4">
+            <div class="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Conversion Failed</h3>
+        </div>
+        <p id="error-message" class="text-gray-600 dark:text-gray-300 mb-6"></p>
+        <div class="flex justify-end">
+            <button id="close-error" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/presentation_converter/presentation_converter.js') }}" defer></script>
+{% endblock %}

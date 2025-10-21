@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}HEIC ⇄ JPG Converter - Cropio{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/converter.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/phase-1-5.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='image/heic_jpg.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="converter-wrapper">
+    <div class="page-header">
+        <div class="container">
+            <h1><i class="fas fa-mobile-alt"></i> HEIC ⇄ JPG Converter</h1>
+            <p class="subtitle">Convert Apple HEIC images to JPG and vice versa with full metadata support</p>
+        </div>
+    </div>
+
+    <div class="container">
+        {% if heic_unavailable %}
+        <!-- HEIC Support Unavailable -->
+        <div class="alert alert-error">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>HEIC Support Unavailable</strong>
+            <p>HEIC image format support is not available on this system. Please contact the administrator for assistance.</p>
+        </div>
+        {% elif quota_exceeded %}
+        <!-- Quota Exceeded -->
+        <div class="alert alert-warning">
+            <i class="fas fa-hourglass-half"></i>
+            <strong>Daily Limit Reached</strong>
+            <p>You've used all {{ usage.conversions_count }} daily conversions. Upgrade to premium for unlimited access!</p>
+            <a href="{{ url_for('dashboard.subscription') }}" class="btn btn-primary">Upgrade Now</a>
+        </div>
+        {% else %}
+        
+        <!-- Usage Information -->
+        {% if usage %}
+        <div class="usage-info">
+            <strong>Daily Usage:</strong> {{ usage.conversions_used if usage.conversions_used else 0 }}/{{ usage.daily_limit if usage.daily_limit else 5 }} conversions used
+            <div class="usage-bar">
+                <div class="usage-fill" style="width: {{ usage.percentage if usage.percentage else 0 }}%"></div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Main Converter Card -->
+        <div class="converter-card">
+            <div class="card-header">
+                <h2><i class="fas fa-exchange-alt"></i> Apple HEIC Image Conversion</h2>
+            </div>
+            <div class="card-body">
+                <!-- Conversion Type Selection -->
+                <div class="conversion-type-selector">
+                    <div class="type-option active" data-type="heic_to_jpg">
+                        <i class="fas fa-arrow-right"></i>
+                        <span>HEIC → JPG</span>
+                    </div>
+                    <div class="type-option" data-type="jpg_to_heic">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>JPG → HEIC</span>
+                    </div>
+                </div>
+
+                <!-- Upload Zone -->
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div class="upload-text">Drop your HEIC or JPG files here</div>
+                    <div class="upload-hint">or click to browse and upload</div>
+                    <input type="file" id="fileInput" multiple accept=".heic,.heif,.jpg,.jpeg" style="display: none;">
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click();">
+                        <i class="fas fa-folder-open"></i> Choose Files
+                    </button>
+                </div>
+
+                <!-- HEIC Format Support Info -->
+                {% if supported_formats %}
+                <div class="supported-formats">
+                    <h4><i class="fas fa-info-circle"></i> HEIC Format Information</h4>
+                    <div class="format-grid">
+                        <div class="format-item">📱 iOS Camera (HEIC)</div>
+                        <div class="format-item">📱 iPhone Photos (HEIF)</div>
+                        <div class="format-item">🖼️ High Efficiency Images</div>
+                        <div class="format-item">🗜️ 50% Smaller than JPG</div>
+                        <div class="format-item">📸 Better Quality</div>
+                        <div class="format-item">🔒 Metadata Preserved</div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Conversion Settings -->
+                <div class="conversion-settings">
+                    <div class="setting-group">
+                        <label for="outputFormat">Output Format:</label>
+                        <select id="outputFormat" name="output_format">
+                            <option value="jpeg" selected>JPEG - Standard</option>
+                            <option value="png">PNG - Lossless</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="quality">Quality Level:</label>
+                        <select id="quality" name="quality">
+                            <option value="100">Maximum (100%)</option>
+                            <option value="95" selected>High Quality (95%)</option>
+                            <option value="90">Good Quality (90%)</option>
+                            <option value="85">Standard (85%)</option>
+                            <option value="75">Balanced (75%)</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="preserveMetadata" checked>
+                            <span class="checkmark"></span>
+                            Preserve EXIF metadata
+                        </label>
+                    </div>
+                    <div class="setting-group" id="heicOptions" style="display: none;">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="enableLossless">
+                            <span class="checkmark"></span>
+                            Enable lossless compression (HEIC)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div class="progress" style="display: none;" id="conversionProgress">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="progress-text" id="progressText"></div>
+
+                <!-- File List -->
+                <div class="file-list" id="fileList" style="display: none;">
+                    <!-- Files will be populated here -->
+                </div>
+
+                <!-- Preview Section -->
+                <div class="preview-section" id="previewSection" style="display: none;">
+                    <h4><i class="fas fa-eye"></i> Image Preview</h4>
+                    <div class="preview-container">
+                        <div class="preview-before">
+                            <h5>Original</h5>
+                            <img id="previewBefore" src="" alt="Original">
+                            <div class="preview-info" id="previewInfoBefore"></div>
+                        </div>
+                        <div class="preview-after">
+                            <h5>Converted</h5>
+                            <img id="previewAfter" src="" alt="Converted" style="display: none;">
+                            <div class="preview-info" id="previewInfoAfter"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h4>Apple HEIC Support</h4>
+                <p>Full support for HEIC and HEIF formats used by iPhone and iPad cameras</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-compress-alt"></i>
+                </div>
+                <h4>Optimized Compression</h4>
+                <p>Advanced algorithms to maintain image quality while reducing file size</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h4>Metadata Preservation</h4>
+                <p>Keep all EXIF data including location, camera settings, and timestamps</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h4>Fast Processing</h4>
+                <p>Quick conversion with support for batch processing of multiple images</p>
+            </div>
+        </div>
+
+        <!-- Information Section -->
+        <div class="info-section">
+            <div class="info-card">
+                <h3><i class="fas fa-question-circle"></i> About HEIC Format</h3>
+                <p>HEIC (High Efficiency Image Container) is Apple's modern image format that provides:</p>
+                <ul>
+                    <li>50% better compression than JPEG</li>
+                    <li>Higher image quality at smaller file sizes</li>
+                    <li>Support for transparency and multiple images</li>
+                    <li>Better color depth and dynamic range</li>
+                </ul>
+                <p><strong>Note:</strong> HEIC files may not be compatible with all devices and software. Converting to JPG ensures universal compatibility.</p>
+            </div>
+            
+            <div class="info-card">
+                <h3><i class="fas fa-cogs"></i> Conversion Tips</h3>
+                <ul>
+                    <li>Use 95% quality for photos you want to edit further</li>
+                    <li>Use 85% quality for web sharing and social media</li>
+                    <li>Enable metadata preservation to keep photo details</li>
+                    <li>PNG format provides lossless conversion but larger files</li>
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/image/heic_jpg.js') }}"></script>
+{% endblock %}

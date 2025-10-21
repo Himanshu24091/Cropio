@@ -1,0 +1,138 @@
+# ================================================================
+# DEVELOPMENT REQUIREMENTS FOR CONVERTER APPLICATION
+# ================================================================
+# This file contains dependencies needed only for development,
+# testing, and debugging. Install with:
+# pip install -r requirements.txt -r requirements-dev.txt
+
+# === TESTING FRAMEWORK ===
+pytest==7.4.3
+pytest-flask==1.3.0
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+pytest-xdist==3.5.0  # Parallel test execution
+pytest-html==4.1.1   # HTML test reports
+pytest-benchmark==4.0.0  # Performance benchmarking
+
+# === TEST DATA AND FACTORIES ===
+factory-boy==3.3.0
+faker==20.1.0
+
+# === CODE QUALITY AND LINTING ===
+# Code formatting
+black==23.11.0
+isort==5.13.2
+autopep8==2.0.4
+
+# Linting and static analysis
+flake8==6.1.0
+pylint==3.0.3
+mypy==1.7.1
+bandit==1.7.5  # Security linting
+
+# Import sorting and unused import detection
+autoflake==2.2.1
+pyflakes==3.1.0
+
+# === DEBUGGING AND DEVELOPMENT TOOLS ===
+Flask-DebugToolbar==0.13.1
+watchdog==3.0.0  # File watching for auto-reload
+ipdb==0.13.13    # Enhanced debugger
+pdb++==0.10.3    # Enhanced pdb
+
+# === DOCUMENTATION GENERATION ===
+Sphinx==7.2.6
+sphinx-rtd-theme==1.3.0
+sphinx-autodoc-typehints==1.25.2
+
+# === PERFORMANCE PROFILING ===
+line-profiler==4.1.1
+memory-profiler==0.61.0
+py-spy==0.3.14
+
+# === API TESTING AND DOCUMENTATION ===
+httpx==0.25.2      # Modern HTTP client for testing
+responses==0.24.1  # Mock HTTP responses
+
+# === DATABASE TESTING ===
+pytest-postgresql==5.0.0
+testing.postgresql==1.3.0
+
+# === MOCK AND FIXTURES ===
+pytest-mock==3.12.0
+freezegun==1.2.2  # Mock datetime
+responses==0.24.1  # Mock HTTP requests
+
+# === ENVIRONMENT MANAGEMENT ===
+python-decouple==3.8  # Alternative to python-dotenv for development
+
+# === JUPYTER AND NOTEBOOKS (Development) ===
+jupyter==1.0.0
+jupyterlab==4.0.9
+notebook==7.0.6
+ipython==8.18.1
+ipykernel==6.27.1
+
+# === ADDITIONAL DEVELOPMENT UTILITIES ===
+# File monitoring and live reload
+livereload==2.6.3
+
+# Enhanced REPL
+ptpython==3.0.25
+
+# HTTP server for testing
+http-server-python==0.0.6
+
+# === OPTIONAL ADVANCED FEATURES ===
+# Image optimization (development builds)
+pillow-simd==10.0.1  # SIMD-accelerated Pillow (if needed)
+
+# Enhanced video processing (development)
+ffmpeg-python==0.2.0
+
+# Advanced configuration management
+dynaconf==3.2.4
+
+# === SECURITY TESTING ===
+safety==2.3.5  # Check for known security vulnerabilities
+pip-audit==2.6.1  # Alternative security scanner
+
+# === PRE-COMMIT HOOKS ===
+pre-commit==3.6.0
+
+# === LOAD TESTING ===
+locust==2.17.0  # Load testing framework
+
+# === DEVELOPMENT SERVER ALTERNATIVES ===
+flask-cors==4.0.0  # CORS for frontend development
+flask-restx==1.3.0  # API documentation and testing
+
+# ================================================================
+# INSTALLATION INSTRUCTIONS
+# ================================================================
+# 1. Install production dependencies:
+#    pip install -r requirements.txt
+#
+# 2. Install development dependencies:
+#    pip install -r requirements-dev.txt
+#
+# 3. Set up pre-commit hooks:
+#    pre-commit install
+#
+# 4. Run tests:
+#    pytest
+#
+# 5. Run with coverage:
+#    pytest --cov=. --cov-report=html
+#
+# 6. Format code:
+#    black .
+#    isort .
+#
+# 7. Lint code:
+#    flake8 .
+#    pylint app.py routes/ utils/
+#
+# 8. Security check:
+#    bandit -r .
+#    safety check

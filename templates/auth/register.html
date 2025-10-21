@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up - {{ config.get('SITE_NAME', 'Cropio') }}{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='auth/auth.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Create Account</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">Join Cropio and start converting files</p>
+        </div>
+
+        <div class="tier-info">
+            <h3 class="font-semibold text-gray-800 dark:text-white mb-2">🆓 Free Account Benefits:</h3>
+            <ul class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                <li>• 5 conversions per day</li>
+                <li>• All basic file conversion tools</li>
+                <li>• Files up to 100MB</li>
+                <li>• Conversion history tracking</li>
+            </ul>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'error' if category == 'error' else category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth.register') }}" id="registerForm">
+            <div class="form-group">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" 
+                       id="username" 
+                       name="username" 
+                       class="form-input" 
+                       value="{{ request.form.username or '' }}"
+                       required 
+                       autofocus
+                       minlength="3"
+                       maxlength="20"
+                       placeholder="Choose a unique username">
+                <div id="usernameValidation" class="validation-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" 
+                       id="email" 
+                       name="email" 
+                       class="form-input" 
+                       value="{{ request.form.email or '' }}"
+                       required
+                       placeholder="Enter your email address">
+                <div id="emailValidation" class="validation-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" 
+                       id="password" 
+                       name="password" 
+                       class="form-input" 
+                       required
+                       minlength="6"
+                       placeholder="Create a secure password">
+                <div id="passwordStrength" class="password-strength"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password" class="form-label">Confirm Password</label>
+                <input type="password" 
+                       id="confirm_password" 
+                       name="confirm_password" 
+                       class="form-input" 
+                       required
+                       placeholder="Repeat your password">
+                <div id="confirmPasswordValidation" class="validation-message"></div>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" 
+                       id="terms_accepted" 
+                       name="terms_accepted" 
+                       required
+                       class="rounded border-gray-300">
+                <label for="terms_accepted" class="text-sm text-gray-600 dark:text-gray-400">
+                    I agree to the <a href="#" class="text-blue-600 hover:underline">Terms of Service</a> 
+                    and <a href="#" class="text-blue-600 hover:underline">Privacy Policy</a>
+                </label>
+            </div>
+
+            <button type="submit" class="btn-primary" id="submitBtn">
+                Create Account
+            </button>
+        </form>
+
+        <div class="auth-links">
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                Already have an account? 
+                <a href="{{ url_for('auth.login') }}" class="font-medium">Sign in here</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

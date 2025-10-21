@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - {{ config.get('SITE_NAME', 'Cropio') }}{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='auth/auth.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='user_dashboard/profile.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="auth-container">
+    <div class="auth-card profile-edit">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Edit Profile</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">Update your account information</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'error' if category == 'error' else category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth.edit_profile') }}" id="editProfileForm">
+            <div class="form-group">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" 
+                       id="username" 
+                       name="username" 
+                       class="form-input" 
+                       value="{{ current_user.username }}"
+                       required 
+                       minlength="3"
+                       maxlength="20"
+                       placeholder="Enter your username">
+                <div id="usernameValidation" class="validation-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" 
+                       id="email" 
+                       name="email" 
+                       class="form-input" 
+                       value="{{ current_user.email }}"
+                       required
+                       placeholder="Enter your email address">
+                <div id="emailValidation" class="validation-message"></div>
+                {% if not current_user.email_verified %}
+                    <p class="text-sm text-amber-600 mt-1">
+                        ⚠ Your email is not verified. <a href="#" class="underline">Resend verification email</a>
+                    </p>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="current_password" class="form-label">Current Password <span class="text-red-500">*</span></label>
+                <input type="password" 
+                       id="current_password" 
+                       name="current_password" 
+                       class="form-input" 
+                       placeholder="Enter current password to confirm changes"
+                       required>
+                <p class="text-sm text-red-600 dark:text-red-400 mt-1 font-medium">⚠️ Required to save any profile changes for security</p>
+            </div>
+
+            <div class="form-group">
+                <label for="new_password" class="form-label">New Password (Optional)</label>
+                <input type="password" 
+                       id="new_password" 
+                       name="new_password" 
+                       class="form-input" 
+                       placeholder="Leave blank to keep current password">
+                <p class="text-sm text-gray-500 mt-1">Must be at least 6 characters</p>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password" class="form-label">Confirm New Password</label>
+                <input type="password" 
+                       id="confirm_password" 
+                       name="confirm_password" 
+                       class="form-input" 
+                       placeholder="Confirm your new password">
+            </div>
+
+            <div class="profile-stats">
+                <h3 class="font-semibold text-gray-800 dark:text-white mb-3">Account Status</h3>
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <span class="stat-label">Subscription Plan:</span>
+                        <span class="badge badge-{{ current_user.subscription_tier.lower() }}">
+                            {{ current_user.subscription_tier.title() }}
+                        </span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Member Since:</span>
+                        <span>{{ current_user.created_at.strftime('%B %Y') }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Conversions:</span>
+                        <span>{{ current_user.total_conversions or 0 }}</span>
+                    </div>
+                </div>
+            </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary" id="submitBtn">
+                        <span id="submitText">Update Profile</span>
+                        <span id="submitLoader" style="display: none;">Updating...</span>
+                    </button>
+                    <a href="{{ url_for('auth.profile') }}" class="btn-secondary">
+                        Cancel
+                    </a>
+                </div>
+        </form>
+
+        <div class="additional-actions">
+            <div class="action-section">
+                <h3 class="font-semibold text-gray-800 dark:text-white mb-2">Additional Actions</h3>
+                <div class="action-links">
+                    <a href="{{ url_for('auth.edit_profile') }}" class="action-link">
+                        🔒 Change Password (in Profile Edit)
+                    </a>
+                    {% if not current_user.email_verified %}
+                        <a href="#" class="action-link">
+                            📧 Verify Email Address
+                        </a>
+                    {% endif %}
+                    <a href="{{ url_for('dashboard.index') }}" class="action-link">
+                        📊 Go to Dashboard
+                    </a>
+                </div>
+            </div>
+
+            <div class="danger-section">
+                <h3 class="font-semibold text-red-600 mb-2">Danger Zone</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                    These actions cannot be undone. Please be certain.
+                </p>
+                <a href="{{ url_for('auth.delete_account') }}" class="btn-danger">
+                    Delete My Account
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+<script>
+// Profile editing specific JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('editProfileForm');
+    const usernameInput = document.getElementById('username');
+    const emailInput = document.getElementById('email');
+    
+    // Real-time validation
+    usernameInput.addEventListener('input', function() {
+        const username = this.value;
+        const validation = document.getElementById('usernameValidation');
+        
+        if (username.length < 3) {
+            validation.textContent = 'Username must be at least 3 characters';
+            validation.className = 'validation-message error';
+        } else if (username.length > 20) {
+            validation.textContent = 'Username must be less than 20 characters';
+            validation.className = 'validation-message error';
+        } else {
+            validation.textContent = '';
+            validation.className = 'validation-message';
+        }
+    });
+    
+    emailInput.addEventListener('input', function() {
+        const email = this.value;
+        const validation = document.getElementById('emailValidation');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        if (email && !emailRegex.test(email)) {
+            validation.textContent = 'Please enter a valid email address';
+            validation.className = 'validation-message error';
+        } else {
+            validation.textContent = '';
+            validation.className = 'validation-message';
+        }
+    });
+});
+</script>
+{% endblock %}

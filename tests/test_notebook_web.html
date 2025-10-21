@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notebook Converter Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="file"], select, input[type="checkbox"] {
+            margin: 5px 0;
+        }
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            font-weight: normal;
+        }
+        .radio-group input {
+            margin-right: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        .error {
+            background-color: #ffebee;
+            border-color: #f44336;
+            color: #d32f2f;
+        }
+        .success {
+            background-color: #e8f5e8;
+            border-color: #4caf50;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <h1>Notebook Converter Test</h1>
+    <p>This page tests the notebook conversion functionality directly.</p>
+    
+    <form id="test-form" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="file-input">Select Jupyter Notebook (.ipynb):</label>
+            <input type="file" id="file-input" name="file" accept=".ipynb" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Output Format:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="output_format" value="html" checked> HTML</label>
+                <label><input type="radio" name="output_format" value="pdf"> PDF</label>
+                <label><input type="radio" name="output_format" value="docx"> DOCX</label>
+                <label><input type="radio" name="output_format" value="markdown"> Markdown</label>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label>Options:</label>
+            <label><input type="checkbox" name="include_code_cells" checked> Include code cells</label>
+            <label><input type="checkbox" name="include_outputs" checked> Include cell outputs</label>
+            <label><input type="checkbox" name="include_metadata"> Include metadata</label>
+            <label><input type="checkbox" name="include_images" checked> Include images and charts</label>
+        </div>
+        
+        <button type="submit">Convert Notebook</button>
+    </form>
+    
+    <div id="result-area"></div>
+    
+    <script>
+        document.getElementById('test-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const resultArea = document.getElementById('result-area');
+            const formData = new FormData(e.target);
+            
+            // Show loading message
+            resultArea.innerHTML = '<div class="result">Converting notebook...</div>';
+            
+            try {
+                console.log('Sending request to /convert/notebook');
+                
+                // Log form data
+                console.log('Form data:');
+                for (let [key, value] of formData.entries()) {
+                    console.log(key + ': ' + value);
+                }
+                
+                const response = await fetch('/convert/notebook', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+                
+                if (response.ok) {
+                    const contentType = response.headers.get('content-type');
+                    console.log('Content-Type:', contentType);
+                    
+                    if (contentType && contentType.includes('application/json')) {
+                        // JSON response (likely an error)
+                        const jsonData = await response.json();
+                        console.log('JSON response:', jsonData);
+                        
+                        if (jsonData.success) {
+                            resultArea.innerHTML = `<div class="result success">
+                                <h3>Conversion Successful!</h3>
+                                <p>File: ${jsonData.filename || 'converted file'}</p>
+                            </div>`;
+                        } else {
+                            resultArea.innerHTML = `<div class="result error">
+                                <h3>Conversion Failed</h3>
+                                <p>Error: ${jsonData.error || 'Unknown error'}</p>
+                            </div>`;
+                        }
+                    } else {
+                        // Binary response (successful file download)
+                        const blob = await response.blob();
+                        console.log('Blob response, size:', blob.size);
+                        
+                        // Get filename from Content-Disposition header
+                        const disposition = response.headers.get('Content-Disposition');
+                        let filename = 'converted_notebook.file';
+                        if (disposition) {
+                            const filenameMatch = disposition.match(/filename="(.+)"/);
+                            if (filenameMatch) {
+                                filename = filenameMatch[1];
+                            }
+                        }
+                        
+                        // Create download link
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.URL.revokeObjectURL(url);
+                        
+                        resultArea.innerHTML = `<div class="result success">
+                            <h3>Conversion Successful!</h3>
+                            <p>File downloaded: ${filename}</p>
+                            <p>File size: ${blob.size} bytes</p>
+                        </div>`;
+                    }
+                } else {
+                    // HTTP error
+                    const text = await response.text();
+                    console.log('Error response text:', text);
+                    
+                    let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+                    try {
+                        const errorData = JSON.parse(text);
+                        if (errorData.error) {
+                            errorMessage = errorData.error;
+                        }
+                    } catch (e) {
+                        // Not JSON, use the text as error message if it's short
+                        if (text.length < 200) {
+                            errorMessage = text;
+                        }
+                    }
+                    
+                    resultArea.innerHTML = `<div class="result error">
+                        <h3>HTTP Error</h3>
+                        <p>${errorMessage}</p>
+                    </div>`;
+                }
+                
+            } catch (error) {
+                console.error('Network error:', error);
+                resultArea.innerHTML = `<div class="result error">
+                    <h3>Network Error</h3>
+                    <p>${error.message}</p>
+                </div>`;
+            }
+        });
+        
+        // Add file input change handler for validation
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                console.log('Selected file:', file.name, 'Size:', file.size, 'Type:', file.type);
+                
+                if (!file.name.toLowerCase().endsWith('.ipynb')) {
+                    alert('Please select a Jupyter notebook (.ipynb) file');
+                    e.target.value = '';
+                }
+                
+                const maxSize = 50 * 1024 * 1024; // 50MB
+                if (file.size > maxSize) {
+                    alert('File size exceeds 50MB limit');
+                    e.target.value = '';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

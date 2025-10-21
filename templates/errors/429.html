@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Rate Limit Exceeded - {{ config.SITE_NAME }}{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+    .error-container {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+    .error-code {
+        font-size: 120px;
+        font-weight: bold;
+        color: #e67e22;
+        margin: 0;
+        line-height: 1;
+    }
+    .error-message {
+        font-size: 24px;
+        color: #333;
+        margin: 20px 0;
+    }
+    .error-description {
+        font-size: 16px;
+        color: #666;
+        margin-bottom: 30px;
+        max-width: 500px;
+    }
+    .error-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .error-btn {
+        display: inline-block;
+        padding: 12px 30px;
+        background-color: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    .error-btn:hover {
+        background-color: #2980b9;
+    }
+    .error-btn-secondary {
+        background-color: #95a5a6;
+    }
+    .error-btn-secondary:hover {
+        background-color: #7f8c8d;
+    }
+    .rate-limit-info {
+        background: #fdf2e9;
+        border: 1px solid #e67e22;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px auto;
+        max-width: 400px;
+        color: #d35400;
+    }
+    .countdown {
+        font-size: 18px;
+        font-weight: bold;
+        color: #e67e22;
+        margin: 15px 0;
+    }
+    .premium-notice {
+        background: #e8f5e8;
+        border: 1px solid #27ae60;
+        padding: 15px;
+        border-radius: 5px;
+        margin: 20px auto;
+        max-width: 400px;
+        color: #27ae60;
+    }
+</style>
+<script>
+function startCountdown(seconds) {
+    const countdownElement = document.getElementById('countdown');
+    if (!countdownElement) return;
+    
+    let timeLeft = seconds;
+    const timer = setInterval(function() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        
+        countdownElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (timeLeft <= 0) {
+            clearInterval(timer);
+            countdownElement.textContent = "You can try again now!";
+            // Optionally refresh the page or show a retry button
+            location.reload();
+        }
+        timeLeft--;
+    }, 1000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const retryAfter = {{ retry_after | default(60) }};
+    if (retryAfter > 0) {
+        startCountdown(retryAfter);
+    }
+});
+</script>
+{% endblock %}
+
+{% block page_content %}
+<div class="error-container">
+    <div class="error-content">
+        <h1 class="error-code">429</h1>
+        <h2 class="error-message">Rate Limit Exceeded</h2>
+        <p class="error-description">
+            You've made too many requests in a short period. Please slow down and try again later.
+        </p>
+        
+        <div class="rate-limit-info">
+            <strong>⏱️ Please wait before trying again</strong>
+            <div class="countdown" id="countdown">
+                {% if retry_after %}
+                    {{ "%d:%02d" | format((retry_after // 60), (retry_after % 60)) }}
+                {% else %}
+                    1:00
+                {% endif %}
+            </div>
+            <small>This helps us maintain service quality for everyone</small>
+        </div>
+        
+        {% if current_user.is_authenticated and not current_user.is_premium() %}
+        <div class="premium-notice">
+            <strong>💎 Premium Benefits</strong>
+            <br>
+            Premium users get higher rate limits and priority processing!
+            <br>
+            <a href="{{ url_for('dashboard.subscription') }}" style="color: #27ae60; font-weight: bold;">Learn More →</a>
+        </div>
+        {% endif %}
+        
+        <div class="error-actions">
+            <a href="javascript:location.reload()" class="error-btn">Retry</a>
+            {% if current_user.is_authenticated and not current_user.is_premium() %}
+            <a href="{{ url_for('dashboard.subscription') }}" class="error-btn">Upgrade Account</a>
+            {% endif %}
+            <a href="{{ url_for('main.index') }}" class="error-btn error-btn-secondary">Go to Homepage</a>
+        </div>
+        
+        {% if error_id %}
+        <p class="error-id">Error ID: {{ error_id }}</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

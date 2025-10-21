@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Profile - {{ config.get('SITE_NAME', 'Cropio') }}{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='auth/auth.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='user_dashboard/profile.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            <div class="avatar-placeholder">
+                {{ user.username[0].upper() }}
+            </div>
+        </div>
+        <div class="profile-info">
+            <h1 class="profile-name">{{ user.username }}</h1>
+            <p class="profile-email">{{ user.email }}</p>
+            <div class="profile-badges">
+                <span class="badge badge-{{ user.subscription_tier.lower() }}">{{ user.subscription_tier.title() }} Plan</span>
+                {% if user.email_verified %}
+                    <span class="badge badge-success">✓ Verified</span>
+                {% else %}
+                    <span class="badge badge-warning">⚠ Unverified</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="profile-actions">
+            <a href="{{ url_for('auth.edit_profile') }}" class="btn btn-primary">Edit Profile</a>
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'error' if category == 'error' else category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="profile-content">
+        <div class="profile-section">
+            <h2>Account Information</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Username</label>
+                    <span>{{ user.username }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Email</label>
+                    <span>{{ user.email }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Member Since</label>
+                    <span>{{ user.created_at.strftime('%B %d, %Y') }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Subscription Plan</label>
+                    <span class="subscription-tier">{{ user.subscription_tier.title() }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Email Status</label>
+                    {% if user.email_verified %}
+                        <span class="status verified">Verified</span>
+                    {% else %}
+                        <span class="status unverified">Not Verified</span>
+                    {% endif %}
+                </div>
+                <div class="info-item">
+                    <label>Last Login</label>
+                    <span>{{ user.last_login.strftime('%B %d, %Y at %I:%M %p') if user.last_login else 'Never' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <h2>Usage Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">{{ user.conversions_used_today or 0 }}</div>
+                    <div class="stat-label">Today's Conversions</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ user.total_conversions or 0 }}</div>
+                    <div class="stat-label">Total Conversions</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ "%.1f"|format((user.total_storage_used or 0) / (1024*1024)) }} MB</div>
+                    <div class="stat-label">Storage Used</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-section">
+            <h2>Quick Actions</h2>
+            <div class="action-buttons">
+                <a href="{{ url_for('auth.edit_profile') }}" class="action-btn edit">
+                    <i class="icon-edit"></i>
+                    Edit Profile
+                </a>
+                <a href="{{ url_for('auth.change_password') }}" class="action-btn password">
+                    <i class="icon-lock"></i>
+                    Change Password
+                </a>
+                {% if not user.email_verified %}
+                    <a href="#" class="action-btn verify">
+                        <i class="icon-mail"></i>
+                        Verify Email
+                    </a>
+                {% endif %}
+                <a href="{{ url_for('dashboard.index') }}" class="action-btn dashboard">
+                    <i class="icon-dashboard"></i>
+                    Go to Dashboard
+                </a>
+            </div>
+        </div>
+
+        <div class="profile-section danger-zone">
+            <h2>Account Management</h2>
+            <div class="danger-actions">
+                <a href="{{ url_for('auth.delete_account') }}" class="btn btn-danger">
+                    Delete Account
+                </a>
+            </div>
+            <p class="text-sm text-gray-500 mt-2">
+                This action cannot be undone. All your data will be permanently deleted.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text OCR Debug Test</title>
+</head>
+<body>
+    <h1>Simple Test Form</h1>
+    
+    <form method="POST" action="/text-ocr/process" enctype="multipart/form-data">
+        <div>
+            <label>Select Files:</label>
+            <input type="file" name="files" multiple accept=".txt,.jpg,.png,.pdf" required>
+        </div>
+        
+        <div>
+            <label>Processing Type:</label>
+            <input type="radio" name="processing_type" value="ocr" checked> OCR
+            <input type="radio" name="processing_type" value="text_extract"> Text Extract
+        </div>
+        
+        <div>
+            <label>Language:</label>
+            <select name="ocr_language">
+                <option value="eng">English</option>
+                <option value="auto">Auto-detect</option>
+            </select>
+        </div>
+        
+        <div>
+            <label>Output Format:</label>
+            <select name="output_format">
+                <option value="txt">Plain Text</option>
+                <option value="json">JSON</option>
+            </select>
+        </div>
+        
+        <button type="submit">Process Files</button>
+    </form>
+    
+    <script>
+        document.querySelector('form').addEventListener('submit', function(e) {
+            console.log('Simple form submitted!');
+            const files = document.querySelector('input[type="file"]').files;
+            console.log('Files selected:', files.length);
+            for (let file of files) {
+                console.log('File:', file.name, file.size);
+            }
+        });
+    </script>
+</body>
+</html>

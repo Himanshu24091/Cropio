@@ -1,0 +1,22 @@
+/* PowerBI Converter - styles adapted from secure_pdf.css */
+@import url('./secure_pdf.css');
+
+/* Accent colors for PowerBI tool */
+:root {
+  --accent: #7c3aed; /* purple */
+  --accent-2: #3b82f6; /* blue */
+}
+
+.tab-button.active { color: var(--accent-2) !important; border-color: var(--accent-2) !important; }
+
+/* Upload area tweaks */
+.upload-area { min-height: 180px; }
+
+/* Spinner reuse */
+.spinner { width: 20px; height: 20px; border: 2px solid #f3f4f6; border-top: 2px solid var(--accent-2); border-radius: 50%; animation: spin 1s linear infinite; }
+@keyframes spin { 0%{transform:rotate(0)} 100%{transform:rotate(360deg)} }
+
+/* Buttons */
+.btn { font-weight: 600; display:inline-flex; align-items:center; justify-content:center; transition: .2s; }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,.3); }

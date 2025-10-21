@@ -1,0 +1,111 @@
+{
+  "max_file_size_mb": 10,
+  "max_content_size_mb": 5,
+  "timeout_seconds": 30,
+  "max_pages": 100,
+  "enable_caching": true,
+  "cache_duration_hours": 24,
+  "temp_cleanup_hours": 48,
+  
+  "security": {
+    "allowed_domains": [],
+    "blocked_domains": [
+      "localhost",
+      "127.0.0.1",
+      "0.0.0.0",
+      "10.0.0.0/8",
+      "172.16.0.0/12", 
+      "192.168.0.0/16"
+    ],
+    "sanitize_html": true,
+    "sanitize_css": true,
+    "max_redirects": 5
+  },
+  
+  "backends": {
+    "preferred_order": ["weasyprint", "pdfkit", "selenium"],
+    "weasyprint": {
+      "enabled": true,
+      "font_config": true,
+      "optimize_images": true,
+      "presentational_hints": true
+    },
+    "pdfkit": {
+      "enabled": true,
+      "quiet": true,
+      "enable_local_file_access": false
+    },
+    "selenium": {
+      "enabled": true,
+      "headless": true,
+      "no_sandbox": true,
+      "disable_gpu": true,
+      "window_size": "1366,768"
+    }
+  },
+  
+  "default_settings": {
+    "page_size": "A4",
+    "orientation": "portrait",
+    "margins": {
+      "top": 2,
+      "bottom": 2,
+      "left": 2,
+      "right": 2
+    },
+    "viewport_width": 1366,
+    "scale_factor": 1.0,
+    "full_page": true,
+    "background_graphics": true,
+    "wait_for_load": false,
+    "wait_time": 3,
+    "custom_css": "",
+    "header_html": "",
+    "footer_html": ""
+  },
+  
+  "rate_limiting": {
+    "enabled": true,
+    "max_conversions_per_hour": 100,
+    "max_conversions_per_day": 500,
+    "max_file_size_per_conversion": "10MB",
+    "cooldown_seconds": 1
+  },
+  
+  "logging": {
+    "level": "INFO",
+    "track_conversions": true,
+    "track_performance": true,
+    "log_file": "logs/html_pdf_converter.log",
+    "max_log_size_mb": 10,
+    "backup_count": 5
+  },
+  
+  "features": {
+    "preview_enabled": true,
+    "thumbnail_generation": true,
+    "metadata_extraction": true,
+    "url_preview": true,
+    "custom_css_editor": true,
+    "headers_footers": true,
+    "bulk_conversion": false,
+    "api_access": true
+  },
+  
+  "performance": {
+    "max_concurrent_conversions": 5,
+    "memory_limit_mb": 512,
+    "pdf_compression": true,
+    "image_optimization": true,
+    "css_minification": false
+  },
+  
+  "ui": {
+    "max_preview_size_mb": 2,
+    "preview_timeout_seconds": 10,
+    "auto_save_settings": true,
+    "show_advanced_options": true,
+    "enable_keyboard_shortcuts": true,
+    "theme": "auto"
+  }
+}
