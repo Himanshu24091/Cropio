@@ -1,0 +1,121 @@
+# Render Deployment - Ignore unnecessary files to reduce build size
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Development files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+tests/
+*.test.py
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Documentation (keep only RENDER_DEPLOYMENT.md)
+docs/
+md files/
+*.md
+!RENDER_DEPLOYMENT.md
+!README.md
+
+# Backup folders
+backup_*/
+
+# Local development
+instance/
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# Uploaded/generated files (recreated on deploy)
+uploads/
+outputs/
+compressed/
+temp/
+
+# Binary executables
+bin/
+*.exe
+
+# LaTeX
+latex/
+latex_portable/
+*.tex
+*.aux
+
+# Large language models or data files
+*.model
+*.bin
+*.dat
+
+# Design files
+*.puml
+puml/
+
+# Example/sample files
+sample_*.ipynb
+excel_test_manual.csv
+
+# Build artifacts
+*.pyc
+*.pyo
+*.pyd
+.eggs/
+*.egg-info/
+dist/
+build/
+
+# Environment files (use Render's env variables instead)
+.env
+.env.local
+.env.*.local
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker (using Render's build, not Docker)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# PowerBI converter (if not needed)
+powerbi_converter/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Render handles these
+.python-version
+runtime.txt
+
+# Migration backups
+backup_before_security_migration_*/
+

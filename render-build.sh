@@ -1,51 +1,41 @@
 #!/usr/bin/env bash
-# Build script for Cropio deployment with Notebook Converter support
+# Build script for Cropio deployment - Optimized for Render Free Tier
 set -o errexit  # Exit on error
 
-echo "🚀 Starting Cropio build process..."
+echo "🚀 Starting Cropio build process (Render Free Tier Optimized)..."
 
-# Check if we can write to apt lists (for local development)
-if [ -w "/var/lib/apt/lists" ] 2>/dev/null; then
-    echo "📦 Updating system packages..."
-    apt-get update
-    
-    # Install system dependencies
-    echo "🖼️ Installing system dependencies..."
-    apt-get install -y libgl1-mesa-glx
-    
-    # Install TeX Live for PDF conversion (nbconvert requirement)
-    echo "📄 Installing TeX Live for PDF support..."
-    apt-get install -y texlive-xetex texlive-fonts-recommended texlive-latex-extra
-    
-    # Install Pandoc for document conversion
-    echo "📝 Installing Pandoc for document conversion..."
-    apt-get install -y pandoc
-    
-    # Install Tesseract for OCR functionality
-    echo "🔍 Installing Tesseract OCR..."
-    apt-get install -y tesseract-ocr tesseract-ocr-eng
-    
-    # Install additional image processing libraries
-    echo "🖼️ Installing image processing libraries..."
-    apt-get install -y libjpeg-dev libpng-dev libtiff-dev libwebp-dev
-else
-    echo "⚠️ Read-only filesystem detected (likely Render environment)"
-    echo "📦 Skipping apt-get operations - relying on Python packages"
-fi
+# Render free tier has read-only filesystem for apt
+# Only install lightweight essential dependencies
+echo "📦 Installing minimal system dependencies..."
 
 # Install Python dependencies
 echo "🐍 Installing Python dependencies..."
 pip install --upgrade pip
-pip install -r requirements.txt
+
+# For Render free tier, install with reduced memory footprint
+echo "📦 Installing packages (this may take a while on free tier)..."
+pip install -r requirements.txt --no-cache-dir
 
 # Create necessary directories for file processing
 echo "📁 Creating application directories..."
-mkdir -p uploads outputs compressed
+mkdir -p uploads outputs compressed temp logs
 
-# Verify critical installations
-echo "✅ Verifying installations..."
-echo "XeLaTeX: $(which xelatex || echo 'Not found')"
-echo "Pandoc: $(which pandoc || echo 'Not found')"
-echo "Tesseract: $(which tesseract || echo 'Not found')"
+# Set environment for production
+echo "⚙️ Configuring for production..."
+export FLASK_ENV=production
+
+# Display system info
+echo "ℹ️ System Information:"
+echo "Python version: $(python --version)"
+echo "Pip version: $(pip --version)"
+echo "Available memory: $(free -h 2>/dev/null || echo 'N/A')"
+
+# Note about disabled features on free tier
+echo "⚠️ Note: On Render free tier, the following features are limited:"
+echo "   - LaTeX/PDF conversion (no TeX Live)"
+echo "   - Pandoc conversion (no Pandoc)"
+echo "   - OCR functionality (no Tesseract)"
+echo "   - Video processing (no FFmpeg)"
+echo "   For full functionality, upgrade to Render paid tier or use alternative deployment."
 
 echo "🎉 Cropio build completed successfully!"
