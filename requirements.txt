@@ -142,6 +142,7 @@ sentry-sdk[flask]==1.39.2
 prometheus-flask-exporter==0.23.0
 Flask-HealthZ==1.0.1
 Flask-UUID==0.2
+psutil==5.9.6
 
 # === VALIDATION AND SERIALIZATION ===
 marshmallow==3.20.2
