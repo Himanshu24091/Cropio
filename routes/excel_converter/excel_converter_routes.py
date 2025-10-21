@@ -478,11 +478,12 @@ def convert_excel_internal(input_path, temp_dir, form_data):
                 file_size = os.path.getsize(output_path)
                 error_details.append(f'Output file exists but is {file_size} bytes')
             
-            logger.error(f"Excel to {output_format.upper()} conversion failed: {'; '.join(error_details)}")
+            error_message = '; '.join(error_details)
+            logger.error(f"Excel to {output_format.upper()} conversion failed: {error_message}")
             
             return {
                 'success': False,
-                'error': f'Excel to {output_format.upper()} conversion failed: {'; '.join(error_details)}'
+                'error': f'Excel to {output_format.upper()} conversion failed: {error_message}'
             }
 
     except Exception as e:
