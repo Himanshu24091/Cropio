@@ -79,10 +79,11 @@ class User(UserMixin, db.Model):
     last_failed_login = db.Column(db.DateTime, nullable=True)
     password_changed_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Password strength tracking (NEW)
-    password_alert_dismissed_at = db.Column(db.DateTime, nullable=True)
-    password_strength_checked = db.Column(db.Boolean, default=False, nullable=False)
-    last_password_change = db.Column(db.DateTime, nullable=True)
+    # TEMPORARILY COMMENTED: Password strength tracking (columns don't exist in DB yet)
+    # TODO: Uncomment after running database migration (migrations/add_password_alert_fields.py)
+    # password_alert_dismissed_at = db.Column(db.DateTime, nullable=True)
+    # password_strength_checked = db.Column(db.Boolean, default=False, nullable=False)
+    # last_password_change = db.Column(db.DateTime, nullable=True)
     
     # Preferences
     email_notifications = db.Column(db.Boolean, default=True)
