@@ -482,7 +482,7 @@ def convert_excel_internal(input_path, temp_dir, form_data):
             
             return {
                 'success': False,
-                'error': f'Excel to {output_format.upper()} conversion failed: {'; '.join(error_details)}'
+                'error': f'Excel to {output_format.upper()} conversion failed: {", ".join(error_details)}'
             }
 
     except Exception as e:
