@@ -5,7 +5,6 @@ Implements secure file handling, validation, cleanup, and monitoring
 import os
 import shutil
 import hashlib
-import magic
 import time
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple, Union
@@ -14,6 +13,16 @@ from dataclasses import dataclass
 from flask import current_app
 from werkzeug.utils import secure_filename
 from core.logging_config import cropio_logger
+
+# Try to import python-magic, fall back to filetype if not available
+try:
+    import magic
+    MAGIC_AVAILABLE = True
+except (ImportError, OSError) as e:
+    # libmagic not available on Windows or magic not installed
+    MAGIC_AVAILABLE = False
+    import filetype
+    print(f"Warning: python-magic not available ({e}), using filetype as fallback")
 
 
 @dataclass
@@ -89,8 +98,30 @@ class FileSecurityValidator:
     ]
     
     def __init__(self):
-        self.mime_checker = magic.Magic(mime=True)
-        self.file_checker = magic.Magic()
+        if MAGIC_AVAILABLE:
+            self.mime_checker = magic.Magic(mime=True)
+            self.file_checker = magic.Magic()
+        else:
+            self.mime_checker = None
+            self.file_checker = None
+    
+    def get_mime_type(self, file_path: str) -> str:
+        """Get MIME type using available library"""
+        if MAGIC_AVAILABLE and self.mime_checker:
+            try:
+                return self.mime_checker.from_file(file_path)
+            except Exception as e:
+                cropio_logger.warning(f"Magic MIME detection failed: {e}")
+        
+        # Fallback to filetype
+        try:
+            kind = filetype.guess(file_path)
+            if kind:
+                return kind.mime
+        except Exception as e:
+            cropio_logger.warning(f"Filetype MIME detection failed: {e}")
+        
+        return "application/octet-stream"
     
     def validate_file_signature(self, file_path: str) -> Tuple[bool, List[str]]:
         """Validate file signature against known dangerous patterns"""
@@ -122,7 +153,7 @@ class FileSecurityValidator:
         errors = []
         
         try:
-            detected_mime = self.mime_checker.from_file(file_path)
+            detected_mime = self.get_mime_type(file_path)
             file_extension = Path(file_path).suffix.lower()[1:]  # Remove dot
             
             # MIME type mappings for common file types
@@ -281,7 +312,7 @@ class FileManager:
             
             # Get MIME type
             try:
-                mime_type = self.validator.mime_checker.from_file(temp_path)
+                mime_type = self.validator.get_mime_type(temp_path)
             except Exception:
                 mime_type = "unknown"
             

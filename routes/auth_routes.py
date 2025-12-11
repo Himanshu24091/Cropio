@@ -42,7 +42,8 @@ def register():
                 f'CSRF validation failed for registration: IP={request.remote_addr}, error={csrf_error}'
             )
             flash('Security validation failed. Please try again.', 'error')
-            return render_template('auth/register.html')
+            from flask_wtf.csrf import generate_csrf
+            return render_template('auth/register.html', csrf_token=generate_csrf())
         
         # NEW: Enhanced input validation and sanitization
         raw_username = request.form.get('username', '').strip()
@@ -57,7 +58,8 @@ def register():
         if not username_valid:
             for error in username_errors:
                 flash(f'Username validation: {error}', 'error')
-            return render_template('auth/register.html', username=raw_username, email=raw_email)
+            from flask_wtf.csrf import generate_csrf
+            return render_template('auth/register.html', username=raw_username, email=raw_email, csrf_token=generate_csrf())
         
         if not email_valid:
             for error in email_errors:
@@ -101,7 +103,8 @@ def register():
         if errors:
             for error in errors:
                 flash(error, 'error')
-            return render_template('auth/register.html', username=username, email=email)
+            from flask_wtf.csrf import generate_csrf
+            return render_template('auth/register.html', username=username, email=email, csrf_token=generate_csrf())
         
         try:
             # Create new user
@@ -132,7 +135,9 @@ def register():
             flash('Registration failed. Please try again.', 'error')
             print(f"Registration error: {e}")
     
-    return render_template('auth/register.html')
+    # Generate CSRF token for the template
+    from flask_wtf.csrf import generate_csrf
+    return render_template('auth/register.html', csrf_token=generate_csrf())
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])

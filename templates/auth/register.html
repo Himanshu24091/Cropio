@@ -26,74 +26,51 @@
 
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'error' if category == 'error' else category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ 'error' if category == 'error' else category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
         {% endwith %}
 
         <form method="POST" action="{{ url_for('auth.register') }}" id="registerForm">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
             <div class="form-group">
                 <label for="username" class="form-label">Username</label>
-                <input type="text" 
-                       id="username" 
-                       name="username" 
-                       class="form-input" 
-                       value="{{ request.form.username or '' }}"
-                       required 
-                       autofocus
-                       minlength="3"
-                       maxlength="20"
-                       placeholder="Choose a unique username">
+                <input type="text" id="username" name="username" class="form-input"
+                    value="{{ request.form.username or '' }}" required autofocus minlength="3" maxlength="20"
+                    placeholder="Choose a unique username">
                 <div id="usernameValidation" class="validation-message"></div>
             </div>
 
             <div class="form-group">
                 <label for="email" class="form-label">Email Address</label>
-                <input type="email" 
-                       id="email" 
-                       name="email" 
-                       class="form-input" 
-                       value="{{ request.form.email or '' }}"
-                       required
-                       placeholder="Enter your email address">
+                <input type="email" id="email" name="email" class="form-input" value="{{ request.form.email or '' }}"
+                    required placeholder="Enter your email address">
                 <div id="emailValidation" class="validation-message"></div>
             </div>
 
             <div class="form-group">
                 <label for="password" class="form-label">Password</label>
-                <input type="password" 
-                       id="password" 
-                       name="password" 
-                       class="form-input" 
-                       required
-                       minlength="6"
-                       placeholder="Create a secure password">
+                <input type="password" id="password" name="password" class="form-input" required minlength="6"
+                    placeholder="Create a secure password">
                 <div id="passwordStrength" class="password-strength"></div>
             </div>
 
             <div class="form-group">
                 <label for="confirm_password" class="form-label">Confirm Password</label>
-                <input type="password" 
-                       id="confirm_password" 
-                       name="confirm_password" 
-                       class="form-input" 
-                       required
-                       placeholder="Repeat your password">
+                <input type="password" id="confirm_password" name="confirm_password" class="form-input" required
+                    placeholder="Repeat your password">
                 <div id="confirmPasswordValidation" class="validation-message"></div>
             </div>
 
             <div class="checkbox-group">
-                <input type="checkbox" 
-                       id="terms_accepted" 
-                       name="terms_accepted" 
-                       required
-                       class="rounded border-gray-300">
+                <input type="checkbox" id="terms_accepted" name="terms_accepted" required
+                    class="rounded border-gray-300">
                 <label for="terms_accepted" class="text-sm text-gray-600 dark:text-gray-400">
-                    I agree to the <a href="#" class="text-blue-600 hover:underline">Terms of Service</a> 
+                    I agree to the <a href="#" class="text-blue-600 hover:underline">Terms of Service</a>
                     and <a href="#" class="text-blue-600 hover:underline">Privacy Policy</a>
                 </label>
             </div>
@@ -105,7 +82,7 @@
 
         <div class="auth-links">
             <p class="text-sm text-gray-600 dark:text-gray-400">
-                Already have an account? 
+                Already have an account?
                 <a href="{{ url_for('auth.login') }}" class="font-medium">Sign in here</a>
             </p>
         </div>

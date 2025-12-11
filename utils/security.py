@@ -8,11 +8,18 @@ from werkzeug.exceptions import RequestEntityTooLarge
 from datetime import datetime, timedelta
 import hashlib
 import re
-import magic
 import os
 from functools import wraps
 from collections import defaultdict
 import time
+
+# Try to import python-magic, fall back to filetype if not available
+try:
+    import magic
+    MAGIC_AVAILABLE = True
+except (ImportError, OSError):
+    MAGIC_AVAILABLE = False
+    import filetype
 
 # Initialize CSRF protection
 csrf = CSRFProtect()
@@ -141,10 +148,17 @@ def validate_file_upload(file, allowed_extensions, max_size_mb=100):
     if file_size > max_size_mb * 1024 * 1024:
         return False, f"File size exceeds {max_size_mb}MB limit"
     
-    # Check MIME type using python-magic
+    # Check MIME type
     try:
-        file_mime = magic.from_buffer(file.read(2048), mime=True)
-        file.seek(0)
+        if MAGIC_AVAILABLE:
+            file_mime = magic.from_buffer(file.read(2048), mime=True)
+            file.seek(0)
+        else:
+            # Use filetype as fallback
+            file_data = file.read(2048)
+            file.seek(0)
+            kind = filetype.guess(file_data)
+            file_mime = kind.mime if kind else 'application/octet-stream'
         
         # Define allowed MIME types for each extension
         mime_map = {
