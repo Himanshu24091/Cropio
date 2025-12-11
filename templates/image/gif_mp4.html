@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block title %}GIF ⇄ MP4 Converter - Cropio{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/converter.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/phase-1-5.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='image/gif_mp4.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="converter-wrapper">
+    <div class="page-header">
+        <div class="container">
+            <h1><i class="fas fa-exchange-alt"></i> GIF ⇄ MP4 Converter</h1>
+            <p class="subtitle">Convert animated GIFs to MP4 videos and vice versa with professional quality</p>
+        </div>
+    </div>
+
+    <div class="container">
+        {% if not ffmpeg_available %}
+        <!-- FFmpeg Not Available -->
+        <div class="alert alert-error">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>FFmpeg Not Available</strong>
+            <p>{{ ffmpeg_info[1] if ffmpeg_info else "FFmpeg is required for video conversion but is not available on this system." }}</p>
+            <p>Please contact the administrator to install FFmpeg for video conversion features.</p>
+        </div>
+        {% elif quota_exceeded %}
+        <!-- Quota Exceeded -->
+        <div class="alert alert-warning">
+            <i class="fas fa-hourglass-half"></i>
+            <strong>Daily Limit Reached</strong>
+            <p>You've used all {{ usage.conversions_used }} daily conversions. Upgrade to premium for unlimited access!</p>
+            <a href="{{ url_for('dashboard.subscription') }}" class="btn btn-primary">Upgrade Now</a>
+        </div>
+        {% else %}
+        
+        <!-- Usage Information -->
+        {% if usage %}
+        <div class="usage-info">
+            <strong>Daily Usage:</strong> {{ usage.conversions_used }}/{{ usage.daily_limit }} conversions used
+            <div class="usage-bar">
+                <div class="usage-fill" style="width: {{ usage.percentage }}%"></div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Main Converter Card -->
+        <div class="converter-card">
+            <div class="card-header">
+                <h2><i class="fas fa-video"></i> Video Conversion</h2>
+            </div>
+            <div class="card-body">
+                <!-- Conversion Type Selection -->
+                <div class="conversion-type-selector">
+                    <div class="type-option active" data-type="gif_to_mp4">
+                        <i class="fas fa-play"></i>
+                        <span>GIF → MP4</span>
+                        <!-- <small>Convert animated GIF to MP4 video</small> -->
+                    </div>
+                    <div class="type-option" data-type="mp4_to_gif">
+                        <i class="fas fa-film"></i>
+                        <span>MP4 → GIF</span>
+                        <!-- <small>Convert MP4 video to animated GIF</small> -->
+                    </div>
+                </div>
+
+                <!-- Upload Zone -->
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div class="upload-text" id="uploadText">Drop your GIF files here</div>
+                    <div class="upload-hint">or click to browse and upload</div>
+                    <input type="file" id="fileInput" accept=".gif" style="display: none;">
+                    <button class="btn btn-primary" onclick="document.getElementById('fileInput').click();">
+                        <i class="fas fa-folder-open"></i> Choose Files
+                    </button>
+                    <div class="upload-specs">
+                        <span class="badge bg-info">Max: {{ max_file_size }}MB</span>
+                        <span class="badge bg-info" id="formatBadge">Format: GIF</span>
+                    </div>
+                </div>
+
+                <!-- File List -->
+                <div id="fileList" class="file-list" style="display: none;"></div>
+
+                <!-- Conversion Settings -->
+                <div id="conversionSettings" class="conversion-settings" style="display: none;">
+                    
+                    <!-- GIF to MP4 Settings -->
+                    <div id="gifToMp4Settings" class="settings-group">
+                        <h5><i class="fas fa-cogs"></i> MP4 Conversion Settings</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="quality">Quality Level:</label>
+                                <select id="quality" name="quality" class="form-select">
+                                    <option value="lossless">Lossless (Largest file)</option>
+                                    <option value="high" selected>High Quality (Recommended)</option>
+                                    <option value="medium">Medium Quality</option>
+                                    <option value="low">Low Quality (Smallest file)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="fps">Frame Rate (FPS):</label>
+                                <select id="fps" name="fps" class="form-select">
+                                    <option value="">Auto (Preserve original)</option>
+                                    <option value="60">60 FPS - Silky smooth</option>
+                                    <option value="30" selected>30 FPS - Standard</option>
+                                    <option value="24">24 FPS - Cinema</option>
+                                    <option value="15">15 FPS - Web optimized</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="scale">Resolution:</label>
+                                <select id="scale" name="scale" class="form-select">
+                                    <option value="">Original size</option>
+                                    <option value="1920:1080">1080p (1920×1080)</option>
+                                    <option value="1280:720">720p (1280×720)</option>
+                                    <option value="640:480">480p (640×480)</option>
+                                    <option value="50%">50% of original</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mt-4">
+                                    <input class="form-check-input" type="checkbox" id="optimize" checked>
+                                    <label class="form-check-label" for="optimize">
+                                        Optimize for web streaming
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MP4 to GIF Settings -->
+                    <div id="mp4ToGifSettings" class="settings-group" style="display: none;">
+                        <h5><i class="fas fa-cogs"></i> GIF Conversion Settings</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="gifFps">Frame Rate (FPS):</label>
+                                <input type="range" class="form-range" id="gifFps" min="5" max="30" value="15">
+                                <div class="range-value"><span id="gifFpsValue">15</span> FPS</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="gifScale">Resolution:</label>
+                                <select id="gifScale" name="gif_scale" class="form-select">
+                                    <option value="-1:480" selected>480p height (Auto width)</option>
+                                    <option value="640:480">640×480</option>
+                                    <option value="320:240">320×240</option>
+                                    <option value="50%">50% of original</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="startTime">Start Time (optional):</label>
+                                <input type="text" class="form-control" id="startTime" placeholder="00:00:10" 
+                                       title="Format: HH:MM:SS or seconds">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="duration">Duration (optional):</label>
+                                <input type="text" class="form-control" id="duration" placeholder="00:00:05"
+                                       title="Format: HH:MM:SS or seconds">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="paletteQuality">Color Quality:</label>
+                                <select id="paletteQuality" name="palette_quality" class="form-select">
+                                    <option value="high" selected>High (256 colors)</option>
+                                    <option value="medium">Medium (128 colors)</option>
+                                    <option value="low">Low (64 colors)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="loopCount">Loop Count:</label>
+                                <select id="loopCount" name="loop_count" class="form-select">
+                                    <option value="0" selected>Infinite loop</option>
+                                    <option value="1">Play once</option>
+                                    <option value="3">3 times</option>
+                                    <option value="5">5 times</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress -->
+                <div class="progress" style="display: none;" id="conversionProgress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar"></div>
+                </div>
+                <div class="progress-text" id="progressText"></div>
+
+                <!-- Convert Button -->
+                <div class="text-center mt-4">
+                    <button id="convertBtn" class="btn btn-success btn-lg" style="display: none;">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span id="convertBtnText">Convert GIF to MP4</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="converter-card" style="display: none; margin-top: 2rem;">
+            <div class="card-header">
+                <h3><i class="fas fa-check-circle"></i> Conversion Complete</h3>
+            </div>
+            <div class="card-body">
+                <!-- Conversion Info -->
+                <div id="conversionInfo" class="conversion-info">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="info-stat">
+                                <div class="stat-number" id="conversionType">-</div>
+                                <div class="stat-label">Conversion</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-stat">
+                                <div class="stat-number" id="inputSize">-</div>
+                                <div class="stat-label">Original Size</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-stat">
+                                <div class="stat-number" id="outputSize">-</div>
+                                <div class="stat-label">Converted Size</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-stat">
+                                <div class="stat-number" id="compressionRatio">-</div>
+                                <div class="stat-label">Size Change</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preview Section -->
+                <div id="previewSection" class="preview-section">
+                    <h5><i class="fas fa-eye"></i> Preview</h5>
+                    <div class="preview-container">
+                        <div class="preview-item">
+                            <h6>Original</h6>
+                            <div class="preview-placeholder" id="originalPreview">
+                                <i class="fas fa-file"></i>
+                                <span>Original file</span>
+                            </div>
+                        </div>
+                        <div class="preview-item">
+                            <h6>Converted</h6>
+                            <div class="preview-placeholder" id="convertedPreview">
+                                <i class="fas fa-video"></i>
+                                <span>Converted file ready</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Download Actions -->
+                <div class="download-actions text-center">
+                    <button id="downloadBtn" class="btn btn-success btn-lg">
+                        <i class="fas fa-download"></i>
+                        <span id="downloadBtnText">Download MP4</span>
+                    </button>
+                    <button id="newConversionBtn" class="btn btn-outline-primary">
+                        <i class="fas fa-plus"></i>
+                        New Conversion
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-video"></i>
+                </div>
+                <h4>High-Quality Video</h4>
+                <p>Convert GIFs to MP4 with lossless quality options and advanced compression settings</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-film"></i>
+                </div>
+                <h4>Animated GIFs</h4>
+                <p>Create optimized animated GIFs from videos with custom color palettes and timing</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <h4>Advanced Options</h4>
+                <p>Control frame rate, resolution, quality, timing, and optimization settings</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h4>Fast Processing</h4>
+                <p>Powered by FFmpeg for professional-grade video processing with optimal performance</p>
+            </div>
+        </div>
+
+        <!-- Technical Information -->
+        {% if ffmpeg_info and ffmpeg_info[0] %}
+        <div class="info-section">
+            <div class="info-card">
+                <h3><i class="fas fa-info-circle"></i> Technical Information</h3>
+                <p><strong>FFmpeg Status:</strong> {{ ffmpeg_info[1] }}</p>
+                {% if supported_formats %}
+                <p><strong>Supported Input Formats:</strong></p>
+                <ul>
+                    <li><strong>GIF to MP4:</strong> {{ supported_formats.gif_to_mp4.input | join(', ') }}</li>
+                    <li><strong>MP4 to GIF:</strong> {{ supported_formats.mp4_to_gif.input | join(', ') }}</li>
+                </ul>
+                {% endif %}
+            </div>
+            
+            <div class="info-card">
+                <h3><i class="fas fa-lightbulb"></i> Conversion Tips</h3>
+                <ul>
+                    <li>Use high quality for videos you want to edit further</li>
+                    <li>Lower frame rates create smaller GIF files</li>
+                    <li>Trim long videos before converting to GIF</li>
+                    <li>MP4 files are typically much smaller than equivalent GIFs</li>
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/image/gif_mp4.js') }}"></script>
+{% endblock %}

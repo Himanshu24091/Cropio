@@ -1,0 +1,452 @@
+/* YAML JSON Converter Theme CSS */
+
+/* Body-level theme overrides for YAML converter pages only */
+body:has(.yaml-json-converter) {
+    background: var(--yaml-background, #ffffff) !important;
+    color: var(--yaml-text-primary, #1a202c) !important;
+}
+
+.dark body:has(.yaml-json-converter) {
+    background: var(--yaml-background, #0f172a) !important;
+    color: var(--yaml-text-primary, #f1f5f9) !important;
+}
+
+/* Fallback for browsers that don't support :has() */
+body {
+    background: var(--yaml-background, #ffffff) !important;
+    color: var(--yaml-text-primary, #1a202c) !important;
+}
+
+.dark body {
+    background: var(--yaml-background, #0f172a) !important;
+    color: var(--yaml-text-primary, #f1f5f9) !important;
+}
+
+/* Base theme variables for light mode */
+:root {
+    --yaml-text-primary: #1a202c;
+    --yaml-text-secondary: #4a5568;
+    --yaml-background: #ffffff;
+    --yaml-card-background: #ffffff;
+    --yaml-border-color: #e2e8f0;
+    --yaml-primary-color: #6366f1;
+    --yaml-success-color: #10b981;
+    --yaml-error-color: #ef4444;
+    --yaml-warning-color: #f59e0b;
+    --yaml-info-color: #3b82f6;
+    --yaml-hover-color: #f8fafc;
+    --yaml-input-background: #ffffff;
+    --yaml-background-secondary: #f8fafc;
+    
+    /* RGB equivalents for alpha operations */
+    --yaml-primary-color-rgb: 99, 102, 241;
+    --yaml-success-color-rgb: 16, 185, 129;
+    --yaml-error-color-rgb: 239, 68, 68;
+    --yaml-warning-color-rgb: 245, 158, 11;
+    --yaml-info-color-rgb: 59, 130, 246;
+}
+
+/* Dark theme variables */
+.dark {
+    --yaml-text-primary: #f1f5f9;
+    --yaml-text-secondary: #cbd5e1;
+    --yaml-background: #0f172a;
+    --yaml-card-background: #1e293b;
+    --yaml-border-color: #334155;
+    --yaml-primary-color: #818cf8;
+    --yaml-success-color: #34d399;
+    --yaml-error-color: #f87171;
+    --yaml-warning-color: #fbbf24;
+    --yaml-info-color: #60a5fa;
+    --yaml-hover-color: #334155;
+    --yaml-input-background: #1e293b;
+    --yaml-background-secondary: #334155;
+    
+    /* RGB equivalents for alpha operations */
+    --yaml-primary-color-rgb: 129, 140, 248;
+    --yaml-success-color-rgb: 52, 211, 153;
+    --yaml-error-color-rgb: 248, 113, 113;
+    --yaml-warning-color-rgb: 251, 191, 36;
+    --yaml-info-color-rgb: 96, 165, 250;
+}
+
+/* Converter Wrapper */
+.dark .converter-wrapper {
+    background: var(--yaml-background);
+    color: var(--yaml-text-primary);
+}
+
+/* Ensure converter wrapper uses theme colors in light mode too */
+.converter-wrapper {
+    background: var(--yaml-background, #ffffff) !important;
+    color: var(--yaml-text-primary, #1a202c) !important;
+}
+
+/* Page Header */
+.page-header {
+    background: linear-gradient(135deg, #667eee 0%, #764ba2 100%) !important;
+    color: white !important;
+}
+
+.dark .page-header {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+    color: var(--yaml-text-primary) !important;
+}
+
+/* Control Panel */
+.dark .control-panel {
+    background: var(--yaml-card-background) !important;
+    border-color: var(--yaml-border-color) !important;
+    color: var(--yaml-text-primary);
+}
+
+/* Mode Selector */
+.dark .mode-selector {
+    background: var(--yaml-background-secondary);
+}
+
+.dark .mode-option {
+    background: var(--yaml-card-background);
+    border-color: var(--yaml-border-color);
+}
+
+.dark .mode-option:hover {
+    border-color: var(--yaml-primary-color);
+    background: rgba(var(--yaml-primary-color-rgb), 0.1);
+}
+
+.dark .mode-label {
+    color: var(--yaml-text-primary);
+}
+
+/* Options Panel */
+.dark .options-panel {
+    background: var(--yaml-card-background);
+    border-color: var(--yaml-border-color);
+}
+
+.dark .options-group h4 {
+    color: var(--yaml-text-primary);
+}
+
+.dark .option-checkbox {
+    color: var(--yaml-text-secondary);
+}
+
+.dark #indent-size {
+    background: var(--yaml-input-background);
+    color: var(--yaml-text-primary);
+    border-color: var(--yaml-border-color);
+}
+
+/* Action Buttons */
+.dark .btn-primary {
+    background: var(--yaml-primary-color) !important;
+    color: white !important;
+}
+
+.dark .btn-primary:hover:not(:disabled) {
+    background: #4f46e5 !important;
+    box-shadow: 0 4px 8px rgba(var(--yaml-primary-color-rgb), 0.3) !important;
+}
+
+.dark .btn-secondary {
+    background: var(--yaml-background-secondary) !important;
+    color: var(--yaml-text-primary) !important;
+    border-color: var(--yaml-border-color) !important;
+}
+
+.dark .btn-secondary:hover:not(:disabled) {
+    background: var(--yaml-hover-color) !important;
+    color: var(--yaml-text-primary) !important;
+}
+
+.dark .btn-outline {
+    background: var(--yaml-card-background) !important;
+    color: var(--yaml-text-primary) !important;
+    border-color: var(--yaml-border-color) !important;
+}
+
+.dark .btn-outline:hover:not(:disabled) {
+    background: var(--yaml-hover-color) !important;
+    border-color: var(--yaml-primary-color) !important;
+    color: var(--yaml-primary-color) !important;
+}
+
+/* Upload Section */
+.dark .upload-label {
+    background: var(--yaml-background-secondary);
+    border-color: var(--yaml-border-color);
+    color: var(--yaml-text-secondary);
+}
+
+.dark .upload-label:hover {
+    border-color: var(--yaml-primary-color);
+    background: rgba(var(--yaml-primary-color-rgb), 0.1);
+    color: var(--yaml-primary-color);
+}
+
+.dark .upload-info {
+    background: rgba(var(--yaml-success-color-rgb), 0.1);
+    border-color: var(--yaml-success-color);
+}
+
+.dark .upload-info .filename {
+    color: var(--yaml-text-primary);
+}
+
+.dark .upload-info .filesize {
+    color: var(--yaml-text-secondary);
+}
+
+.dark .remove-file {
+    color: var(--yaml-error-color);
+}
+
+.dark .remove-file:hover {
+    background: rgba(var(--yaml-error-color-rgb), 0.1);
+}
+
+/* Conversion Panels */
+.dark .panel {
+    background: var(--yaml-card-background) !important;
+    border-color: var(--yaml-border-color) !important;
+}
+
+.dark .panel-header {
+    background: var(--yaml-background-secondary) !important;
+    border-color: var(--yaml-border-color) !important;
+}
+
+.dark .panel-header h3 {
+    color: var(--yaml-text-primary);
+}
+
+.dark .panel-btn {
+    color: var(--yaml-text-secondary);
+}
+
+.dark .panel-btn:hover {
+    background: rgba(var(--yaml-primary-color-rgb), 0.1);
+    color: var(--yaml-primary-color);
+}
+
+/* CodeMirror Editor */
+.dark .CodeMirror {
+    background: var(--yaml-input-background) !important;
+    color: var(--yaml-text-primary) !important;
+    border-color: var(--yaml-border-color) !important;
+}
+
+.dark .CodeMirror-gutters {
+    background: var(--yaml-background-secondary) !important;
+    border-color: var(--yaml-border-color) !important;
+}
+
+.dark .CodeMirror-linenumber {
+    color: var(--yaml-text-secondary) !important;
+}
+
+.dark .CodeMirror-cursor {
+    border-left-color: var(--yaml-primary-color) !important;
+}
+
+.dark .CodeMirror-selected {
+    background: rgba(var(--yaml-primary-color-rgb), 0.2) !important;
+}
+
+.dark .CodeMirror-focused {
+    border-color: var(--yaml-primary-color) !important;
+}
+
+/* Content Stats */
+.dark .content-stats {
+    background: var(--yaml-background-secondary);
+    color: var(--yaml-text-secondary);
+    border-color: var(--yaml-border-color);
+}
+
+/* Validation Status */
+.dark .validation-indicator[data-status="valid"] {
+    color: var(--yaml-success-color);
+}
+
+.dark .validation-indicator[data-status="invalid"] {
+    color: var(--yaml-error-color);
+}
+
+.dark .validation-indicator[data-status="unknown"] {
+    color: var(--yaml-text-secondary);
+}
+
+/* Error Display */
+.dark .error-display {
+    background: rgba(var(--yaml-error-color-rgb), 0.1);
+    border-color: var(--yaml-error-color);
+}
+
+.dark .error-header {
+    background: var(--yaml-error-color);
+    color: white;
+}
+
+.dark .error-message {
+    color: var(--yaml-error-color);
+}
+
+.dark .error-details summary {
+    color: var(--yaml-text-secondary);
+}
+
+.dark .error-details-content {
+    background: var(--yaml-background-secondary);
+    color: var(--yaml-text-primary);
+}
+
+/* Success Display */
+.dark .success-display {
+    background: rgba(var(--yaml-success-color-rgb), 0.1);
+    border-color: var(--yaml-success-color);
+}
+
+.dark .success-header {
+    background: var(--yaml-success-color);
+    color: white;
+}
+
+.dark .success-stats {
+    color: var(--yaml-success-color);
+}
+
+/* Loading Indicator */
+.dark .loading-text {
+    color: white;
+}
+
+/* Fullscreen Modal */
+.dark .fullscreen-content {
+    background: var(--yaml-card-background);
+    border-color: var(--yaml-border-color);
+}
+
+.dark .fullscreen-header {
+    background: var(--yaml-background-secondary);
+    border-color: var(--yaml-border-color);
+}
+
+.dark .fullscreen-header h3 {
+    color: var(--yaml-text-primary);
+}
+
+.dark .fullscreen-close {
+    color: var(--yaml-text-secondary);
+}
+
+.dark .fullscreen-close:hover {
+    background: rgba(var(--yaml-error-color-rgb), 0.1);
+    color: var(--yaml-error-color);
+}
+
+.dark .fullscreen-body textarea {
+    background: var(--yaml-input-background);
+    color: var(--yaml-text-primary);
+    border-color: var(--yaml-border-color);
+}
+
+.dark .fullscreen-actions {
+    background: var(--yaml-background-secondary);
+    border-color: var(--yaml-border-color);
+}
+
+/* Features Section */
+.dark .features-section {
+    background: var(--yaml-background-secondary);
+}
+
+.dark .features-container h2 {
+    color: var(--yaml-text-primary);
+}
+
+.dark .feature {
+    background: var(--yaml-card-background);
+    border-color: var(--yaml-border-color);
+}
+
+.dark .feature:hover {
+    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.07);
+}
+
+.dark .feature-icon {
+    color: var(--yaml-primary-color);
+}
+
+.dark .feature h3 {
+    color: var(--yaml-text-primary);
+}
+
+.dark .feature p {
+    color: var(--yaml-text-secondary);
+}
+
+/* Usage Guide */
+.dark .usage-guide {
+    background: var(--yaml-background);
+    color: var(--yaml-text-primary);
+}
+
+.dark .guide-container {
+    background: var(--yaml-background);
+}
+
+.dark .guide-container h2 {
+    color: var(--yaml-text-primary);
+}
+
+.dark .step-number {
+    background: var(--yaml-primary-color);
+}
+
+.dark .step-content h4 {
+    color: var(--yaml-text-primary);
+}
+
+.dark .step-content p {
+    color: var(--yaml-text-secondary);
+}
+
+/* Enhanced Shadows for Dark Mode */
+.dark .panel,
+.dark .control-panel,
+.dark .feature:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* High Contrast Improvements for Dark Mode */
+.dark .btn {
+    border-color: rgba(var(--yaml-primary-color-rgb), 0.3);
+}
+
+.dark .mode-option input[type="radio"]:checked + .mode-label {
+    color: var(--yaml-primary-color);
+}
+
+/* Visual Feedback Enhancements */
+.dark .validation-status.success {
+    background: rgba(var(--yaml-success-color-rgb), 0.1);
+    border-color: rgba(var(--yaml-success-color-rgb), 0.2);
+}
+
+.dark .validation-status.error {
+    background: rgba(var(--yaml-error-color-rgb), 0.1);
+    border-color: rgba(var(--yaml-error-color-rgb), 0.2);
+}
+
+.dark .validation-status.warning {
+    background: rgba(var(--yaml-warning-color-rgb), 0.1);
+    border-color: rgba(var(--yaml-warning-color-rgb), 0.2);
+}
+
+/* Input Placeholder Text */
+.dark .CodeMirror-placeholder {
+    color: rgba(var(--yaml-text-secondary-rgb), 0.5) !important;
+}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Login - {{ config.get('SITE_NAME', 'Cropio') }}{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='auth/auth.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Welcome Back</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">Sign in to your account</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'error' if category == 'error' else category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            {{ form.hidden_tag() }}
+            
+            <div class="form-group">
+                {{ form.username_or_email.label(class="form-label") }}
+                {{ form.username_or_email(class="form-input", 
+                                          placeholder="Enter your username or email", 
+                                          autofocus=true, 
+                                          value=(request.form.username_or_email or '')) }}
+                {% if form.username_or_email.errors %}
+                    {% for error in form.username_or_email.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.password.label(class="form-label") }}
+                {{ form.password(class="form-input", 
+                                 placeholder="Enter your password") }}
+                {% if form.password.errors %}
+                    {% for error in form.password.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="checkbox-group">
+                {{ form.remember_me(class="rounded border-gray-300") }}
+                {{ form.remember_me.label(class="text-sm text-gray-600 dark:text-gray-400") }}
+            </div>
+
+            {{ form.submit(class="btn-primary") }}
+        </form>
+
+        <div class="auth-links">
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                Don't have an account? 
+                <a href="{{ url_for('auth.register') }}" class="font-medium">Sign up here</a>
+            </p>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                <a href="{{ url_for('auth.request_password_reset') }}" class="font-medium">Forgot your password?</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

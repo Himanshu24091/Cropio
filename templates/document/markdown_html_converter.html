@@ -1,0 +1,348 @@
+{% extends "base.html" %}
+
+{% block title %}Markdown ⇄ HTML Converter - Cropio{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='document/markdown_html_converter.css') }}">
+    <!-- Highlight.js for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" media="(prefers-color-scheme: dark)">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" media="(prefers-color-scheme: light)">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- Markdown preview library -->
+    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+{% endblock %}
+
+{% block page_content %}
+<div class="markdown-html-converter" id="markdown-html-app">
+    <!-- Header Section -->
+    <header class="converter-header">
+        <div class="container mx-auto px-6 py-16 text-center">
+            <div class="header-icon mb-6">
+                <svg class="w-16 h-16 mx-auto text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 3v6a2 2 0 002 2h6"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 9h1m0 0h1m-1 0v1m0-1V8"></path>
+                </svg>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4">
+                Markdown ⇄ HTML <span class="text-blue-600">Converter</span>
+            </h1>
+            <p class="text-xl text-slate-600 dark:text-slate-400 max-w-3xl mx-auto leading-relaxed">
+                Transform between Markdown and HTML formats with real-time preview, syntax highlighting, and professional styling.
+            </p>
+        </div>
+    </header>
+
+    <!-- Conversion Mode Toggle -->
+    <section class="conversion-modes-section">
+        <div class="container mx-auto px-6">
+            <div class="mode-selector">
+                <div class="mode-toggle">
+                    <button class="mode-btn active" data-mode="markdown-to-html" id="mdToHtmlBtn">
+                        <div class="mode-icon">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <div class="mode-info">
+                            <div class="mode-title">Markdown → HTML</div>
+                            <div class="mode-desc">Convert Markdown to HTML</div>
+                        </div>
+                    </button>
+                    <button class="mode-btn" data-mode="html-to-markdown" id="htmlToMdBtn">
+                        <div class="mode-icon">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                            </svg>
+                        </div>
+                        <div class="mode-info">
+                            <div class="mode-title">HTML → Markdown</div>
+                            <div class="mode-desc">Convert HTML to Markdown</div>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- File Upload Section -->
+    <section class="upload-section">
+        <div class="container mx-auto px-6">
+            <div class="upload-card">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-content">
+                        <div class="upload-icon">
+                            <svg class="w-12 h-12 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                        </div>
+                        <h3 class="upload-title">Drop your files here</h3>
+                        <p class="upload-subtitle" id="uploadSubtitle">Supports .md, .markdown, .txt files up to 10MB</p>
+                        <input type="file" id="fileInput" class="hidden" accept=".md,.markdown,.txt,.html,.htm">
+                        <button class="upload-btn" id="uploadBtn">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9l3 3 3-3"></path>
+                            </svg>
+                            Choose File
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Converter Workspace -->
+    <section class="converter-workspace">
+        <div class="container mx-auto px-6">
+            <div class="workspace-grid">
+                <!-- Input Panel -->
+                <div class="input-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title" id="inputPanelTitle">Input (Markdown)</h3>
+                        <div class="panel-controls">
+                            <button class="control-btn" id="clearInputBtn" title="Clear input">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                            </button>
+                            <button class="control-btn" id="pasteBtn" title="Paste from clipboard">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <textarea id="inputText" class="input-textarea" placeholder="Enter your content here...
+
+Example Markdown:
+# My Document
+## Introduction
+This is **bold** text with *italic* formatting.
+
+- Item 1  
+- Item 2
+- Item 3
+
+```python
+def hello():
+    print('Hello, World!')
+```
+
+[Link example](https://example.com)"></textarea>
+                        <div class="input-stats">
+                            <span>Lines: <span id="inputLines">0</span></span>
+                            <span>Words: <span id="inputWords">0</span></span>
+                            <span>Characters: <span id="inputChars">0</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Conversion Controls -->
+                <div class="conversion-controls">
+                    <div class="controls-content">
+                        <button class="convert-btn" id="convertBtn">
+                            <div class="btn-content">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                                </svg>
+                                <span id="convertBtnText">Convert</span>
+                            </div>
+                        </button>
+                        
+                        <div class="conversion-options">
+                            <label class="option-label">
+                                <input type="checkbox" id="realTimePreview" checked>
+                                <span class="checkmark"></span>
+                                <span class="option-text">Real-time preview</span>
+                            </label>
+                            <label class="option-label" id="preserveFormattingLabel" style="display: none;">
+                                <input type="checkbox" id="preserveFormatting">
+                                <span class="checkmark"></span>
+                                <span class="option-text">Preserve HTML formatting</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Output Panel -->
+                <div class="output-panel">
+                    <div class="panel-header">
+                        <h3 class="panel-title" id="outputPanelTitle">Output (HTML)</h3>
+                        <div class="panel-controls">
+                            <button class="control-btn" id="copyOutputBtn" title="Copy to clipboard">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                            </button>
+                            <button class="control-btn" id="downloadBtn" title="Download file">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m-1 9.5H6.5a2 2 0 01-2-2v-7a2 2 0 012-2H9"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <!-- Output Tabs -->
+                        <div class="output-tabs">
+                            <button class="tab-btn active" data-tab="code">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                                </svg>
+                                Code
+                            </button>
+                            <button class="tab-btn" data-tab="preview" id="previewTabBtn">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                                Preview
+                            </button>
+                        </div>
+
+                        <!-- Tab Content -->
+                        <div class="tab-content">
+                            <div class="tab-panel active" id="codeTab">
+                                <textarea id="outputText" class="output-textarea" readonly placeholder="Converted content will appear here..."></textarea>
+                            </div>
+                            <div class="tab-panel" id="previewTab">
+                                <div id="previewContent" class="preview-content">
+                                    <div class="preview-placeholder">
+                                        <svg class="w-12 h-12 text-slate-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                        <p class="text-slate-500 dark:text-slate-400">Preview will appear here as you type...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="output-stats">
+                            <span>Lines: <span id="outputLines">0</span></span>
+                            <span>Size: <span id="outputSize">0 B</span></span>
+                            <span id="conversionTime" class="conversion-time"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container mx-auto px-6 py-16">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">Powerful Features</h2>
+                <p class="text-xl text-slate-600 dark:text-slate-400">Everything you need for Markdown and HTML conversion</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Real-time Conversion</h3>
+                    <p class="feature-desc">See your Markdown rendered as HTML instantly as you type</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Syntax Highlighting</h3>
+                    <p class="feature-desc">Full support for code blocks with syntax highlighting</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Table Support</h3>
+                    <p class="feature-desc">Convert Markdown tables to HTML tables seamlessly</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Bidirectional</h3>
+                    <p class="feature-desc">Convert both Markdown to HTML and HTML back to Markdown</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Converting...</div>
+    </div>
+</div>
+
+<!-- Success/Error Messages -->
+<div id="messageContainer" class="message-container">
+    <!-- Messages will be dynamically inserted here -->
+</div>
+
+<!-- Quick Help Modal -->
+<div id="helpModal" class="modal-overlay hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Markdown Quick Reference</h3>
+            <button class="modal-close" onclick="closeHelpModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="help-grid">
+                <div class="help-section">
+                    <h4>Headers</h4>
+                    <code># H1<br>## H2<br>### H3</code>
+                </div>
+                <div class="help-section">
+                    <h4>Text Formatting</h4>
+                    <code>**bold**<br>*italic*<br>~~strikethrough~~</code>
+                </div>
+                <div class="help-section">
+                    <h4>Lists</h4>
+                    <code>- Item 1<br>- Item 2<br><br>1. Numbered<br>2. List</code>
+                </div>
+                <div class="help-section">
+                    <h4>Links & Images</h4>
+                    <code>[Link](url)<br>![Image](url)</code>
+                </div>
+                <div class="help-section">
+                    <h4>Code</h4>
+                    <code>`inline code`<br>```<br>code block<br>```</code>
+                </div>
+                <div class="help-section">
+                    <h4>Tables</h4>
+                    <code>| Col1 | Col2 |<br>|------|------|<br>| Val1 | Val2 |</code>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Help Button -->
+<button class="help-btn" onclick="openHelpModal()">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    </svg>
+    <span>Help</span>
+</button>
+
+<script src="{{ url_for('static', filename='js/document/markdown_html_converter.js') }}"></script>
+<script>
+// Initialize highlight.js
+document.addEventListener('DOMContentLoaded', function() {
+    hljs.highlightAll();
+});
+</script>
+{% endblock %}

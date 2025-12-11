@@ -1,0 +1,39 @@
+This is a sample text file for testing the Text & OCR Processor functionality in Cropio.
+
+The Text & OCR Processor is designed to handle various file formats including:
+- PDF documents with text extraction capabilities
+- Microsoft Word (DOCX) documents
+- Plain text files like this one
+- Image files (PNG, JPG, JPEG) with OCR when Tesseract is installed
+
+Key Features:
+1. Multi-language support including Hindi, English, Spanish, French, German, Arabic, Chinese, and Japanese
+2. Automatic language detection for OCR processing
+3. Multiple output formats: Plain text, Word documents, and PDF files
+4. Text processing options like noise removal and formatting preservation
+5. Confidence scoring for OCR results when available
+
+This sample file can be used to test the text processing capabilities of the system. The processor should be able to:
+- Extract this text content
+- Clean and format it according to user preferences
+- Generate output in the selected format
+- Preserve or modify formatting as requested
+
+Testing different scenarios:
+- Upload this TXT file and convert to DOCX
+- Upload this TXT file and convert to PDF
+- Test with different processing options enabled/disabled
+
+The system is designed with security in mind, including file validation, malware scanning, and proper sanitization of user inputs.
+
+Sample text in different scripts for testing:
+English: Hello World
+Hindi: नमस्ते दुनिया
+Spanish: Hola Mundo
+French: Bonjour le monde
+German: Hallo Welt
+Arabic: مرحبا بالعالم
+Chinese: 你好世界
+Japanese: こんにちは世界
+
+This concludes the sample text file for testing purposes.

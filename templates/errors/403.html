@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Access Forbidden - {{ config.SITE_NAME }}{% endblock %}
+
+{% block head %}
+{{ super() }}
+<style>
+    .error-container {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+    .error-code {
+        font-size: 120px;
+        font-weight: bold;
+        color: #e74c3c;
+        margin: 0;
+        line-height: 1;
+    }
+    .error-message {
+        font-size: 24px;
+        color: #333;
+        margin: 20px 0;
+    }
+    .error-description {
+        font-size: 16px;
+        color: #666;
+        margin-bottom: 30px;
+        max-width: 500px;
+    }
+    .error-actions {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .error-btn {
+        display: inline-block;
+        padding: 12px 30px;
+        background-color: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+    }
+    .error-btn:hover {
+        background-color: #2980b9;
+    }
+    .error-btn-secondary {
+        background-color: #95a5a6;
+    }
+    .error-btn-secondary:hover {
+        background-color: #7f8c8d;
+    }
+    .error-id {
+        font-size: 12px;
+        color: #999;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="error-container">
+    <div class="error-content">
+        <h1 class="error-code">403</h1>
+        <h2 class="error-message">Access Forbidden</h2>
+        <p class="error-description">
+            You don't have permission to access this resource. This could be because:
+            <br>• You need to log in to access this page
+            <br>• Your account doesn't have sufficient privileges
+            <br>• The resource is restricted to certain users
+        </p>
+        <div class="error-actions">
+            {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('auth.login') }}" class="error-btn">Login</a>
+            {% endif %}
+            <a href="{{ url_for('main.index') }}" class="error-btn error-btn-secondary">Go to Homepage</a>
+            <a href="javascript:history.back()" class="error-btn error-btn-secondary">Go Back</a>
+        </div>
+        {% if error_id %}
+        <p class="error-id">Error ID: {{ error_id }}</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

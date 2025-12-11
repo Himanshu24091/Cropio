@@ -1,0 +1,821 @@
+{% extends "base.html" %}
+
+{% block title %}Conversion History - {{ current_user.username }}{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='user_dashboard/dashboard.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="dashboard-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="page-header mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    📊 Conversion History
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400">
+                    Track all your file conversions and their status
+                </p>
+            </div>
+            <div class="mt-4 sm:mt-0">
+                <a href="{{ url_for('dashboard.index') }}" class="btn-secondary">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters-section mb-6">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2 class="card-title">Filters</h2>
+                <button onclick="clearFilters()" class="btn-clear">Clear All</button>
+            </div>
+            <div class="card-content">
+                <form method="GET" class="filters-form">
+                    <div class="filter-grid grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <!-- Tool Filter -->
+                        <div class="filter-group">
+                            <label for="tool" class="filter-label">Tool</label>
+                            <select name="tool" id="tool" class="filter-select">
+                                <option value="">All Tools</option>
+                                {% for tool in available_tools %}
+                                <option value="{{ tool }}" {% if current_filters.tool == tool %}selected{% endif %}>
+                                    {{ tool.replace('_', ' ').title() }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <!-- Date Filter -->
+                        <div class="filter-group">
+                            <label for="date" class="filter-label">Date</label>
+                            <input type="date" name="date" id="date" class="filter-input" 
+                                   value="{{ current_filters.date or '' }}">
+                        </div>
+                        
+                        <!-- Status Filter -->
+                        <div class="filter-group">
+                            <label for="status" class="filter-label">Status</label>
+                            <select name="status" id="status" class="filter-select">
+                                <option value="">All Status</option>
+                                <option value="completed" {% if current_filters.status == 'completed' %}selected{% endif %}>
+                                    ✅ Completed
+                                </option>
+                                <option value="failed" {% if current_filters.status == 'failed' %}selected{% endif %}>
+                                    ❌ Failed
+                                </option>
+                                <option value="processing" {% if current_filters.status == 'processing' %}selected{% endif %}>
+                                    ⏳ Processing
+                                </option>
+                            </select>
+                        </div>
+                        
+                        <!-- Apply Button -->
+                        <div class="filter-group flex items-end">
+                            <button type="submit" class="btn-primary w-full">
+                                Apply Filters
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="results-section">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    Conversion Results 
+                    {% if conversions.total %}
+                        ({{ conversions.total }} total)
+                    {% endif %}
+                </h2>
+                <div class="results-actions">
+                    <button onclick="exportHistory()" class="btn-secondary">
+                        📥 Export
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                {% if conversions.items %}
+                    <!-- Conversion List -->
+                    <div class="history-list">
+                        {% for conversion in conversions.items %}
+                        <div class="history-item" onclick="showConversionDetails({{ conversion.id }})">
+                            <div class="history-icon">
+                                {% if conversion.conversion_type == 'image' %}
+                                    📷
+                                {% elif conversion.conversion_type == 'pdf' %}
+                                    📄
+                                {% elif conversion.conversion_type == 'document' %}
+                                    📝
+                                {% elif conversion.conversion_type == 'excel' %}
+                                    📊
+                                {% elif conversion.conversion_type == 'compression' %}
+                                    🗜️
+                                {% elif conversion.conversion_type == 'cropping' %}
+                                    ✂️
+                                {% else %}
+                                    🔄
+                                {% endif %}
+                            </div>
+                            
+                            <div class="history-details">
+                                <div class="history-filename">
+                                    {{ conversion.original_filename }}
+                                </div>
+                                <div class="history-meta">
+                                    <span class="meta-item">
+                                        <span class="meta-label">Tool:</span>
+                                        {{ conversion.tool_used.replace('_', ' ').title() }}
+                                    </span>
+                                    <span class="meta-item">
+                                        <span class="meta-label">Format:</span>
+                                        {{ conversion.original_format.upper() }} → {{ conversion.target_format.upper() }}
+                                    </span>
+                                    <span class="meta-item">
+                                        <span class="meta-label">Size:</span>
+                                        {% if conversion.file_size %}
+                                            {% if conversion.file_size > 1048576 %}
+                                                {{ "%.1f"|format(conversion.file_size / 1048576) }} MB
+                                            {% else %}
+                                                {{ "%.1f"|format(conversion.file_size / 1024) }} KB
+                                            {% endif %}
+                                        {% else %}
+                                            Unknown
+                                        {% endif %}
+                                    </span>
+                                    <span class="meta-item">
+                                        <span class="meta-label">Time:</span>
+                                        {% if conversion.processing_time %}
+                                            {{ "%.1f"|format(conversion.processing_time) }}s
+                                        {% else %}
+                                            Unknown
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="history-timestamp">
+                                    {{ conversion.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                </div>
+                            </div>
+                            
+                            <div class="history-status">
+                                <span class="status-badge status-{{ conversion.status }}">
+                                    {% if conversion.status == 'completed' %}
+                                        ✅ Completed
+                                    {% elif conversion.status == 'failed' %}
+                                        ❌ Failed
+                                    {% elif conversion.status == 'processing' %}
+                                        ⏳ Processing
+                                    {% else %}
+                                        ❓ Unknown
+                                    {% endif %}
+                                </span>
+                                
+                                {% if conversion.error_message %}
+                                <div class="error-message">
+                                    {{ conversion.error_message[:100] }}{% if conversion.error_message|length > 100 %}...{% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination -->
+                    {% if conversions.pages > 1 %}
+                    <div class="pagination-container mt-6">
+                        <nav class="pagination">
+                            {% if conversions.has_prev %}
+                                <a href="{{ url_for('dashboard.conversion_history', page=conversions.prev_num, 
+                                                  tool=current_filters.tool, date=current_filters.date, 
+                                                  status=current_filters.status) }}" 
+                                   class="pagination-btn pagination-prev">
+                                    ← Previous
+                                </a>
+                            {% endif %}
+                            
+                            <div class="pagination-info">
+                                Page {{ conversions.page }} of {{ conversions.pages }}
+                                ({{ conversions.total }} total results)
+                            </div>
+                            
+                            {% if conversions.has_next %}
+                                <a href="{{ url_for('dashboard.conversion_history', page=conversions.next_num,
+                                                  tool=current_filters.tool, date=current_filters.date,
+                                                  status=current_filters.status) }}" 
+                                   class="pagination-btn pagination-next">
+                                    Next →
+                                </a>
+                            {% endif %}
+                        </nav>
+                    </div>
+                    {% endif %}
+                    
+                {% else %}
+                    <!-- Empty State -->
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <h3 class="empty-title">No conversions found</h3>
+                        <p class="empty-description">
+                            {% if current_filters.tool or current_filters.date or current_filters.status %}
+                                No conversions match your current filters. Try adjusting your search criteria.
+                            {% else %}
+                                You haven't converted any files yet. Start by using one of our conversion tools!
+                            {% endif %}
+                        </p>
+                        <div class="empty-actions mt-4">
+                            {% if current_filters.tool or current_filters.date or current_filters.status %}
+                                <button onclick="clearFilters()" class="btn-secondary mr-2">
+                                    Clear Filters
+                                </button>
+                            {% endif %}
+                            <a href="{{ url_for('main.index') }}" class="btn-primary">
+                                Start Converting
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Conversion Details Modal (Hidden by default) -->
+<div id="conversionModal" class="modal hidden">
+    <div class="modal-overlay" onclick="closeConversionModal()"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Conversion Details</h3>
+            <button onclick="closeConversionModal()" class="modal-close">×</button>
+        </div>
+        <div class="modal-body" id="conversionModalBody">
+            <!-- Content loaded dynamically -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    /**
+     * Clear all filters
+     */
+    function clearFilters() {
+        window.location.href = "{{ url_for('dashboard.conversion_history') }}";
+    }
+    
+    /**
+     * Export conversion history
+     */
+    async function exportHistory() {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const exportUrl = "{{ url_for('dashboard.conversion_history') }}" + "?export=csv&" + params.toString();
+            
+            const response = await fetch(exportUrl);
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `conversion_history_${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+                showSuccess('History exported successfully!');
+            } else {
+                throw new Error('Export failed');
+            }
+        } catch (error) {
+            showError('Failed to export history');
+            console.error('Export error:', error);
+        }
+    }
+    
+    /**
+     * Show conversion details modal
+     */
+    async function showConversionDetails(conversionId) {
+        try {
+            const response = await fetch(`/dashboard/api/conversion/${conversionId}`);
+            if (response.ok) {
+                const data = await response.json();
+                displayConversionModal(data);
+            } else {
+                throw new Error('Failed to load conversion details');
+            }
+        } catch (error) {
+            showError('Failed to load conversion details');
+            console.error('Details error:', error);
+        }
+    }
+    
+    /**
+     * Display conversion details in modal
+     */
+    function displayConversionModal(conversion) {
+        const modalBody = document.getElementById('conversionModalBody');
+        modalBody.innerHTML = `
+            <div class="conversion-details-grid">
+                <div class="detail-group">
+                    <label class="detail-label">Original File:</label>
+                    <span class="detail-value">${conversion.original_filename}</span>
+                </div>
+                <div class="detail-group">
+                    <label class="detail-label">Conversion:</label>
+                    <span class="detail-value">${conversion.original_format.toUpperCase()} → ${conversion.target_format.toUpperCase()}</span>
+                </div>
+                <div class="detail-group">
+                    <label class="detail-label">Tool Used:</label>
+                    <span class="detail-value">${conversion.tool_used.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                </div>
+                <div class="detail-group">
+                    <label class="detail-label">File Size:</label>
+                    <span class="detail-value">${formatFileSize(conversion.file_size)}</span>
+                </div>
+                <div class="detail-group">
+                    <label class="detail-label">Processing Time:</label>
+                    <span class="detail-value">${conversion.processing_time.toFixed(2)} seconds</span>
+                </div>
+                <div class="detail-group">
+                    <label class="detail-label">Status:</label>
+                    <span class="detail-value status-${conversion.status}">${conversion.status.replace(/\b\w/g, l => l.toUpperCase())}</span>
+                </div>
+                <div class="detail-group">
+                    <label class="detail-label">Processed:</label>
+                    <span class="detail-value">${new Date(conversion.created_at).toLocaleString()}</span>
+                </div>
+                ${conversion.error_message ? `
+                <div class="detail-group col-span-2">
+                    <label class="detail-label">Error Message:</label>
+                    <span class="detail-value error-text">${conversion.error_message}</span>
+                </div>
+                ` : ''}
+            </div>
+        `;
+        
+        document.getElementById('conversionModal').classList.remove('hidden');
+    }
+    
+    /**
+     * Close conversion details modal
+     */
+    function closeConversionModal() {
+        document.getElementById('conversionModal').classList.add('hidden');
+    }
+    
+    /**
+     * Format file size
+     */
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
+    }
+    
+    /**
+     * Show success message
+     */
+    function showSuccess(message) {
+        const div = document.createElement('div');
+        div.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+        div.textContent = message;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 3000);
+    }
+    
+    /**
+     * Show error message
+     */
+    function showError(message) {
+        const div = document.createElement('div');
+        div.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+        div.textContent = message;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 5000);
+    }
+    
+    // Auto-submit form when filters change
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterInputs = document.querySelectorAll('.filter-select, .filter-input');
+        filterInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                // Small delay to allow user to make multiple changes
+                setTimeout(() => {
+                    this.form.submit();
+                }, 500);
+            });
+        });
+    });
+</script>
+
+<style>
+/* Additional styles for history page */
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    color: #64748b;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.dark .btn-secondary {
+    color: #94a3b8;
+    border-color: #4b5563;
+}
+
+.btn-secondary:hover {
+    background: #f8fafc;
+    border-color: #9ca3af;
+    color: #374151;
+}
+
+.dark .btn-secondary:hover {
+    background: rgba(51, 65, 85, 0.5);
+    border-color: #6b7280;
+    color: #f3f4f6;
+}
+
+.btn-clear {
+    padding: 0.25rem 0.75rem;
+    background: transparent;
+    color: #64748b;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dark .btn-clear {
+    color: #94a3b8;
+    border-color: #4b5563;
+}
+
+.btn-clear:hover {
+    background: #f1f5f9;
+    color: #374151;
+}
+
+.filter-grid {
+    gap: 1rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.dark .filter-label {
+    color: #d1d5db;
+}
+
+.filter-select,
+.filter-input {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background: white;
+    color: #374151;
+    transition: all 0.2s ease;
+}
+
+.dark .filter-select,
+.dark .filter-input {
+    background: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+}
+
+.filter-select:focus,
+.filter-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.history-list {
+    space-y: 1rem;
+}
+
+.history-item {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dark .history-item {
+    background: rgba(51, 65, 85, 0.3);
+    border-color: rgba(71, 85, 105, 0.5);
+}
+
+.history-item:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.dark .history-item:hover {
+    background: rgba(51, 65, 85, 0.5);
+    border-color: rgba(71, 85, 105, 0.7);
+}
+
+.history-icon {
+    font-size: 2rem;
+    margin-right: 1.5rem;
+    flex-shrink: 0;
+}
+
+.history-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.history-filename {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+    word-break: break-word;
+}
+
+.dark .history-filename {
+    color: #f1f5f9;
+}
+
+.history-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.meta-item {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.dark .meta-item {
+    color: #94a3b8;
+}
+
+.meta-label {
+    font-weight: 500;
+}
+
+.history-timestamp {
+    font-size: 0.75rem;
+    color: #9ca3af;
+}
+
+.dark .history-timestamp {
+    color: #6b7280;
+}
+
+.history-status {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.error-message {
+    font-size: 0.75rem;
+    color: #dc2626;
+    margin-top: 0.25rem;
+    background: #fef2f2;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+}
+
+.dark .error-message {
+    background: rgba(220, 38, 38, 0.1);
+    color: #f87171;
+}
+
+/* Pagination Styles */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+}
+
+.dark .pagination {
+    background: rgba(51, 65, 85, 0.3);
+    border-color: rgba(71, 85, 105, 0.5);
+}
+
+.pagination-btn {
+    padding: 0.5rem 1rem;
+    background: white;
+    color: #374151;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.dark .pagination-btn {
+    background: #374151;
+    color: #f9fafb;
+    border-color: #4b5563;
+}
+
+.pagination-btn:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.dark .pagination-btn:hover {
+    background: #4b5563;
+    border-color: #6b7280;
+}
+
+.pagination-info {
+    font-size: 0.875rem;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.dark .pagination-info {
+    color: #94a3b8;
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.modal-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    position: relative;
+    background: white;
+    border-radius: 1rem;
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow: auto;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.dark .modal-content {
+    background: #1e293b;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.dark .modal-header {
+    border-bottom-color: rgba(71, 85, 105, 0.5);
+}
+
+.modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.dark .modal-title {
+    color: #f1f5f9;
+}
+
+.modal-close {
+    width: 2rem;
+    height: 2rem;
+    border: none;
+    background: transparent;
+    color: #9ca3af;
+    font-size: 1.5rem;
+    cursor: pointer;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.dark .modal-close:hover {
+    background: rgba(75, 85, 99, 0.5);
+    color: #f9fafb;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.conversion-details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.detail-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.detail-group.col-span-2 {
+    grid-column: span 2;
+}
+
+.detail-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #64748b;
+    margin-bottom: 0.25rem;
+}
+
+.dark .detail-label {
+    color: #94a3b8;
+}
+
+.detail-value {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.dark .detail-value {
+    color: #f1f5f9;
+}
+
+.detail-value.error-text {
+    color: #dc2626;
+    font-family: monospace;
+    font-size: 0.875rem;
+}
+
+.dark .detail-value.error-text {
+    color: #f87171;
+}
+
+@media (max-width: 640px) {
+    .history-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .conversion-details-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .detail-group.col-span-2 {
+        grid-column: span 1;
+    }
+    
+    .pagination {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+</style>
+{% endblock %}

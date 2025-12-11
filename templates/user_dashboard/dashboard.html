@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - {{ current_user.username }}{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='user_dashboard/dashboard.css') }}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block page_content %}
+<div class="dashboard-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    Welcome back, {{ current_user.username }}! 👋
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400">
+                    Here's what's happening with your account today.
+                </p>
+            </div>
+            <div class="mt-4 sm:mt-0">
+                <div class="subscription-badge {{ 'premium' if current_user.is_premium() else 'free' }}">
+                    {% if current_user.is_premium() %}
+                        ⭐ Premium Member
+                    {% else %}
+                        🆓 Free Account
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards -->
+    <div class="stats-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Today's Usage -->
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-icon stat-icon-blue">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </div>
+                <h3 class="stat-title">Today's Usage</h3>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number">{{ data.today_usage.conversions_count }}</div>
+                <div class="stat-label">
+                    {% if data.daily_limit == 'Unlimited' %}
+                        of Unlimited
+                    {% else %}
+                        of {{ data.daily_limit }} conversions
+                    {% endif %}
+                </div>
+                {% if data.daily_limit != 'Unlimited' %}
+                <div class="stat-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ data.usage_percentage }}%"></div>
+                    </div>
+                    <span class="progress-text">{{ data.usage_percentage|round }}% used</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Total Conversions -->
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-icon stat-icon-green">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h3 class="stat-title">Total Conversions</h3>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number">{{ data.total_conversions }}</div>
+                <div class="stat-label">All time</div>
+            </div>
+        </div>
+
+        <!-- Storage Used -->
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-icon stat-icon-purple">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"></path>
+                    </svg>
+                </div>
+                <h3 class="stat-title">Storage Processed</h3>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number">
+                    {% if data.total_storage_used > 1073741824 %}
+                        {{ "%.1f"|format(data.total_storage_used / 1073741824) }} GB
+                    {% elif data.total_storage_used > 1048576 %}
+                        {{ "%.1f"|format(data.total_storage_used / 1048576) }} MB
+                    {% else %}
+                        {{ "%.1f"|format(data.total_storage_used / 1024) }} KB
+                    {% endif %}
+                </div>
+                <div class="stat-label">Total processed</div>
+            </div>
+        </div>
+
+        <!-- Favorite Tool -->
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-icon stat-icon-yellow">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
+                    </svg>
+                </div>
+                <h3 class="stat-title">Favorite Tool</h3>
+            </div>
+            <div class="stat-content">
+                <div class="stat-number tool-name">{{ data.most_used_tool.replace('_', ' ').title() }}</div>
+                <div class="stat-label">Most used</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Content -->
+    <div class="dashboard-grid grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Chart Section -->
+        <div class="lg:col-span-2">
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2 class="card-title">Usage Trends</h2>
+                    <div class="chart-controls">
+                        <select id="chartType" class="chart-select">
+                            <option value="conversions">Conversions</option>
+                            <option value="storage">Storage Used</option>
+                            <option value="processing_time">Processing Time</option>
+                        </select>
+                        <select id="chartPeriod" class="chart-select ml-2">
+                            <option value="7">Last 7 days</option>
+                            <option value="14">Last 14 days</option>
+                            <option value="30">Last 30 days</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <canvas id="usageChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions & Info -->
+        <div class="lg:col-span-1">
+            <!-- Quick Actions -->
+            <div class="dashboard-card mb-6">
+                <div class="card-header">
+                    <h2 class="card-title">Quick Actions</h2>
+                </div>
+                <div class="card-content">
+                    <div class="quick-actions">
+                        <a href="{{ url_for('image_converter.image_converter') }}" class="quick-action-btn">
+                            <span class="quick-action-icon">📷</span>
+                            <span>Convert Images</span>
+                        </a>
+                        <a href="{{ url_for('pdf_converter.pdf_converter') }}" class="quick-action-btn">
+                            <span class="quick-action-icon">📄</span>
+                            <span>Convert PDF</span>
+                        </a>
+                        <a href="{{ url_for('compressor.compressor') }}" class="quick-action-btn">
+                            <span class="quick-action-icon">🗜️</span>
+                            <span>Compress Files</span>
+                        </a>
+                        <a href="{{ url_for('cropper.image_cropper') }}" class="quick-action-btn">
+                            <span class="quick-action-icon">✂️</span>
+                            <span>Crop Images</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Info -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2 class="card-title">Account Information</h2>
+                </div>
+                <div class="card-content">
+                    <div class="account-info">
+                        <div class="info-item">
+                            <span class="info-label">Email:</span>
+                            <span class="info-value">{{ current_user.email }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Member since:</span>
+                            <span class="info-value">{{ current_user.created_at.strftime('%B %Y') }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Plan:</span>
+                            <span class="info-value subscription-status {{ current_user.subscription_tier }}">
+                                {{ current_user.subscription_tier.title() }}
+                                {% if current_user.is_premium() %}
+                                    ⭐
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Daily Limit:</span>
+                            <span class="info-value">
+                                {% if current_user.is_premium() %}
+                                    Unlimited
+                                {% else %}
+                                    {{ data.daily_limit }} conversions
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Max File Size:</span>
+                            <span class="info-value">{{ data.max_file_size_mb }} MB</span>
+                        </div>
+                    </div>
+                    
+                    {% if not current_user.is_premium() %}
+                    <div class="upgrade-prompt">
+                        <p class="upgrade-text">Unlock unlimited conversions and larger file sizes!</p>
+                        <a href="{{ url_for('dashboard.subscription') }}" class="btn-upgrade">
+                            ⭐ Upgrade to Premium
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity Section -->
+    <div class="recent-activity mt-8">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2 class="card-title">Recent Conversions</h2>
+                <a href="{{ url_for('dashboard.conversion_history') }}" class="view-all-link">
+                    View All →
+                </a>
+            </div>
+            <div class="card-content">
+                {% if data.recent_conversions %}
+                    <div class="conversion-list">
+                        {% for conversion in data.recent_conversions %}
+                        <div class="conversion-item">
+                            <div class="conversion-icon">
+                                {% if conversion.conversion_type == 'image' %}
+                                    📷
+                                {% elif conversion.conversion_type == 'pdf' %}
+                                    📄
+                                {% elif conversion.conversion_type == 'document' %}
+                                    📝
+                                {% elif conversion.conversion_type == 'excel' %}
+                                    📊
+                                {% else %}
+                                    🔄
+                                {% endif %}
+                            </div>
+                            <div class="conversion-details">
+                                <div class="conversion-title">
+                                    {{ conversion.original_filename[:30] }}{% if conversion.original_filename|length > 30 %}...{% endif %}
+                                </div>
+                                <div class="conversion-meta">
+                                    <span class="conversion-type">{{ conversion.tool_used.replace('_', ' ').title() }}</span>
+                                    <span class="conversion-formats">{{ conversion.original_format.upper() }} → {{ conversion.target_format.upper() }}</span>
+                                    <span class="conversion-time">{{ conversion.created_at.strftime('%m/%d %I:%M %p') }}</span>
+                                </div>
+                            </div>
+                            <div class="conversion-status">
+                                <span class="status-badge status-{{ conversion.status }}">
+                                    {% if conversion.status == 'completed' %}
+                                        ✅ Done
+                                    {% elif conversion.status == 'failed' %}
+                                        ❌ Failed
+                                    {% else %}
+                                        ⏳ Processing
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">📁</div>
+                        <p class="empty-title">No conversions yet</p>
+                        <p class="empty-description">Start by converting your first file!</p>
+                        <a href="{{ url_for('main.index') }}" class="btn-primary mt-4">
+                            Explore Tools
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Tool Usage Breakdown -->
+    {% if data.tool_usage %}
+    <div class="tool-breakdown mt-8">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2 class="card-title">Tool Usage Breakdown</h2>
+            </div>
+            <div class="card-content">
+                <div class="tool-usage-grid">
+                    {% for tool, count in data.tool_usage.items() %}
+                    <div class="tool-usage-item">
+                        <div class="tool-usage-icon">
+                            {% if tool == 'image' %}
+                                📷
+                            {% elif tool == 'pdf' %}
+                                📄
+                            {% elif tool == 'document' %}
+                                📝
+                            {% elif tool == 'excel' %}
+                                📊
+                            {% elif tool == 'compression' %}
+                                🗜️
+                            {% elif tool == 'cropping' %}
+                                ✂️
+                            {% else %}
+                                🔄
+                            {% endif %}
+                        </div>
+                        <div class="tool-usage-details">
+                            <div class="tool-name">{{ tool.replace('_', ' ').title() }}</div>
+                            <div class="tool-count">{{ count }} uses</div>
+                        </div>
+                        <div class="tool-usage-bar">
+                            <div class="usage-bar-fill" style="width: {{ (count / data.total_conversions * 100)|round }}%"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Dashboard Navigation -->
+<div class="dashboard-nav fixed bottom-6 right-6 lg:hidden">
+    <div class="nav-fab-container">
+        <button id="dashboardNavToggle" class="nav-fab">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+        <div id="dashboardNavMenu" class="nav-fab-menu hidden">
+            <a href="{{ url_for('dashboard.conversion_history') }}" class="nav-fab-item">
+                📊 History
+            </a>
+            <a href="{{ url_for('dashboard.usage_analytics') }}" class="nav-fab-item">
+                📈 Analytics
+            </a>
+            <a href="{{ url_for('dashboard.subscription') }}" class="nav-fab-item">
+                ⭐ Subscription
+            </a>
+            <a href="{{ url_for('dashboard.settings') }}" class="nav-fab-item">
+                ⚙️ Settings
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='user_dashboard/dashboard.js') }}"></script>
+<script>
+    // Initialize dashboard with data
+    const dashboardData = {
+        chartData: {{ data.chart_data | tojson }},
+        chartLabels: {{ data.chart_labels | tojson }},
+        toolUsage: {{ data.tool_usage | tojson }},
+        isPremium: {{ current_user.is_premium() | tojson }}
+    };
+    
+    // Initialize dashboard when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeDashboard(dashboardData);
+    });
+</script>
+{% endblock %}

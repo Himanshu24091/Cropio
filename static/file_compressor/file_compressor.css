@@ -1,0 +1,639 @@
+/* File Compressor Specific Styles */
+/* Based on Image Converter with compression-specific enhancements */
+
+/* CSS Variables for Theme Consistency */
+:root {
+    --primary-purple: #7c3aed;
+    --primary-purple-dark: #6d28d9;
+    --primary-purple-light: #8b5cf6;
+    --primary-blue: #2563eb;
+    --primary-blue-dark: #1d4ed8;
+    
+    --success-color: #059669;
+    --error-color: #dc2626;
+    --warning-color: #d97706;
+    --info-color: #0891b2;
+    
+    --text-primary: #1f2937;
+    --text-secondary: #4b5563;
+    --text-muted: #6b7280;
+    
+    --bg-light: #f9fafb;
+    --bg-medium: #f3f4f6;
+    --bg-dark: #e5e7eb;
+    
+    --border-light: #e5e7eb;
+    --border-medium: #d1d5db;
+    --border-dark: #9ca3af;
+    
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+    
+    --transition-fast: all 0.2s ease;
+    --transition-normal: all 0.3s ease;
+    --transition-slow: all 0.5s ease;
+    
+    --gradient-purple: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --gradient-compression: linear-gradient(145deg, #7c3aed, #6d28d9);
+}
+
+/* Dark Mode Variables */
+.dark {
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-muted: #9ca3af;
+    
+    --bg-light: #374151;
+    --bg-medium: #4b5563;
+    --bg-dark: #6b7280;
+    
+    --border-light: #4b5563;
+    --border-medium: #6b7280;
+    --border-dark: #9ca3af;
+}
+
+/* Upload Area - File Compressor Specific */
+.upload-area {
+    border: 2px dashed var(--border-medium);
+    border-radius: 1rem;
+    padding: 3rem;
+    text-align: center;
+    background: linear-gradient(145deg, var(--bg-light), var(--bg-medium));
+    transition: var(--transition-normal);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    min-height: 220px;
+}
+
+.upload-area::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(124, 58, 237, 0.05));
+    opacity: 0;
+    transition: var(--transition-normal);
+}
+
+.upload-area:hover {
+    border-color: var(--primary-purple);
+    background: linear-gradient(145deg, #f3e8ff, #e9d5ff);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.upload-area:hover::before {
+    opacity: 1;
+}
+
+.upload-area.dragover {
+    border-color: var(--primary-purple);
+    background: linear-gradient(145deg, #e9d5ff, #d8b4fe);
+    transform: scale(1.02);
+    box-shadow: var(--shadow-xl);
+}
+
+.upload-area.files-selected {
+    border-color: var(--success-color);
+    background: linear-gradient(145deg, #ecfdf5, #d1fae5);
+}
+
+.upload-area.files-selected::before {
+    background: linear-gradient(45deg, transparent, rgba(124, 58, 237, 0.1));
+    opacity: 1;
+}
+
+.dark .upload-area {
+    background: linear-gradient(145deg, #374151, #4b5563);
+    border-color: #6b7280;
+}
+
+.dark .upload-area:hover {
+    background: linear-gradient(145deg, #553c9a, #6d28d9);
+    border-color: var(--primary-purple);
+}
+
+.dark .upload-area.dragover {
+    background: linear-gradient(145deg, #6d28d9, #7c3aed);
+}
+
+.dark .upload-area.files-selected {
+    background: linear-gradient(145deg, #065f46, #047857);
+    border-color: var(--success-color);
+}
+
+/* File Input */
+.file-input {
+    display: none;
+}
+
+/* Upload Label */
+.upload-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    z-index: 10;
+}
+
+.upload-text {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+    transition: var(--transition-fast);
+}
+
+.upload-subtext {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    transition: var(--transition-fast);
+}
+
+.upload-area:hover .upload-text {
+    color: var(--primary-purple);
+}
+
+.upload-area.files-selected .upload-text {
+    color: var(--success-color);
+}
+
+/* Compression Mode Cards */
+.compression-mode-card {
+    position: relative;
+    border: 2px solid var(--border-light);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    background: white;
+    transition: var(--transition-fast);
+    cursor: pointer;
+}
+
+.compression-mode-card:hover {
+    border-color: var(--primary-purple);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.compression-mode-card:has(.mode-radio:checked) {
+    border-color: var(--primary-purple);
+    background: linear-gradient(145deg, #f3e8ff, #faf5ff);
+    box-shadow: var(--shadow-md);
+}
+
+.dark .compression-mode-card {
+    background: #374151;
+    border-color: #6b7280;
+}
+
+.dark .compression-mode-card:has(.mode-radio:checked) {
+    background: linear-gradient(145deg, #553c9a, #6d28d9);
+    border-color: var(--primary-purple-light);
+}
+
+.mode-radio {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    opacity: 0;
+}
+
+.compression-mode-label {
+    display: flex;
+    align-items: center;
+    space-x: 0.75rem;
+    cursor: pointer;
+    width: 100%;
+    padding-right: 2rem;
+}
+
+.mode-icon {
+    flex-shrink: 0;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-light);
+    border-radius: 0.5rem;
+    margin-right: 0.75rem;
+}
+
+.mode-content h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.mode-content p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.3;
+}
+
+.compression-mode-card:has(.mode-radio:checked) .mode-icon {
+    background: var(--primary-purple);
+}
+
+.compression-mode-card:has(.mode-radio:checked) .mode-icon svg {
+    color: white !important;
+}
+
+/* File Preview Grid */
+.file-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(124, 58, 237, 0.05);
+    border-radius: 0.75rem;
+    border: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+.file-preview-item {
+    position: relative;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background: white;
+    border: 2px solid transparent;
+    transition: var(--transition-fast);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+}
+
+.file-preview-item:hover {
+    border-color: var(--primary-purple);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.file-preview-thumbnail {
+    width: 100%;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-light);
+    color: var(--primary-purple);
+}
+
+.file-preview-thumbnail svg {
+    width: 2.5rem;
+    height: 2.5rem;
+}
+
+.file-preview-info {
+    padding: 0.75rem;
+    text-align: center;
+    background: white;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.file-preview-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    word-break: break-word;
+    line-height: 1.3;
+}
+
+.file-preview-size {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.file-preview-type {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.375rem;
+    background: var(--primary-purple);
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.file-remove-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: rgba(220, 38, 38, 0.9);
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+    font-size: 0.75rem;
+}
+
+.file-remove-btn:hover {
+    background: rgba(220, 38, 38, 1);
+    transform: scale(1.1);
+}
+
+/* Quality Slider Styling */
+#quality-slider {
+    appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--bg-medium);
+    outline: none;
+    transition: var(--transition-fast);
+}
+
+#quality-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary-purple);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition-fast);
+}
+
+#quality-slider::-webkit-slider-thumb:hover {
+    background: var(--primary-purple-dark);
+    transform: scale(1.1);
+    box-shadow: var(--shadow-md);
+}
+
+#quality-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary-purple);
+    cursor: pointer;
+    border: none;
+    box-shadow: var(--shadow-sm);
+}
+
+/* Progress Indicators */
+.compression-progress {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--bg-light);
+    border-radius: 0.75rem;
+    border: 1px solid var(--border-light);
+}
+
+.compression-stage {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    transition: var(--transition-fast);
+}
+
+.compression-stage.active {
+    color: var(--primary-purple);
+    font-weight: 600;
+}
+
+.compression-stage.complete {
+    color: var(--success-color);
+}
+
+.compression-stage.error {
+    color: var(--error-color);
+}
+
+.stage-indicator {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--bg-medium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: var(--transition-fast);
+}
+
+.compression-stage.active .stage-indicator {
+    background: var(--primary-purple);
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+.compression-stage.complete .stage-indicator {
+    background: var(--success-color);
+    color: white;
+}
+
+.compression-stage.error .stage-indicator {
+    background: var(--error-color);
+    color: white;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Compression Statistics */
+.compression-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.compression-stat-card {
+    background: var(--bg-light);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--border-light);
+    text-align: center;
+    transition: var(--transition-fast);
+}
+
+.compression-stat-card:hover {
+    background: var(--bg-medium);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-purple);
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.stat-improvement {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 0.375rem;
+    background: var(--success-color);
+    color: white;
+    display: inline-block;
+}
+
+/* Comparison Preview */
+.compression-comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.comparison-side {
+    background: var(--bg-light);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    border: 1px solid var(--border-light);
+}
+
+.comparison-side h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+}
+
+.comparison-side h4 svg {
+    margin-right: 0.5rem;
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.comparison-preview {
+    width: 100%;
+    height: 150px;
+    background: white;
+    border: 1px solid var(--border-light);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+}
+
+.comparison-preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.comparison-details {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.comparison-details div {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+}
+
+/* Form Controls Override */
+.form-input:focus,
+.form-select:focus {
+    border-color: var(--primary-purple) !important;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1) !important;
+}
+
+/* Spinner Animation */
+.spinner {
+    border: 4px solid var(--border-light);
+    border-top: 4px solid var(--primary-purple);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Feature Cards Enhancement */
+.feature-card {
+    transition: var(--transition-normal);
+    border: 1px solid transparent;
+}
+
+.feature-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary-purple);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .upload-area {
+        padding: 2rem;
+        min-height: 180px;
+    }
+    
+    .compression-comparison {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .compression-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .file-preview-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 0.75rem;
+        padding: 0.75rem;
+    }
+    
+    .compression-mode-card {
+        text-align: center;
+    }
+    
+    .mode-icon {
+        margin: 0 auto 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .upload-area {
+        padding: 1.5rem;
+        min-height: 160px;
+    }
+    
+    .upload-text {
+        font-size: 1rem;
+    }
+    
+    .upload-subtext {
+        font-size: 0.8125rem;
+    }
+}

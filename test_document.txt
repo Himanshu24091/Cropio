@@ -1,0 +1,67 @@
+Welcome to Text & OCR Processor Test Document
+==============================================
+
+This is a test document to demonstrate the Text & OCR Processor functionality.
+
+Introduction
+------------
+The Text & OCR Processor is a powerful tool that can extract and process text from various document formats. This test file will help you verify that the system is working correctly.
+
+Features Being Tested
+---------------------
+1. Text Extraction: The system should successfully extract all text from this document.
+2. Formatting Preservation: When enabled, the system should maintain the structure of the document.
+3. Noise Removal: The system can clean up text by removing unnecessary characters.
+4. Multiple Output Formats: You can convert this text to TXT, DOCX, or PDF formats.
+
+Sample Text in Different Languages
+-----------------------------------
+English: The quick brown fox jumps over the lazy dog.
+Spanish: El rápido zorro marrón salta sobre el perro perezoso.
+French: Le renard brun rapide saute par-dessus le chien paresseux.
+German: Der schnelle braune Fuchs springt über den faulen Hund.
+Hindi: तेज़ भूरी लोमड़ी आलसी कुत्ते के ऊपर कूदती है।
+Chinese: 敏捷的棕色狐狸跳过懒狗。
+Japanese: 素早い茶色のキツネが怠け者の犬を飛び越える。
+Arabic: الثعلب البني السريع يقفز فوق الكلب الكسول.
+
+Testing Special Characters
+---------------------------
+Email: test@example.com
+Phone: +1-234-567-8900
+URL: https://www.example.com
+Date: 2024-11-12
+Time: 15:30:45
+Currency: $100.00, €85.50, £75.25
+Math: 2 + 2 = 4, 10 × 5 = 50, π ≈ 3.14159
+
+Code Sample
+-----------
+def process_text(input_text):
+    """Process text and return cleaned version"""
+    cleaned = input_text.strip()
+    cleaned = cleaned.replace('\t', ' ')
+    return cleaned
+
+print("Hello, Text Processor!")
+
+Tables and Lists
+----------------
+Shopping List:
+• Milk
+• Bread
+• Eggs
+• Cheese
+• Fruits
+  - Apples
+  - Bananas
+  - Oranges
+
+Conclusion
+----------
+If you can read this text after processing, the Text & OCR Processor is working correctly! Try different output formats and processing options to see how they affect the result.
+
+---
+End of Test Document
+Generated: November 12, 2024
+Version: 1.0

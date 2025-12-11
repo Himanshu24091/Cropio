@@ -2,8 +2,12 @@
 
 {% block title %}Cropio - Home{% endblock %}
 
-{% block page_content %}
+{% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/phase-1-5.css') }}">
+{% endblock %}
+
+{% block page_content %}
 
 <!-- Hero Section -->
 <section class="hero-bg text-white relative overflow-hidden">
@@ -14,23 +18,40 @@
     </div>
     
     <div class="hero-content container mx-auto px-6 py-32 text-center relative z-10">
-        <div class="hero-badge mb-6">
-            <span class="badge-text">✨ All-in-One File Solution</span>
-        </div>
+        {% if user_context.is_authenticated %}
+            <!-- Welcome back message for logged-in users -->
+            <div class="hero-badge mb-6 welcome-badge">
+                <span class="badge-text">👋 Welcome back, {{ user_context.username }}!</span>
+            </div>
+        {% else %}
+            <!-- Default badge for anonymous users -->
+            <div class="hero-badge mb-6">
+                <span class="badge-text">✨ All-in-One File Solution</span>
+            </div>
+        {% endif %}
         
         <h1 class="hero-title text-6xl md:text-7xl font-bold mb-6">
             <span class="gradient-text">Cropio</span>
         </h1>
         
-        <p class="hero-subtitle text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8 leading-relaxed">
-            Transform, compress, and edit your files with professional precision. 
-            <span class="text-indigo-200">All tools in one place.</span>
-        </p>
+        {% if not user_context.is_authenticated %}
+            <!-- Anonymous user subtitle -->
+            <p class="hero-subtitle text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8 leading-relaxed">
+                Transform, compress, and edit your files with professional precision. 
+                <span class="text-indigo-200">Login to unlock 15+ advanced tools!</span>
+            </p>
+        {% else %}
+            <!-- Logged-in user subtitle -->
+            <p class="hero-subtitle text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8 leading-relaxed">
+                Transform, compress, and edit your files with professional precision. 
+                <span class="text-indigo-200">All {{ tools|length + premium_tools|length }} tools at your fingertips.</span>
+            </p>
+        {% endif %}
         
         <div class="hero-stats grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto mb-12">
             <div class="stat-item">
-                <div class="stat-number">10+</div>
-                <div class="stat-label">File Types</div>
+                <div class="stat-number">{{ tools|length + premium_tools|length }}+</div>
+                <div class="stat-label">Tools Available</div>
             </div>
             <div class="stat-item">
                 <div class="stat-number">Fast</div>
@@ -41,8 +62,13 @@
                 <div class="stat-label">& Private</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number">Free</div>
-                <div class="stat-label">To Use</div>
+                {% if user_context.is_premium %}
+                    <div class="stat-number text-yellow-400">PRO</div>
+                    <div class="stat-label">Account</div>
+                {% else %}
+                    <div class="stat-number">Free</div>
+                    <div class="stat-label">To Use</div>
+                {% endif %}
             </div>
         </div>
         
@@ -56,6 +82,91 @@
         </div>
     </div>
 </section>
+
+<!-- Usage Dashboard (Only show for authenticated users) -->
+{% if user_context.is_authenticated and user_context.usage %}
+<section class="usage-dashboard bg-slate-100 dark:bg-slate-800 py-6">
+    <div class="container mx-auto px-6">
+        <div class="usage-widget bg-white dark:bg-slate-700 rounded-xl p-6 shadow-lg">
+            <div class="flex items-center justify-between">
+                <div class="usage-info">
+                    <h3 class="text-lg font-semibold text-slate-800 dark:text-white mb-2">
+                        Today's Usage
+                    </h3>
+                    <p class="text-sm text-slate-600 dark:text-slate-300">
+                        {% if user_context.is_premium %}
+                            Unlimited conversions available
+                        {% else %}
+                            {{ user_context.usage.conversions_used }} of {{ user_context.usage.daily_limit }} conversions used
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="usage-progress">
+                    {% if not user_context.is_premium %}
+                        <div class="progress-circle" data-percentage="{{ user_context.usage.percentage }}">
+                            <svg class="w-16 h-16 transform -rotate-90">
+                                <circle cx="32" cy="32" r="28" stroke="#e2e8f0" stroke-width="8" fill="transparent" class="opacity-25"/>
+                                <circle cx="32" cy="32" r="28" stroke="#3b82f6" stroke-width="8" fill="transparent"
+                                        stroke-dasharray="176" stroke-dashoffset="{{ 176 - (176 * user_context.usage.percentage / 100) }}"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <span class="text-lg font-bold text-slate-800 dark:text-white">
+                                    {{ user_context.usage.conversions_used }}/{{ user_context.usage.daily_limit }}
+                                </span>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="premium-badge">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                                ⭐ Premium
+                            </span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% if not user_context.is_premium and user_context.usage.conversions_used >= user_context.usage.daily_limit %}
+                <div class="mt-4 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg border border-orange-200 dark:border-orange-800">
+                    <p class="text-orange-800 dark:text-orange-200 font-medium mb-2">Daily limit reached!</p>
+                    <p class="text-sm text-orange-600 dark:text-orange-300 mb-3">Resets in {{ user_context.usage.time_until_reset }}</p>
+                    <button class="upgrade-btn bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        Upgrade to Pro for Unlimited Access
+                    </button>
+                </div>
+            {% elif not user_context.is_premium %}
+                <div class="mt-4 text-center">
+                    <p class="text-sm text-slate-500 dark:text-slate-400">
+                        Resets in {{ user_context.usage.time_until_reset }}
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Login Prompt (Only show for anonymous users) -->
+{% if not user_context.is_authenticated %}
+<section class="login-prompt bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-slate-800 dark:to-slate-700 py-12">
+    <div class="container mx-auto px-6 text-center">
+        <div class="max-w-2xl mx-auto">
+            <h2 class="text-2xl font-bold text-slate-800 dark:text-white mb-4">
+                🔓 Unlock 15+ Advanced Tools
+            </h2>
+            <p class="text-slate-600 dark:text-slate-300 mb-6">
+                Get access to LaTeX compilation, RAW image processing, HEIC conversion, YAML/JSON tools, and much more!
+            </p>
+            <div class="flex gap-4 justify-center">
+                <a href="{{ url_for('auth.register') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                    Sign Up Free
+                </a>
+                <a href="{{ url_for('auth.login') }}" class="border border-blue-600 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-slate-600 px-6 py-3 rounded-lg font-medium transition-colors">
+                    Login
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
 
 <!-- Tools Section -->
 <section id="tools" class="tools-section bg-slate-50 dark:bg-slate-900 relative">
@@ -72,118 +183,109 @@
         
         <!-- Tools Grid -->
         <div class="tools-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <!-- Image Converter Tool -->
-            <div class="tool-card card card-image">
-                <a href="/image-converter">
-                    <div class="card-header">
-                        <div class="card-icon-wrapper">
-                            <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
+            
+            <!-- Dynamic Tools Rendering -->
+            {% for tool in tools %}
+                <div class="tool-card card {{ tool.card_class }} {% if tool.new_feature %}tool-new{% endif %}" {% if tool.new_feature %}data-new="true"{% endif %}>
+                    <a href="{{ tool.url }}">
+                        {% if tool.new_feature %}
+                            <div class="new-badge">
+                                <span class="new-text">NEW!</span>
+                            </div>
+                        {% endif %}
+                        <div class="card-header">
+                            <div class="card-icon-wrapper">
+                                <!-- Dynamic icon based on tool type -->
+                                {% if tool.icon == 'image' %}
+                                    <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                {% elif tool.icon == 'pdf' %}
+                                    <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                {% elif tool.icon == 'document' %}
+                                    <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                {% elif tool.icon == 'excel' %}
+                                    <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2 2z"></path>
+                                    </svg>
+                                {% elif tool.icon == 'text' %}
+                                    <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h4l2 2h4a2 2 0 012 2v8a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                {% elif tool.icon == 'markdown' %}
+                                    <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    </svg>
+                                {% elif tool.icon == 'latex' %}
+                                    <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                    </svg>
+                                {% elif tool.icon == 'heic' %}
+                                    <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                {% elif tool.icon == 'raw' %}
+                                    <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                {% elif tool.icon == 'config' %}
+                                    <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                {% else %}
+                                    <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"></path>
+                                    </svg>
+                                {% endif %}
+                            </div>
+                            <span class="card-category">{{ tool.category }}</span>
                         </div>
-                        <span class="card-category">Images</span>
-                    </div>
-                    <div class="card-body">
-                        <h3 class="card-title">Image Converter</h3>
-                        <p class="card-description">Convert between PNG, JPG, WEBP, PDF, ICO and more formats</p>
-                        <div class="card-features">
-                            <span class="feature-tag">High Quality</span>
-                            <span class="feature-tag">Batch Convert</span>
+                        <div class="card-body">
+                            <h3 class="card-title">{{ tool.title }}</h3>
+                            <p class="card-description">{{ tool.description }}</p>
+                            <div class="card-features">
+                                {% for feature in tool.features %}
+                                    <span class="feature-tag">{{ feature }}</span>
+                                {% endfor %}
+                            </div>
                         </div>
-                    </div>
-                </a>
-            </div>
-            <!-- PDF Converter Tool -->
-            <div class="tool-card card card-pdf">
-                <a href="/pdf-converter">
-                    <div class="card-header">
-                        <div class="card-icon-wrapper">
-                            <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
+                    </a>
+                </div>
+            {% endfor %}
+            
+            <!-- Additional Tools that are not in dynamic list -->
+            {% for tool in additional_tools %}
+                <div class="tool-card card {{ tool.card_class }}">
+                    <a href="{{ tool.url }}">
+                        <div class="card-header">
+                            <div class="card-icon-wrapper">
+                                <!-- Icon SVG based on tool type -->
+                                {{ tool.icon_svg | safe }}
+                            </div>
+                            <span class="card-category">{{ tool.category }}</span>
                         </div>
-                        <span class="card-category">PDF</span>
-                    </div>
-                    <div class="card-body">
-                        <h3 class="card-title">PDF Converter</h3>
-                        <p class="card-description">Convert PDFs to DOCX, TXT, HTML and many other formats</p>
-                        <div class="card-features">
-                            <span class="feature-tag">OCR Support</span>
-                            <span class="feature-tag">Multi-format</span>
+                        <div class="card-body">
+                            <h3 class="card-title">{{ tool.title }}</h3>
+                            <p class="card-description">{{ tool.description }}</p>
+                            <div class="card-features">
+                                {% for feature in tool.features %}
+                                    <span class="feature-tag">{{ feature }}</span>
+                                {% endfor %}
+                            </div>
                         </div>
-                    </div>
-                </a>
-            </div>
-
-            <!-- Document Converter Tool -->
-            <div class="tool-card card card-doc">
-                <a href="/document-converter">
-                    <div class="card-header">
-                        <div class="card-icon-wrapper">
-                            <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                        </div>
-                        <span class="card-category">Documents</span>
-                    </div>
-                    <div class="card-body">
-                        <h3 class="card-title">Document Converter</h3>
-                        <p class="card-description">Transform documents between various formats seamlessly</p>
-                        <div class="card-features">
-                            <span class="feature-tag">Smart Convert</span>
-                            <span class="feature-tag">Preserve Format</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <!-- Excel Converter Tool -->
-            <div class="tool-card card card-excel">
-                <a href="/excel-converter">
-                    <div class="card-header">
-                        <div class="card-icon-wrapper">
-                            <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                        </div>
-                        <span class="card-category">Spreadsheets</span>
-                    </div>
-                    <div class="card-body">
-                        <h3 class="card-title">Excel Converter</h3>
-                        <p class="card-description">Convert Excel files to CSV, JSON, HTML and more</p>
-                        <div class="card-features">
-                            <span class="feature-tag">Data Intact</span>
-                            <span class="feature-tag">Multiple Sheets</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <!-- Text & OCR Tool -->
-            <div class="tool-card card card-doc">
-                <a href="/text-ocr">
-                    <div class="card-header">
-                        <div class="card-icon-wrapper">
-                            <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h4l2 2h4a2 2 0 012 2v8a2 2 0 01-2 2z"></path>
-                            </svg>
-                        </div>
-                        <span class="card-category">Text</span>
-                    </div>
-                    <div class="card-body">
-                        <h3 class="card-title">Text & OCR</h3>
-                        <p class="card-description">Extract text from images and convert text files</p>
-                        <div class="card-features">
-                            <span class="feature-tag">AI Powered</span>
-                            <span class="feature-tag">High Accuracy</span>
-                        </div>
-                    </div>
-                </a>
-            </div>
+                    </a>
+                </div>
+            {% endfor %}
 
             <!-- File Compressor Tool -->
-            <div class="tool-card card card-excel">
-                <a href="/compressor">
+            <!-- <div class="tool-card card card-excel">
+                <a href="/file-compressor">
                     <div class="card-header">
                         <div class="card-icon-wrapper">
                             <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -201,10 +303,10 @@
                         </div>
                     </div>
                 </a>
-            </div>
+            </div> -->
 
             <!-- Image Cropper Tool -->
-            <div class="tool-card card card-image">
+            <!-- <div class="tool-card card card-image">
                 <a href="/image-cropper">
                     <div class="card-header">
                         <div class="card-icon-wrapper">
@@ -223,9 +325,9 @@
                         </div>
                     </div>
                 </a>
-            </div>
+            </div> -->
             <!-- PDF Editor Tool -->
-            <div class="tool-card card card-pdf">
+            <!-- <div class="tool-card card card-pdf">
                 <a href="/pdf-editor">
                     <div class="card-header">
                         <div class="card-icon-wrapper">
@@ -244,10 +346,10 @@
                         </div>
                     </div>
                 </a>
-            </div>
+            </div> -->
         
             <!-- Secure PDFs Tool -->
-            <div class="tool-card card card-doc">
+            <!-- <div class="tool-card card card-doc">
                 <a href="/secure-pdf">
                     <div class="card-header">
                         <div class="card-icon-wrapper">
@@ -266,10 +368,10 @@
                         </div>
                     </div>
                 </a>
-            </div>
+            </div> -->
 
             <!-- PDF Merge Tool -->
-            <div class="tool-card card card-pdf">
+            <!-- <div class="tool-card card card-pdf">
                 <a href="/pdf-merge">
                     <div class="card-header">
                         <div class="card-icon-wrapper">
@@ -288,10 +390,10 @@
                         </div>
                     </div>
                 </a>
-            </div>
+            </div> -->
 
             <!-- PDF Signature Tool -->
-            <div class="tool-card card card-pdf">
+            <!-- <div class="tool-card card card-pdf">
                 <a href="/pdf-signature">
                     <div class="card-header">
                         <div class="card-icon-wrapper">
@@ -310,10 +412,10 @@
                         </div>
                     </div>
                 </a>
-            </div>
+            </div> -->
 
             <!-- PDF Page Delete Tool -->
-            <div class="tool-card card card-pdf">
+            <!-- <div class="tool-card card card-pdf">
                 <a href="/pdf-page-delete">
                     <div class="card-header">
                         <div class="card-icon-wrapper">
@@ -332,33 +434,114 @@
                         </div>
                     </div>
                 </a>
-            </div>
+            </div> -->
 
-            <!-- notebook_converter Tool -->
-            <div class="tool-card card card-pdf">
-                <a href="/notebook-converter">
+            <!-- Notebook Converter Tool -->
+            <!-- <div class="tool-card card card-document">
+                <a href="/convert/notebook">
                     <div class="card-header">
                         <div class="card-icon-wrapper">
                             <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
                         </div>
-                        <span class="card-category">PDF</span>
+                        <span class="card-category">NOTEBOOK</span>
                     </div>
                     <div class="card-body">
                         <h3 class="card-title">Notebook Converter</h3>
-                        <p class="card-description">Convert Jupyter Notebooks to various formats</p>
+                        <p class="card-description">Convert Jupyter Notebooks to PDF, HTML, DOCX, or Markdown</p>
                         <div class="card-features">
                             <span class="feature-tag">Multiple Formats</span>
+                            <span class="feature-tag">High Accuracy</span>
+                        </div>
+                    </div>
+                </a>
+            </div> -->
+            <!-- Presentation_Converter Tool -->
+            <div class="tool-card card card-pdf">
+                <a href="/convert/presentation">
+                    <div class="card-header">
+                        <div class="card-icon-wrapper">
+                            <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h2a2 2 0 002-2z"></path>
+                            </svg>
+                        </div>
+                        <span class="card-category">PPT</span>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">Presentation Converter</h3>
+                        <p class="card-description">Convert presentations to and from PDF format</p>
+                        <div class="card-features">
+                            <span class="feature-tag">High Quality</span>
                             <span class="feature-tag">Easy Export</span>
                         </div>
                     </div>
                 </a>
             </div>
-
-        </div>
-    </div>
-</section>
+            <!-- pdf_presentation_converter Tool -->
+            <div class="tool-card card card-pdf">
+                <a href="/convert/pdf-to-pptx">
+                    <div class="card-header">
+                        <div class="card-icon-wrapper">
+                            <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h2a2 2 0 002-2z"></path>
+                            </svg>
+                        </div>
+                        <span class="card-category">PDF</span>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">PDF to PPT Converter</h3>
+                        <p class="card-description">Convert PDF files to PowerPoint presentations and vice versa</p>
+                    </div>
+                    <div class="card-features">
+                        <span class="feature-tag">High Quality</span>
+                        <span class="feature-tag">Easy Export</span>
+                    </div>
+                </a>
+            </div>
+            <!-- Powerbi_pdf_converter Tool -->
+            <div class="tool-card card card-pdf">
+                <a href="/convert/powerbi-to-pdf">
+                    <div class="card-header">
+                        <div class="card-icon-wrapper">
+                            <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h2a2 2 0 002-2z"></path>
+                            </svg>
+                        </div>
+                        <span class="card-category">PDF</span>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">PowerBI to PDF Converter</h3>
+                        <p class="card-description">Convert PowerBI reports to PDF format for easy sharing</p>
+                    </div>
+                    <div class="card-features">
+                        <span class="feature-tag">High Quality</span>
+                        <span class="feature-tag">Easy Export</span>
+                    </div>
+                </a>
+            </div>
+            <!-- tableau_pdf_converter Tool -->
+            <div class="tool-card card card-pdf">
+                <a href="/convert/tableau-to-pdf">
+                    <div class="card-header">
+                        <div class="card-icon-wrapper">
+                            <svg class="card-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h2a2 2 0 002-2z"></path>
+                            </svg>
+                        </div>
+                        <span class="card-category">PDF</span>
+                    </div>
+                    <div class="card-body">
+                        <h3 class="card-title">Tableau to PDF Converter</h3>
+                        <p class="card-description">Convert Tableau reports to PDF format for easy sharing</p>
+                    </div>
+                    <div class="card-features">
+                        <span class="feature-tag">High Quality</span>
+                        <span class="feature-tag">Easy Export</span>
+                    </div>
+                </a>
+            </div>
+        </section>
 {% endblock %}
 
 {% block page_scripts %}

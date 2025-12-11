@@ -6,6 +6,11 @@
     <title>{% block title %}Cropio{% endblock %}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- CSRF Token for AJAX -->
+    <meta name="csrf-token" content="{{ csrf_token() if csrf_token else '' }}">
+    {% block head %}{% endblock %}
     <script>
         // Theme initialization - ensure proper contrast in light mode
         (function() {
@@ -20,6 +25,9 @@
                 localStorage.setItem('theme', 'light');
             }
         })();
+        
+        // Global CSRF Token for AJAX requests
+        window.csrfToken = '{{ csrf_token() if csrf_token else "" }}';
     </script>
 </head>
 <body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 antialiased flex flex-col min-h-screen">
@@ -71,11 +79,13 @@
                         <a href="/image-converter" class="block px-4 py-3 text-sm text-white hover:bg-slate-700 dark:hover:bg-slate-600 hover:text-blue-300 transition-colors first:rounded-t-lg">📷 Image Converter</a>
                         <a href="/pdf-converter" class="block px-4 py-3 text-sm text-white hover:bg-slate-700 dark:hover:bg-slate-600 hover:text-red-300 transition-colors">📄 PDF Converter</a>
                         <a href="/document-converter" class="block px-4 py-3 text-sm text-white hover:bg-slate-700 dark:hover:bg-slate-600 hover:text-green-300 transition-colors">📝 Doc Converter</a>
+                        <a href="/convert/presentation" class="block px-4 py-3 text-sm text-white hover:bg-slate-700 dark:hover:bg-slate-600 hover:text-purple-300 transition-colors">📊 PPTX ↔ PDF</a>
                         <a href="/excel-converter" class="block px-4 py-3 text-sm text-white hover:bg-slate-700 dark:hover:bg-slate-600 hover:text-yellow-300 transition-colors">📊 Excel Converter</a>
-                        <a href="/notebook-converter" class="block px-4 py-3 text-sm text-white hover:bg-slate-700 dark:hover:bg-slate-600 hover:text-orange-300 transition-colors last:rounded-b-lg">📓 Notebook Converter</a>
+                        <a href="/notebook-converter" class="block px-4 py-3 text-sm text-white hover:bg-slate-700 dark:hover:bg-slate-600 hover:text-orange-300 transition-colors">📓 Notebook Converter</a>
+                        <!-- <a href="/yaml-json-converter" class="block px-4 py-3 text-sm text-white hover:bg-slate-700 dark:hover:bg-slate-600 hover:text-purple-300 transition-colors last:rounded-b-lg">🔄 YAML ⇄ JSON</a> -->
                     </div>
                 </div>
-                <a href="/compressor" class="nav-link font-semibold">Compressor</a>
+                <a href="/file-compressor" class="nav-link font-semibold">Compressor</a>
                 <a href="/image-cropper" class="nav-link font-semibold">Image Cropper</a>
                 <a href="https://pixport-production.up.railway.app/" target="_blank" rel="noopener noreferrer" class="nav-link font-semibold text-blue-400 hover:text-blue-300 transition-colors">
                     📸 Pixport
@@ -97,6 +107,64 @@
                 </div>
             </div>
             <div class="flex items-center space-x-4">
+                <!-- Authentication Links -->
+                {% if current_user is defined and current_user.is_authenticated %}
+                    <!-- User is logged in -->
+                    <div class="hidden md:flex items-center space-x-3">
+                        <div class="relative group">
+                            <button class="nav-link focus:outline-none flex items-center space-x-2">
+                                <!-- User Avatar -->
+                                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                                    {{ current_user.username[0].upper() if current_user is defined else 'U' }}
+                                </div>
+                                <span class="hidden lg:inline text-white">{{ current_user.username if current_user is defined else 'User' }}</span>
+                                {% if current_user is defined and current_user.is_premium() %}
+                                    <span class="hidden lg:inline bg-yellow-500 text-black px-2 py-0.5 text-xs font-bold rounded-full">PRO</span>
+                                {% endif %}
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </button>
+                            <!-- User Dropdown -->
+                            <div class="absolute right-0 mt-2 w-56 bg-slate-800 dark:bg-slate-700 shadow-xl rounded-lg hidden group-hover:block border border-slate-600 z-50">
+                                <div class="px-4 py-3 border-b border-slate-600">
+                                    <p class="text-white font-medium">{{ current_user.username }}</p>
+                                    <p class="text-slate-300 text-sm">{{ current_user.email }}</p>
+                                    <p class="text-slate-400 text-xs mt-1">
+                                        {{ 'Premium Account' if current_user.is_premium() else 'Free Account' }}
+                                    </p>
+                                </div>
+                                <a href="{{ url_for('auth.profile') }}" class="block px-4 py-3 text-sm text-white hover:bg-slate-700 dark:hover:bg-slate-600 hover:text-blue-300 transition-colors">
+                                    👤 Profile
+                                </a>
+                                <a href="{{ url_for('auth.settings') }}" class="block px-4 py-3 text-sm text-white hover:bg-slate-700 dark:hover:bg-slate-600 hover:text-green-300 transition-colors">
+                                    ⚙️ Settings
+                                </a>
+                                {% if not current_user.is_premium() %}
+                                    <a href="#" class="block px-4 py-3 text-sm text-yellow-400 hover:bg-slate-700 dark:hover:bg-slate-600 hover:text-yellow-300 transition-colors">
+                                        ⭐ Upgrade to Premium
+                                    </a>
+                                {% endif %}
+                                <div class="border-t border-slate-600">
+                                    <a href="{{ url_for('auth.logout') }}" class="block px-4 py-3 text-sm text-red-400 hover:bg-slate-700 dark:hover:bg-slate-600 hover:text-red-300 transition-colors rounded-b-lg">
+                                        🚪 Logout
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- User is not logged in -->
+                    <div class="hidden md:flex items-center space-x-3">
+                        <a href="{{ url_for('auth.login') }}" class="text-slate-300 hover:text-white transition-colors font-medium">
+                            Login
+                        </a>
+                        <a href="{{ url_for('auth.register') }}" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                            Sign Up
+                        </a>
+                    </div>
+                {% endif %}
+                
                 <!-- Mobile menu button -->
                 <button type="button" id="mobile-menu-toggle" class="md:hidden text-white hover:text-gray-300 focus:outline-none focus:text-gray-300">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -135,6 +203,10 @@
                             <span class="text-green-400 mr-3">📝</span>
                             Doc Converter
                         </a>
+                        <a href="/convert/presentation" class="block text-slate-300 hover:text-white transition-colors flex items-center py-2">
+                            <span class="text-purple-400 mr-3">📊</span>
+                            PPTX ↔ PDF
+                        </a>
                         <a href="/excel-converter" class="block text-slate-300 hover:text-white transition-colors flex items-center py-2">
                             <span class="text-yellow-400 mr-3">📊</span>
                             Excel Converter
@@ -143,12 +215,16 @@
                             <span class="text-orange-400 mr-3">📓</span>
                             Notebook Converter
                         </a>
+                        <!-- <a href="/yaml-json-converter" class="block text-slate-300 hover:text-white transition-colors flex items-center py-2">
+                            <span class="text-purple-400 mr-3">🔄</span>
+                            YAML ⇄ JSON
+                        </a> -->
                     </div>
                 </div>
                 <div class="space-y-1">
-                    <a href="/compressor" class="block text-white font-semibold hover:text-gray-300 transition-colors flex items-center py-3 px-2 rounded-lg hover:bg-slate-700">
+                    <a href="/file-compressor" class="block text-white font-semibold hover:text-gray-300 transition-colors flex items-center py-3 px-2 rounded-lg hover:bg-slate-700">
                         <span class="text-purple-400 mr-3 text-lg">🗜️</span>
-                        Compressor
+                        File Compressor
                     </a>
                     <a href="/image-cropper" class="block text-white font-semibold hover:text-gray-300 transition-colors flex items-center py-3 px-2 rounded-lg hover:bg-slate-700">
                         <span class="text-cyan-400 mr-3 text-lg">✂️</span>
@@ -195,6 +271,60 @@
                         Text & OCR
                     </a>
                 </div>
+                
+                <!-- Mobile Authentication Links -->
+                <div class="border-t border-slate-700 pt-4">
+                    {% if current_user is defined and current_user.is_authenticated %}
+                        <div class="space-y-1">
+                            <div class="px-2 py-3 border-b border-slate-700 mb-3">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                                        {{ current_user.username[0].upper() }}
+                                    </div>
+                                    <div>
+                                        <p class="text-white font-semibold">{{ current_user.username }}</p>
+                                        <p class="text-slate-400 text-sm">
+                                            {{ 'Premium Account' if current_user.is_premium() else 'Free Account' }}
+                                        </p>
+                                    </div>
+                                    {% if current_user.is_premium() %}
+                                        <span class="bg-yellow-500 text-black px-2 py-0.5 text-xs font-bold rounded-full">PRO</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <a href="{{ url_for('auth.profile') }}" class="block text-white font-semibold hover:text-blue-300 transition-colors flex items-center py-3 px-2 rounded-lg hover:bg-slate-700">
+                                <span class="text-blue-400 mr-3 text-lg">👤</span>
+                                Profile
+                            </a>
+                            <a href="{{ url_for('auth.settings') }}" class="block text-white font-semibold hover:text-green-300 transition-colors flex items-center py-3 px-2 rounded-lg hover:bg-slate-700">
+                                <span class="text-green-400 mr-3 text-lg">⚙️</span>
+                                Settings
+                            </a>
+                            {% if not current_user.is_premium() %}
+                                <a href="#" class="block text-yellow-400 font-semibold hover:text-yellow-300 transition-colors flex items-center py-3 px-2 rounded-lg hover:bg-slate-700">
+                                    <span class="text-yellow-400 mr-3 text-lg">⭐</span>
+                                    Upgrade to Premium
+                                </a>
+                            {% endif %}
+                            <a href="{{ url_for('auth.logout') }}" class="block text-red-400 font-semibold hover:text-red-300 transition-colors flex items-center py-3 px-2 rounded-lg hover:bg-slate-700">
+                                <span class="text-red-400 mr-3 text-lg">🚪</span>
+                                Logout
+                            </a>
+                        </div>
+                    {% else %}
+                        <div class="space-y-1">
+                            <p class="text-white font-semibold mb-3 px-2">Account</p>
+                            <a href="{{ url_for('auth.login') }}" class="block text-slate-300 hover:text-white transition-colors flex items-center py-3 px-2 rounded-lg hover:bg-slate-700">
+                                <span class="text-blue-400 mr-3 text-lg">🔑</span>
+                                Login
+                            </a>
+                            <a href="{{ url_for('auth.register') }}" class="block bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors flex items-center py-3 px-2 rounded-lg mx-2">
+                                <span class="mr-3 text-lg">✨</span>
+                                Sign Up
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </header>
@@ -203,26 +333,164 @@
         {% block page_content %}{% endblock %}
     </main>
 
-    <footer class="site-footer bg-white dark:bg-slate-800/90 border-t border-slate-200 dark:border-slate-700/50 py-8">
-        <div class="container mx-auto px-6 text-center text-slate-600 dark:text-slate-400">
-            <div class="mb-4">
-                <div class="flex justify-center items-center space-x-8 mb-3">
-                    <a href="/" class="text-slate-700 dark:text-slate-300 hover:text-indigo-500 dark:hover:text-indigo-400 font-semibold transition-colors flex items-center">
-                        <span class="mr-2">✂️</span>
-                        Cropio - File Toolkit
-                    </a>
-                    <span class="text-slate-400">•</span>
-                    <a href="https://pixport-production.up.railway.app/" target="_blank" rel="noopener noreferrer" class="text-slate-700 dark:text-slate-300 hover:text-blue-500 dark:hover:text-blue-400 font-semibold transition-colors flex items-center">
-                        <span class="mr-2">📸</span>
-                        Pixport - AI Passport Photos
-                    </a>
+    <!-- Professional Footer -->
+    <footer class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 border-t border-slate-200 dark:border-slate-700">
+        <!-- Main Footer Content -->
+        <div class="container mx-auto px-6 py-12">
+            <!-- Appointment CTA Section -->
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl mb-6">
+                    <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-slate-800 dark:text-white mb-4">
+                    Get Started With Professional Tools Today
+                </h2>
+                <p class="text-lg text-slate-600 dark:text-slate-300 mb-8 max-w-2xl mx-auto">
+                    Transform your files with our professional-grade conversion tools.
+                    Get started for free or upgrade for premium features.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    {% if current_user is defined and current_user.is_authenticated %}
+                        <a href="{{ url_for('dashboard.index') }}" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                            <span class="mr-2">🚀</span>
+                            Go to Dashboard
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('auth.register') }}" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                            <span class="mr-2">✨</span>
+                            Start Free Account
+                        </a>
+                        <a href="{{ url_for('auth.login') }}" class="inline-flex items-center px-8 py-4 border-2 border-blue-600 text-blue-600 dark:text-blue-400 hover:bg-blue-600 hover:text-white font-semibold rounded-xl transition-all duration-300">
+                            <span class="mr-2">🔑</span>
+                            Login
+                        </a>
+                    {% endif %}
                 </div>
             </div>
-            <p>&copy; 2025 Himanshu. All Rights Reserved.</p>
-            <p class="text-sm mt-2">Professional tools for all your file processing and photo needs.</p>
+
+            <!-- Footer Links Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
+                <!-- Contact Section -->
+                <div class="lg:col-span-1">
+                    <h3 class="text-lg font-semibold text-slate-800 dark:text-white mb-6">Contact</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <span class="text-blue-500 mt-1">📞</span>
+                            <div>
+                                <p class="text-slate-600 dark:text-slate-300 font-medium">+91-9638527410</p>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">Mon-Fri 9AM-6PM</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-blue-500 mt-1">📍</span>
+                            <div>
+                                <p class="text-slate-600 dark:text-slate-300 font-medium">India</p>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">Remote Support Available</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <span class="text-blue-500 mt-1">✉️</span>
+                            <div>
+                                <p class="text-slate-600 dark:text-slate-300 font-medium">support@cropio.com</p>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">24/7 Email Support</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigate Section -->
+                <div class="lg:col-span-1">
+                    <h3 class="text-lg font-semibold text-slate-800 dark:text-white mb-6">Navigate</h3>
+                    <div class="space-y-3">
+                        <a href="/" class="block text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Home</a>
+                        <a href="/image-converter" class="block text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Image Tools</a>
+                        <a href="/pdf-converter" class="block text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">PDF Tools</a>
+                        <a href="/document-converter" class="block text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Document Tools</a>
+                        <a href="/file-compressor" class="block text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Compression</a>
+                        <a href="#" class="block text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Download App</a>
+                    </div>
+                </div>
+
+                <!-- Solution Section -->
+                <div class="lg:col-span-1">
+                    <h3 class="text-lg font-semibold text-slate-800 dark:text-white mb-6">Solution</h3>
+                    <div class="space-y-3">
+                        <a href="#" class="block text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Get in Touch</a>
+                        <a href="#" class="block text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Technology</a>
+                        <a href="#" class="block text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Who're We?</a>
+                        <a href="#" class="block text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Expertise</a>
+                        <a href="/api" class="block text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">API Access</a>
+                    </div>
+                </div>
+
+                <!-- Discover Section -->
+                <div class="lg:col-span-1">
+                    <h3 class="text-lg font-semibold text-slate-800 dark:text-white mb-6">Discover</h3>
+                    <div class="space-y-3">
+                        <a href="#" class="block text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Latest News</a>
+                        <a href="#" class="block text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">New Features</a>
+                        <a href="#" class="block text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Success Stories</a>
+                        <a href="#" class="block text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Tutorials</a>
+                        <a href="#" class="block text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Career</a>
+                    </div>
+                </div>
+
+                <!-- Follow Us Section -->
+                <div class="lg:col-span-1">
+                    <h3 class="text-lg font-semibold text-slate-800 dark:text-white mb-6">Follow Us</h3>
+                    <div class="space-y-4">
+                        <a href="#" class="flex items-center space-x-3 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group">
+                            <span class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">📘</span>
+                            <span>Facebook</span>
+                        </a>
+                        <a href="#" class="flex items-center space-x-3 text-slate-600 dark:text-slate-300 hover:text-pink-600 dark:hover:text-pink-400 transition-colors group">
+                            <span class="w-8 h-8 bg-pink-100 dark:bg-pink-900/30 rounded-lg flex items-center justify-center group-hover:bg-pink-200 dark:group-hover:bg-pink-800/50 transition-colors">📷</span>
+                            <span>Instagram</span>
+                        </a>
+                        <a href="#" class="flex items-center space-x-3 text-slate-600 dark:text-slate-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors group">
+                            <span class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">💼</span>
+                            <span>LinkedIn</span>
+                        </a>
+                        <a href="#" class="flex items-center space-x-3 text-slate-600 dark:text-slate-300 hover:text-sky-500 dark:hover:text-sky-400 transition-colors group">
+                            <span class="w-8 h-8 bg-sky-100 dark:bg-sky-900/30 rounded-lg flex items-center justify-center group-hover:bg-sky-200 dark:group-hover:bg-sky-800/50 transition-colors">🐦</span>
+                            <span>Twitter</span>
+                        </a>
+                        <a href="https://pixport-production.up.railway.app/" target="_blank" class="flex items-center space-x-3 text-slate-600 dark:text-slate-300 hover:text-blue-500 dark:hover:text-blue-400 transition-colors group">
+                            <span class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center group-hover:bg-blue-200 dark:group-hover:bg-blue-800/50 transition-colors">🌐</span>
+                            <span>Pixport</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Bottom -->
+        <div class="border-t border-slate-200 dark:border-slate-700">
+            <div class="container mx-auto px-6 py-6">
+                <div class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+                    <div class="flex items-center space-x-6">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-2xl">✂️</span>
+                            <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Cropio</span>
+                        </div>
+                        <p class="text-slate-600 dark:text-slate-400">
+                            &copy; 2025 <span class="font-semibold">Cropio.com</span> All rights reserved.
+                        </p>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <a href="#" class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm">Privacy & Policy</a>
+                        <a href="#" class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm">Terms & Condition</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </footer>
 
+    <!-- CSRF Token handling for AJAX requests -->
+    <script src="{{ url_for('static', filename='js/csrf.js') }}" defer></script>
+    
     <!-- Theme toggle functionality - loaded on all pages -->
     <script src="{{ url_for('static', filename='js/theme.js') }}" defer></script>
     

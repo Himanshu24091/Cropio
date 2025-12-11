@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+
 :root {
 /* Base colors */
     --card-light: rgba(255, 255, 255, 0.95);
@@ -341,3 +342,4 @@ html.dark .dropdown-menu a {
         scroll-behavior: auto !important;
     }
 }
+

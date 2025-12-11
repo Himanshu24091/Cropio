@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+
+{% block title %}LaTeX ⇄ PDF Converter - Cropio{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/converter.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/phase-1-5.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='document/latex_pdf.css') }}">
+    <!-- CodeMirror for LaTeX syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/theme/default.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.0.1/mode/stex/stex.min.js"></script>
+{% endblock %}
+
+{% block page_content %}
+{% if not current_user.is_authenticated %}
+    <!-- Login Required Section -->
+    <div class="login-required-container">
+        <div class="login-required-content">
+            <div class="login-required-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <h2>Login Required</h2>
+            <p>This feature requires you to be logged in to access the LaTeX ⇄ PDF converter.</p>
+            <div class="login-required-actions">
+                <a href="{{ url_for('auth.login') }}" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-secondary">
+                    <i class="fas fa-user-plus"></i> Register
+                </a>
+            </div>
+            <div class="login-required-info">
+                <p><strong>Why login?</strong> LaTeX compilation requires server resources and we track usage for optimization.</p>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="converter-wrapper">
+        <div class="page-header">
+            <div class="container">
+                <h1><i class="fas fa-file-pdf"></i> LaTeX ⇄ PDF Converter</h1>
+                <p class="subtitle">Professional LaTeX document compilation and PDF text extraction</p>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Usage Information -->
+            <div class="usage-info">
+                <strong>Daily Usage:</strong> {{ usage.conversions_count if usage else 0 }}/{{ user_limits.daily_conversions if user_limits else 5 }} conversions used
+                <div class="usage-bar">
+                    <div class="usage-fill" style="width: {{ ((usage.conversions_count if usage else 0) / (user_limits.daily_conversions if user_limits else 5) * 100) | round(1) }}%"></div>
+                </div>
+            </div>
+
+            <!-- System Requirements Alert -->
+            <div class="alert alert-info" id="systemRequirements" style="display: none;">
+                <i class="fas fa-info-circle alert-icon"></i>
+                <div>
+                    <strong>System Requirements:</strong>
+                    <p>LaTeX compilation requires a TeX distribution (TeX Live, MiKTeX). Installation status is being checked...</p>
+                    <div id="requirementsList"></div>
+                </div>
+            </div>
+
+            <!-- Conversion Mode Toggle -->
+            <div class="converter-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-exchange-alt"></i> LaTeX Document Processing</h2>
+                </div>
+                <div class="card-body">
+                    <!-- Mode Toggle -->
+                    <div class="conversion-modes">
+                        <button class="mode-btn active" data-mode="latex-to-pdf">
+                            <i class="fas fa-file-code"></i> LaTeX → PDF
+                        </button>
+                        <button class="mode-btn" data-mode="pdf-to-latex">
+                            <i class="fas fa-file-pdf"></i> PDF → LaTeX
+                        </button>
+                    </div>
+
+                    <!-- Input/Output Area -->
+                    <div class="latex-converter-grid">
+                        <!-- Input Panel -->
+                        <div class="input-panel">
+                            <div class="panel-header">
+                                <h3 id="inputPanelTitle">Input (LaTeX)</h3>
+                                <div class="panel-controls">
+                                    <button id="clearInputBtn" class="btn btn-sm btn-secondary" title="Clear input">
+                                        <i class="fas fa-trash-alt"></i> Clear
+                                    </button>
+                                    <button id="insertTemplateBtn" class="btn btn-sm btn-secondary" title="Insert template">
+                                        <i class="fas fa-file-plus"></i> Template
+                                    </button>
+                                    <button id="validateBtn" class="btn btn-sm btn-secondary" title="Validate LaTeX">
+                                        <i class="fas fa-check-circle"></i> Validate
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="input-container">
+                                <div id="latexEditor">
+                                    <textarea id="latexInput" placeholder="Enter your LaTeX code here...
+
+Example:
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\title{My Resume}
+\author{Your Name}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Education}
+\textbf{Your University} \\
+Bachelor of Technology - Computer Science \\
+CGPA: 8.5/10
+
+\section{Technical Skills}
+\begin{itemize}
+    \item Programming Languages: Python, Java, JavaScript
+    \item Databases: MySQL, PostgreSQL
+    \item Tools: Git, VS Code, Power BI
+\end{itemize}
+
+\section{Projects}
+\textbf{Data Analysis Project}
+\begin{itemize}
+    \item Analyzed sales data using SQL and Power BI
+    \item Created interactive dashboards
+    \item Improved decision-making process
+\end{itemize}
+
+\end{document}"></textarea>
+                                </div>
+                                <div class="input-stats">
+                                    <span>Lines: <span id="inputLines">0</span></span>
+                                    <span>Commands: <span id="latexCommands">0</span></span>
+                                    <span>Characters: <span id="inputChars">0</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Conversion Controls -->
+                        <div class="conversion-controls">
+                            <button id="convertBtn" class="btn btn-primary btn-lg">
+                                <i class="fas fa-cogs"></i>
+                                <span id="convertBtnText">Compile PDF</span>
+                            </button>
+                            
+                            <div class="conversion-options">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="autoWrapDocument" checked>
+                                    <span class="checkmark"></span>
+                                    Auto-wrap in document structure
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="autoCompileOnChange">
+                                    <span class="checkmark"></span>
+                                    Auto-compile on changes
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="showCompileLog">
+                                    <span class="checkmark"></span>
+                                    Show compilation log
+                                </label>
+                            </div>
+
+                            <!-- File Upload Alternative -->
+                            <div class="upload-zone" id="fileUploadZone">
+                                <div class="upload-icon">
+                                    <i class="fas fa-file-upload"></i>
+                                </div>
+                                <div class="upload-text">Upload LaTeX or PDF file</div>
+                                <div class="upload-hint">Drag & drop files here or click to browse</div>
+                                <input type="file" id="fileInput" accept=".tex,.latex,.pdf" style="display: none;">
+                                <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click();">
+                                    <i class="fas fa-folder-open"></i> Choose File
+                                </button>
+                            </div>
+
+                            <!-- Progress Indicator -->
+                            <div class="compilation-progress" id="compilationProgress" style="display: none;">
+                                <div class="progress-bar">
+                                    <div class="progress-fill"></div>
+                                </div>
+                                <div class="progress-steps">
+                                    <span class="step" id="step1">Validating LaTeX</span>
+                                    <span class="step" id="step2">Compiling Document</span>
+                                    <span class="step" id="step3">Generating PDF</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Output Panel -->
+                        <div class="output-panel">
+                            <div class="panel-header">
+                                <h3 id="outputPanelTitle">Output (PDF)</h3>
+                                <div class="panel-controls">
+                                    <button id="previewBtn" class="btn btn-sm btn-info" style="display: none;" title="Preview PDF">
+                                        <i class="fas fa-eye"></i> Preview
+                                    </button>
+                                    <button id="downloadBtn" class="btn btn-sm btn-success" style="display: none;">
+                                        <i class="fas fa-download"></i> Download
+                                    </button>
+                                    <button id="copyOutputBtn" class="btn btn-sm btn-secondary" style="display: none;">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="output-container">
+                                <div class="output-tabs">
+                                    <button class="tab-btn active" data-tab="result">Result</button>
+                                    <button class="tab-btn" data-tab="validation">Validation</button>
+                                    <button class="tab-btn" data-tab="log" style="display: none;">Compilation Log</button>
+                                </div>
+                                <div class="tab-content">
+                                    <div class="tab-panel active" id="resultTab">
+                                        <div class="pdf-preview" id="pdfPreview" style="display: none;">
+                                            <iframe id="pdfViewer" width="100%" height="500px"></iframe>
+                                        </div>
+                                        <div class="latex-output" id="latexOutput" style="display: none;">
+                                            <textarea id="outputText" readonly placeholder="Extracted LaTeX will appear here..."></textarea>
+                                        </div>
+                                        <div class="empty-output" id="emptyOutput">
+                                            <i class="fas fa-file-alt"></i>
+                                            <p>Your converted document will appear here</p>
+                                        </div>
+                                    </div>
+                                    <div class="tab-panel" id="validationTab">
+                                        <div class="validation-results" id="validationResults">
+                                            <div class="validation-status">
+                                                <i class="fas fa-info-circle"></i>
+                                                <span>Enter LaTeX code to see validation results</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tab-panel" id="logTab">
+                                        <div class="log-content">
+                                            <pre id="compilationLog"></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="output-stats">
+                                    <span id="outputInfo">Ready to compile</span>
+                                    <span id="conversionTime"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LaTeX Templates Section -->
+            <div class="converter-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-file-alt"></i> LaTeX Templates</h2>
+                </div>
+                <div class="card-body">
+                    <div class="template-grid">
+                        <div class="template-card" data-template="resume">
+                            <div class="template-icon">
+                                <i class="fas fa-user-tie"></i>
+                            </div>
+                            <h4>Resume Template</h4>
+                            <p>Professional resume layout with sections for education, projects, and skills</p>
+                        </div>
+                        <div class="template-card" data-template="article">
+                            <div class="template-icon">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <h4>Article</h4>
+                            <p>Basic article template with sections and subsections</p>
+                        </div>
+                        <div class="template-card" data-template="report">
+                            <div class="template-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h4>Report</h4>
+                            <p>Report template with title page and table of contents</p>
+                        </div>
+                        <div class="template-card" data-template="letter">
+                            <div class="template-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <h4>Letter</h4>
+                            <p>Formal letter template with proper formatting</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Grid -->
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-magic"></i>
+                    </div>
+                    <h4>Professional Typesetting</h4>
+                    <p>High-quality document formatting with mathematical equations and professional layouts</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h4>Real-time Validation</h4>
+                    <p>Syntax checking and error detection with helpful suggestions for common issues</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-code"></i>
+                    </div>
+                    <h4>Syntax Highlighting</h4>
+                    <p>Advanced code editor with LaTeX syntax highlighting and auto-completion</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-download"></i>
+                    </div>
+                    <h4>Multiple Formats</h4>
+                    <p>Convert between LaTeX and PDF formats with preserve formatting and structure</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Processing Overlay -->
+    <div class="processing-overlay" id="processingOverlay">
+        <div class="processing-spinner">
+            <div class="spinner"></div>
+            <div class="processing-message">Compiling LaTeX document...</div>
+        </div>
+    </div>
+
+    <!-- PDF Preview Modal -->
+    <div class="pdf-modal" id="pdfModal" style="display: none;">
+        <div class="pdf-modal-overlay" onclick="document.getElementById('pdfModal').style.display='none'"></div>
+        <div class="pdf-modal-content">
+            <div class="pdf-modal-header">
+                <h3><i class="fas fa-file-pdf"></i> PDF Preview</h3>
+                <div class="pdf-modal-controls">
+                    <button class="btn btn-sm btn-secondary" onclick="document.getElementById('pdfModalViewer').contentWindow.print()" title="Print PDF">
+                        <i class="fas fa-print"></i>
+                    </button>
+                    <button class="btn btn-sm btn-success" id="pdfModalDownload" title="Download PDF">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="document.getElementById('pdfModal').style.display='none'" title="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="pdf-modal-body">
+                <iframe id="pdfModalViewer" width="100%" height="100%" frameborder="0"></iframe>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+<script src="{{ url_for('static', filename='js/document/latex_pdf.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,391 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Cropio{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/converter.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/phase-1-5.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='image/gif_png_sequence.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="converter-wrapper">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <h1><i class="fas fa-film me-2"></i>GIF ⇄ PNG Sequence Converter</h1>
+            <p class="subtitle">Extract frames from animated GIFs or create GIF animations from image sequences with professional quality</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Usage Information -->
+        {% if usage %}
+        <div class="usage-info">
+            <strong>Daily Usage:</strong> {{ usage.conversions_used }}/{{ usage.daily_limit }} conversions used
+            <div class="usage-bar">
+                <div class="usage-fill" style="width: {{ usage.percentage }}%"></div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Mode Selector -->
+        <div class="mode-selector">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="mode-buttons">
+                        <button id="gifToPngMode" class="mode-btn active" data-mode="gif-to-png">
+                            <div class="mode-icon">
+                                <i class="fas fa-film"></i>
+                                <i class="fas fa-arrow-right"></i>
+                                <i class="fas fa-images"></i>
+                            </div>
+                            <div class="mode-text">
+                                <h5>GIF → PNG Sequence</h5>
+                                <p>Extract individual frames from animated GIF files</p>
+                            </div>
+                        </button>
+                        <button id="pngToGifMode" class="mode-btn" data-mode="png-to-gif">
+                            <div class="mode-icon">
+                                <i class="fas fa-images"></i>
+                                <i class="fas fa-arrow-right"></i>
+                                <i class="fas fa-film"></i>
+                            </div>
+                            <div class="mode-text">
+                                <h5>PNG Sequence → GIF</h5>
+                                <p>Create animated GIF from image sequence</p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Converter Section -->
+            <div class="col-lg-6 mb-4">
+                <div class="converter-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-cloud-upload-alt me-2"></i>
+                            <span id="uploadTitle">Upload GIF File</span>
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        
+                        <!-- GIF to PNG Upload Zone -->
+                        <div id="gifUploadZone" class="upload-zone active">
+                            <div class="upload-dropzone" id="gifDropzone">
+                                <div class="upload-content">
+                                    <i class="fas fa-film upload-icon"></i>
+                                    <h4>Drop your GIF file here</h4>
+                                    <p class="text-muted">or click to browse files</p>
+                                    <div class="upload-specs">
+                                        <span class="badge bg-info me-2">Max: 50MB</span>
+                                        <span class="badge bg-info">Format: GIF</span>
+                                    </div>
+                                </div>
+                                <input type="file" id="gifFileInput" accept=".gif" class="file-input">
+                            </div>
+                        </div>
+
+                        <!-- PNG to GIF Upload Zone -->
+                        <div id="pngUploadZone" class="upload-zone">
+                            <div class="upload-dropzone" id="pngDropzone">
+                                <div class="upload-content">
+                                    <i class="fas fa-images upload-icon"></i>
+                                    <h4>Drop your image files here</h4>
+                                    <p class="text-muted">or click to browse files</p>
+                                    <div class="upload-specs">
+                                        <span class="badge bg-info me-2">Max: 50MB each</span>
+                                        <span class="badge bg-info me-2">Max: 500 files</span>
+                                        <span class="badge bg-info">Format: PNG, JPG</span>
+                                    </div>
+                                </div>
+                                <input type="file" id="pngFileInput" accept=".png,.jpg,.jpeg" class="file-input" multiple>
+                            </div>
+                        </div>
+
+                        <!-- File List -->
+                        <div id="fileList" class="file-list" style="display: none;"></div>
+
+                        <!-- Conversion Settings -->
+                        <div id="conversionSettings" class="conversion-settings" style="display: none;">
+                            
+                            <!-- GIF to PNG Settings -->
+                            <div id="gifSettings" class="settings-group">
+                                <h5><i class="fas fa-cogs me-2"></i>Extraction Settings</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="preserveTiming" checked>
+                                            <label class="form-check-label" for="preserveTiming">
+                                                Preserve Frame Timing
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="optimizePng" checked>
+                                            <label class="form-check-label" for="optimizePng">
+                                                Optimize PNG Files
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- PNG to GIF Settings -->
+                            <div id="pngSettings" class="settings-group" style="display: none;">
+                                <h5><i class="fas fa-cogs me-2"></i>Animation Settings</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label for="frameDuration" class="form-label">Frame Duration (ms)</label>
+                                        <input type="range" class="form-range" id="frameDuration" min="10" max="2000" value="100">
+                                        <div class="range-value"><span id="frameDurationValue">100</span> ms</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="loopCount" class="form-label">Loop Count</label>
+                                        <select class="form-select" id="loopCount">
+                                            <option value="0" selected>Infinite</option>
+                                            <option value="1">Once</option>
+                                            <option value="3">3 times</option>
+                                            <option value="5">5 times</option>
+                                            <option value="10">10 times</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <label for="quality" class="form-label">Quality</label>
+                                        <select class="form-select" id="quality">
+                                            <option value="low">Low (64 colors)</option>
+                                            <option value="medium" selected>Medium (128 colors)</option>
+                                            <option value="high">High (256 colors)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check mt-4">
+                                            <input class="form-check-input" type="checkbox" id="optimizeGif" checked>
+                                            <label class="form-check-label" for="optimizeGif">
+                                                Optimize GIF
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="enableDithering">
+                                            <label class="form-check-label" for="enableDithering">
+                                                Enable Dithering
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Convert Button -->
+                        <div id="convertSection" class="text-center mt-4" style="display: none;">
+                            <button id="convertBtn" class="btn convert-btn">
+                                <i class="fas fa-magic me-2"></i>
+                                <span id="convertBtnText">Convert GIF to PNG</span>
+                            </button>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div id="progressSection" class="mt-4" style="display: none;">
+                            <div class="progress progress-custom">
+                                <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     role="progressbar" style="width: 0%">
+                                    <span class="progress-text" id="progressText">0%</span>
+                                </div>
+                            </div>
+                            <div class="progress-status mt-2">
+                                <span id="progressStatus">Preparing conversion...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="col-lg-6 mb-4">
+                <div class="converter-card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-download me-2"></i>
+                            Results & Preview
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        
+                        <!-- No Results State -->
+                        <div id="noResults" class="no-results">
+                            <div class="no-results-content">
+                                <i class="fas fa-film no-results-icon"></i>
+                                <h4>No conversion yet</h4>
+                                <p class="text-muted">Upload and convert files to see results here</p>
+                            </div>
+                        </div>
+
+                        <!-- Results Content -->
+                        <div id="resultsContent" style="display: none;">
+                            
+                            <!-- Conversion Info -->
+                            <div id="conversionInfo" class="conversion-info mb-4">
+                                <div class="info-grid">
+                                    <div class="info-item">
+                                        <span class="info-label">Type</span>
+                                        <div class="info-value" id="conversionType">-</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Frames</span>
+                                        <div class="info-value" id="frameCount">-</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Size</span>
+                                        <div class="info-value" id="totalSize">-</div>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label">Status</span>
+                                        <div class="info-value">
+                                            <span id="conversionStatus" class="badge bg-success">Complete</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Preview Section -->
+                            <div id="previewSection" class="preview-section mb-4">
+                                <h5><i class="fas fa-eye me-2"></i>Preview</h5>
+                                
+                                <!-- GIF Preview (for PNG to GIF conversion) -->
+                                <div id="gifPreview" class="preview-container" style="display: none;">
+                                    <div class="gif-preview-wrapper">
+                                        <img id="gifPreviewImage" class="preview-image" alt="GIF Preview">
+                                        <p class="text-muted mt-2">Animated GIF created successfully</p>
+                                    </div>
+                                </div>
+
+                                <!-- Frame Preview (for GIF to PNG conversion) -->
+                                <div id="framePreview" class="frame-preview-container" style="display: none;">
+                                    <div class="frame-navigation">
+                                        <button id="prevFrame" class="btn btn-outline-primary btn-sm" disabled>
+                                            <i class="fas fa-chevron-left"></i>
+                                        </button>
+                                        <span id="frameInfo" class="frame-info">Frame 1 of 1</span>
+                                        <button id="nextFrame" class="btn btn-outline-primary btn-sm" disabled>
+                                            <i class="fas fa-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                    <div class="current-frame-wrapper">
+                                        <img id="currentFrame" class="preview-image" alt="Frame Preview">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Download Actions -->
+                            <div id="downloadActions" class="download-actions">
+                                <div class="d-grid gap-2">
+                                    <button id="downloadBtn" class="btn btn-success btn-lg">
+                                        <i class="fas fa-download me-2"></i>
+                                        <span id="downloadBtnText">Download ZIP</span>
+                                    </button>
+                                    <button id="newConversionBtn" class="btn btn-outline-primary">
+                                        <i class="fas fa-plus me-2"></i>
+                                        New Conversion
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Grid -->
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-film"></i>
+                </div>
+                <h4>GIF Frame Extraction</h4>
+                <p>Extract individual frames from animated GIFs with preserved timing and transparency support</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-images"></i>
+                </div>
+                <h4>Animation Creation</h4>
+                <p>Create smooth animated GIFs from PNG/JPG sequences with custom timing and quality settings</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <h4>Advanced Settings</h4>
+                <p>Control frame duration, loop count, quality, optimization, and dithering for perfect results</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-download"></i>
+                </div>
+                <h4>Batch Processing</h4>
+                <p>Upload up to 500 images or large GIF files (50MB) with professional-grade batch processing</p>
+            </div>
+        </div>
+
+        <!-- Usage Statistics -->
+        {% if usage %}
+        <div class="usage-stats-card">
+            <div class="row text-center">
+                <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number" id="todayUsage">{{ usage.conversions_used or 0 }}</div>
+                        <div class="stat-label">Today</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number" id="remainingUsage">{{ (usage.daily_limit - usage.conversions_used) if usage else 20 }}</div>
+                        <div class="stat-label">Remaining</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalUsage">{{ usage.conversions_used or 0 }}</div>
+                        <div class="stat-label">Total</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ usage.daily_limit or 20 }}</div>
+                        <div class="stat-label">Daily Limit</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal" id="errorModal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title">
+                <i class="fas fa-exclamation-triangle me-2"></i>Error
+            </h5>
+            <button type="button" class="modal-close" id="errorModalClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p id="errorMessage">An error occurred during conversion.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" id="errorModalCloseBtn">Close</button>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/image/gif_png_sequence.js') }}"></script>
+{% endblock %}

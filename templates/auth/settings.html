@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - {{ config.get('SITE_NAME', 'Cropio') }}{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='auth/auth.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='user_dashboard/profile.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="profile-container">
+    <div class="profile-card">
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Account Settings</h1>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">Manage your account preferences and security</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages mb-6">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'error' if category == 'error' else category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Settings Menu -->
+        <div class="settings-menu grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Account Information -->
+            <div class="setting-section">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                    👤 Account Information
+                </h3>
+                <div class="setting-options space-y-3">
+                    <a href="{{ url_for('auth.edit_profile') }}" class="setting-option">
+                        <div class="setting-icon">✏️</div>
+                        <div class="setting-content">
+                            <div class="setting-title">Edit Profile</div>
+                            <div class="setting-description">Update username and email</div>
+                        </div>
+                        <div class="setting-arrow">→</div>
+                    </a>
+                    
+                    <a href="{{ url_for('auth.change_password') }}" class="setting-option">
+                        <div class="setting-icon">🔒</div>
+                        <div class="setting-content">
+                            <div class="setting-title">Change Password</div>
+                            <div class="setting-description">Update your account password</div>
+                        </div>
+                        <div class="setting-arrow">→</div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Subscription & Billing -->
+            <div class="setting-section">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                    ⭐ Subscription & Billing
+                </h3>
+                <div class="setting-options space-y-3">
+                    <a href="{{ url_for('dashboard.subscription') }}" class="setting-option">
+                        <div class="setting-icon">💳</div>
+                        <div class="setting-content">
+                            <div class="setting-title">Manage Subscription</div>
+                            <div class="setting-description">View and upgrade your plan</div>
+                        </div>
+                        <div class="setting-arrow">→</div>
+                    </a>
+                    
+                    <a href="{{ url_for('dashboard.index') }}" class="setting-option">
+                        <div class="setting-icon">📊</div>
+                        <div class="setting-content">
+                            <div class="setting-title">Usage Analytics</div>
+                            <div class="setting-description">View your conversion history</div>
+                        </div>
+                        <div class="setting-arrow">→</div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Security -->
+            <div class="setting-section">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                    🔐 Security & Privacy
+                </h3>
+                <div class="setting-options space-y-3">
+                    <div class="setting-option">
+                        <div class="setting-icon">📧</div>
+                        <div class="setting-content">
+                            <div class="setting-title">Email Verification</div>
+                            <div class="setting-description">
+                                {% if current_user.email_verified %}
+                                    <span class="text-green-600 dark:text-green-400">✓ Verified</span>
+                                {% else %}
+                                    <span class="text-amber-600 dark:text-amber-400">⚠ Not verified</span>
+                                    <button onclick="resendVerification()" class="ml-2 text-blue-600 underline text-sm">
+                                        Resend email
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="setting-option">
+                        <div class="setting-icon">🕒</div>
+                        <div class="setting-content">
+                            <div class="setting-title">Session Timeout</div>
+                            <div class="setting-description">Automatically logout after 1 hour</div>
+                        </div>
+                        <div class="setting-toggle">
+                            <label class="toggle-switch">
+                                <input type="checkbox" checked disabled>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danger Zone -->
+            <div class="setting-section">
+                <h3 class="text-lg font-semibold text-red-600 dark:text-red-400 mb-4">
+                    ⚠️ Danger Zone
+                </h3>
+                <div class="setting-options space-y-3">
+                    <a href="{{ url_for('auth.delete_account') }}" class="setting-option danger">
+                        <div class="setting-icon">🗑️</div>
+                        <div class="setting-content">
+                            <div class="setting-title">Delete Account</div>
+                            <div class="setting-description">Permanently delete your account and data</div>
+                        </div>
+                        <div class="setting-arrow">→</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div class="flex flex-wrap gap-3 justify-center">
+                <a href="{{ url_for('auth.profile') }}" class="btn btn-secondary">
+                    ← Back to Profile
+                </a>
+                <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary">
+                    📊 Dashboard
+                </a>
+                <a href="{{ url_for('main.index') }}" class="btn btn-secondary">
+                    🏠 Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Settings-specific styles */
+.setting-section {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.dark .setting-section {
+    background: #0f172a;
+    border-color: #334155;
+}
+
+.setting-option {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.dark .setting-option {
+    background: #1f2937;
+    border-color: #374151;
+}
+
+.setting-option:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+}
+
+.setting-option.danger:hover {
+    border-color: #dc2626;
+    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
+}
+
+.setting-icon {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    width: 40px;
+    text-align: center;
+}
+
+.setting-content {
+    flex: 1;
+}
+
+.setting-title {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+}
+
+.dark .setting-title {
+    color: #f9fafb;
+}
+
+.setting-description {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.dark .setting-description {
+    color: #9ca3af;
+}
+
+.setting-arrow {
+    font-size: 1.25rem;
+    color: #9ca3af;
+}
+
+.setting-toggle {
+    margin-left: 1rem;
+}
+
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 24px;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .toggle-slider {
+    background-color: #3b82f6;
+}
+
+input:checked + .toggle-slider:before {
+    transform: translateX(26px);
+}
+</style>
+
+<script>
+function resendVerification() {
+    // TODO: Implement email verification resend
+    alert('Email verification will be implemented in the next update!');
+}
+</script>
+{% endblock %}

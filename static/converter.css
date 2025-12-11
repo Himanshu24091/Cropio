@@ -105,3 +105,44 @@ html.dark #drop-zone p {
 html.dark #file-name {
     color: var(--text-dark) !important;
 }
+
+/* Convert button styling */
+.convert-button {
+    background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+    color: white;
+    border: none;
+    padding: 0.875rem 2rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.35);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 140px;
+}
+
+.convert-button:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px -4px rgba(99, 102, 241, 0.5);
+}
+
+.convert-button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.35);
+}
+
+.convert-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.convert-button:disabled:hover {
+    transform: none;
+    box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.35);
+}

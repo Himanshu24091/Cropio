@@ -1,0 +1,913 @@
+{% extends "base.html" %} {% block title %}Text & OCR Processor - Cropio{%
+endblock %} {% block page_content %}
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='converter.css') }}"
+/>
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='text_ocr_converters/text_ocr.css') }}"
+/>
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                <svg
+                    class="w-12 h-12 mx-auto mb-4 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    ></path>
+                </svg>
+                Text & OCR Processor
+            </h1>
+            <p class="text-xl text-gray-600 dark:text-gray-300">
+                Extract and process text from documents and images with advanced
+                OCR technology
+            </p>
+        </div>
+
+        <!-- Main Processor Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                <svg
+                    class="w-6 h-6 inline mr-2 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    ></path>
+                </svg>
+                Process Document or Image
+            </h2>
+            <p class="text-gray-600 dark:text-gray-300 mb-6">
+                Upload documents or images to extract text using intelligent
+                OCR. Supports multiple languages and formats.
+            </p>
+
+            <form
+                method="POST"
+                enctype="multipart/form-data"
+                class="space-y-6"
+                id="text-ocr-form"
+            >
+                <input
+                    type="hidden"
+                    name="conversion_type"
+                    value="text_ocr_processor"
+                />
+
+                <div class="upload-area" id="text-ocr-upload-area">
+                    <input
+                        type="file"
+                        name="file"
+                        id="text-ocr-file"
+                        accept=".pdf,.docx,.txt,.png,.jpg,.jpeg"
+                        class="file-input"
+                        required
+                    />
+                    <label for="text-ocr-file" class="upload-label">
+                        <svg
+                            class="w-12 h-12 text-gray-400 mb-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                            ></path>
+                        </svg>
+                        <span class="upload-text"
+                            >Drop your document or image here or click to
+                            browse</span
+                        >
+                        <span class="upload-subtext"
+                            >PDF, DOCX, TXT, PNG, JPG, JPEG files (Max
+                            50MB)</span
+                        >
+                    </label>
+                </div>
+
+                <!-- Language Selection -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h3
+                        class="text-lg font-semibold text-gray-900 dark:text-white mb-3"
+                    >
+                        <svg
+                            class="w-5 h-5 inline mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
+                            ></path>
+                        </svg>
+                        OCR Language
+                    </h3>
+
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <div class="flex items-center space-x-3">
+                            <input
+                                type="radio"
+                                name="ocr_language"
+                                value="auto"
+                                id="lang-auto"
+                                class="mt-1"
+                                checked
+                            />
+                            <div class="flex-1">
+                                <label
+                                    for="lang-auto"
+                                    class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer"
+                                >
+                                    <span class="flex items-center">
+                                        <svg
+                                            class="w-4 h-4 mr-2 text-blue-500"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M13 10V3L4 14h7v7l9-11h-7z"
+                                            ></path>
+                                        </svg>
+                                        Auto Detect
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <input
+                                type="radio"
+                                name="ocr_language"
+                                value="eng"
+                                id="lang-eng"
+                                class="mt-1"
+                            />
+                            <div class="flex-1">
+                                <label
+                                    for="lang-eng"
+                                    class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer"
+                                >
+                                    <span class="flex items-center">
+                                        🇬🇧 English
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <input
+                                type="radio"
+                                name="ocr_language"
+                                value="hin"
+                                id="lang-hin"
+                                class="mt-1"
+                            />
+                            <div class="flex-1">
+                                <label
+                                    for="lang-hin"
+                                    class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer"
+                                >
+                                    <span class="flex items-center">
+                                        🇮🇳 हिंदी (Hindi)
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <input
+                                type="radio"
+                                name="ocr_language"
+                                value="spa"
+                                id="lang-spa"
+                                class="mt-1"
+                            />
+                            <div class="flex-1">
+                                <label
+                                    for="lang-spa"
+                                    class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer"
+                                >
+                                    <span class="flex items-center">
+                                        🇪🇸 Español (Spanish)
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <input
+                                type="radio"
+                                name="ocr_language"
+                                value="fra"
+                                id="lang-fra"
+                                class="mt-1"
+                            />
+                            <div class="flex-1">
+                                <label
+                                    for="lang-fra"
+                                    class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer"
+                                >
+                                    <span class="flex items-center">
+                                        🇫🇷 Français (French)
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <input
+                                type="radio"
+                                name="ocr_language"
+                                value="deu"
+                                id="lang-deu"
+                                class="mt-1"
+                            />
+                            <div class="flex-1">
+                                <label
+                                    for="lang-deu"
+                                    class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer"
+                                >
+                                    <span class="flex items-center">
+                                        🇩🇪 Deutsch (German)
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <input
+                                type="radio"
+                                name="ocr_language"
+                                value="ara"
+                                id="lang-ara"
+                                class="mt-1"
+                            />
+                            <div class="flex-1">
+                                <label
+                                    for="lang-ara"
+                                    class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer"
+                                >
+                                    <span class="flex items-center">
+                                        🇸🇦 العربية (Arabic)
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <input
+                                type="radio"
+                                name="ocr_language"
+                                value="chi_sim"
+                                id="lang-chi"
+                                class="mt-1"
+                            />
+                            <div class="flex-1">
+                                <label
+                                    for="lang-chi"
+                                    class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer"
+                                >
+                                    <span class="flex items-center">
+                                        🇨🇳 中文 (Chinese)
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <input
+                                type="radio"
+                                name="ocr_language"
+                                value="jpn"
+                                id="lang-jpn"
+                                class="mt-1"
+                            />
+                            <div class="flex-1">
+                                <label
+                                    for="lang-jpn"
+                                    class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer"
+                                >
+                                    <span class="flex items-center">
+                                        🇯🇵 日本語 (Japanese)
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <input
+                                type="radio"
+                                name="ocr_language"
+                                value="kor"
+                                id="lang-kor"
+                                class="mt-1"
+                            />
+                            <div class="flex-1">
+                                <label
+                                    for="lang-kor"
+                                    class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer"
+                                >
+                                    <span class="flex items-center">
+                                        🇰🇷 한국어 (Korean)
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <input
+                                type="radio"
+                                name="ocr_language"
+                                value="rus"
+                                id="lang-rus"
+                                class="mt-1"
+                            />
+                            <div class="flex-1">
+                                <label
+                                    for="lang-rus"
+                                    class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer"
+                                >
+                                    <span class="flex items-center">
+                                        🇷🇺 Русский (Russian)
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Output Format Selection -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h3
+                        class="text-lg font-semibold text-gray-900 dark:text-white mb-3"
+                    >
+                        <svg
+                            class="w-5 h-5 inline mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            ></path>
+                        </svg>
+                        Output Format
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="flex items-center space-x-3">
+                            <input
+                                type="radio"
+                                name="output_format"
+                                value="txt"
+                                id="format-txt"
+                                class="mt-1"
+                                checked
+                            />
+                            <div class="flex-1">
+                                <label
+                                    for="format-txt"
+                                    class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer"
+                                >
+                                    <span class="flex items-center">
+                                        <svg
+                                            class="w-4 h-4 mr-2 text-gray-500"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                            ></path>
+                                        </svg>
+                                        Plain Text (.txt)
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <input
+                                type="radio"
+                                name="output_format"
+                                value="docx"
+                                id="format-docx"
+                                class="mt-1"
+                            />
+                            <div class="flex-1">
+                                <label
+                                    for="format-docx"
+                                    class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer"
+                                >
+                                    <span class="flex items-center">
+                                        <svg
+                                            class="w-4 h-4 mr-2 text-blue-500"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                            ></path>
+                                        </svg>
+                                        Word Document (.docx)
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <input
+                                type="radio"
+                                name="output_format"
+                                value="pdf"
+                                id="format-pdf"
+                                class="mt-1"
+                            />
+                            <div class="flex-1">
+                                <label
+                                    for="format-pdf"
+                                    class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer"
+                                >
+                                    <span class="flex items-center">
+                                        <svg
+                                            class="w-4 h-4 mr-2 text-red-500"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                                            ></path>
+                                        </svg>
+                                        PDF Document (.pdf)
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Processing Options -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h3
+                        class="text-lg font-semibold text-gray-900 dark:text-white mb-3"
+                    >
+                        <svg
+                            class="w-5 h-5 inline mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                            ></path>
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                            ></path>
+                        </svg>
+                        Processing Options
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex items-center">
+                            <input
+                                type="checkbox"
+                                name="remove_noise"
+                                id="remove-noise"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                checked
+                            />
+                            <label
+                                for="remove-noise"
+                                class="ml-2 text-sm text-gray-700 dark:text-gray-300"
+                                >Remove image noise</label
+                            >
+                        </div>
+                        <div class="flex items-center">
+                            <input
+                                type="checkbox"
+                                name="enhance_contrast"
+                                id="enhance-contrast"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                checked
+                            />
+                            <label
+                                for="enhance-contrast"
+                                class="ml-2 text-sm text-gray-700 dark:text-gray-300"
+                                >Enhance contrast</label
+                            >
+                        </div>
+                        <div class="flex items-center">
+                            <input
+                                type="checkbox"
+                                name="preserve_formatting"
+                                id="preserve-formatting"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                checked
+                            />
+                            <label
+                                for="preserve-formatting"
+                                class="ml-2 text-sm text-gray-700 dark:text-gray-300"
+                                >Preserve formatting</label
+                            >
+                        </div>
+                        <div class="flex items-center">
+                            <input
+                                type="checkbox"
+                                name="detect_tables"
+                                id="detect-tables"
+                                class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            />
+                            <label
+                                for="detect-tables"
+                                class="ml-2 text-sm text-gray-700 dark:text-gray-300"
+                                >Detect tables</label
+                            >
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button
+                        type="submit"
+                        class="btn btn-primary px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
+                    >
+                        <svg
+                            class="w-5 h-5 inline mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                            ></path>
+                        </svg>
+                        Extract Text
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Features Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <div
+                class="feature-card bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6"
+            >
+                <div class="flex items-center mb-4">
+                    <svg
+                        class="w-8 h-8 text-blue-500 mr-3"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"
+                        ></path>
+                    </svg>
+                    <h3
+                        class="text-lg font-semibold text-gray-900 dark:text-white"
+                    >
+                        Multi-Language Support
+                    </h3>
+                </div>
+                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                    <li class="flex items-center">
+                        <svg
+                            class="w-4 h-4 text-green-500 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 13l4 4L19 7"
+                            ></path>
+                        </svg>
+                        Top 10 global languages supported
+                    </li>
+                    <li class="flex items-center">
+                        <svg
+                            class="w-4 h-4 text-green-500 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 13l4 4L19 7"
+                            ></path>
+                        </svg>
+                        Hindi and multilingual OCR
+                    </li>
+                    <li class="flex items-center">
+                        <svg
+                            class="w-4 h-4 text-green-500 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 13l4 4L19 7"
+                            ></path>
+                        </svg>
+                        Automatic language detection
+                    </li>
+                    <li class="flex items-center">
+                        <svg
+                            class="w-4 h-4 text-green-500 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 13l4 4L19 7"
+                            ></path>
+                        </svg>
+                        Handwritten text recognition
+                    </li>
+                </ul>
+            </div>
+
+            <div
+                class="feature-card bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6"
+            >
+                <div class="flex items-center mb-4">
+                    <svg
+                        class="w-8 h-8 text-purple-500 mr-3"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                    </svg>
+                    <h3
+                        class="text-lg font-semibold text-gray-900 dark:text-white"
+                    >
+                        High Accuracy
+                    </h3>
+                </div>
+                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                    <li class="flex items-center">
+                        <svg
+                            class="w-4 h-4 text-green-500 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 13l4 4L19 7"
+                            ></path>
+                        </svg>
+                        95-99% accuracy for printed text
+                    </li>
+                    <li class="flex items-center">
+                        <svg
+                            class="w-4 h-4 text-green-500 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 13l4 4L19 7"
+                            ></path>
+                        </svg>
+                        Advanced image preprocessing
+                    </li>
+                    <li class="flex items-center">
+                        <svg
+                            class="w-4 h-4 text-green-500 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 13l4 4L19 7"
+                            ></path>
+                        </svg>
+                        Smart noise reduction
+                    </li>
+                    <li class="flex items-center">
+                        <svg
+                            class="w-4 h-4 text-green-500 mr-2"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M5 13l4 4L19 7"
+                            ></path>
+                        </svg>
+                        Format preservation
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Processing Modal -->
+<div
+    id="processing-modal"
+    class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center"
+>
+    <div
+        class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm mx-4 text-center"
+    >
+        <div class="mb-4">
+            <div class="spinner mx-auto"></div>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            Processing Text
+        </h3>
+        <p
+            id="processing-message"
+            class="text-gray-600 dark:text-gray-300 mb-4"
+        >
+            Please wait while we extract text from your file...
+        </p>
+        <div id="progress-container" class="mb-4">
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div
+                    id="progress-bar"
+                    class="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style="width: 0%"
+                ></div>
+            </div>
+            <p
+                id="progress-text"
+                class="text-sm text-gray-500 dark:text-gray-400 mt-2"
+            >
+                0% complete
+            </p>
+        </div>
+        <p class="text-xs text-gray-400 dark:text-gray-500">
+            This may take a few moments depending on file size and complexity.
+        </p>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div
+    id="success-modal"
+    class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center"
+>
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-4">
+        <div class="flex items-center space-x-3 mb-4">
+            <div
+                class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center"
+            >
+                <svg
+                    class="w-6 h-6 text-green-600 dark:text-green-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 13l4 4L19 7"
+                    ></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                Text Extraction Complete!
+            </h3>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            Your text has been successfully extracted. The download will start
+            automatically.
+        </p>
+        <div class="flex justify-end space-x-3">
+            <button
+                id="close-success"
+                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+            >
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div
+    id="error-modal"
+    class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center"
+>
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-4">
+        <div class="flex items-center space-x-3 mb-4">
+            <div
+                class="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center"
+            >
+                <svg
+                    class="w-6 h-6 text-red-600 dark:text-red-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    ></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                Extraction Failed
+            </h3>
+        </div>
+        <p id="error-message" class="text-gray-600 dark:text-gray-300 mb-6"></p>
+        <div class="flex justify-end">
+            <button
+                id="close-error"
+                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+<script
+    src="{{ url_for('static', filename='js/text_ocr_converters/text_ocr.js') }}"
+    defer
+></script>
+{% endblock %}

@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+
+{% block title %}Image Converter - Cropio{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='converter.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='image_converter/image_converter.css') }}">
+
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                <svg class="w-12 h-12 mx-auto mb-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                Image Converter
+            </h1>
+            <p class="text-xl text-gray-600 dark:text-gray-300">
+                Convert your images between JPG, PNG, BMP, TIFF, GIF, and WEBP formats with editing options
+            </p>
+        </div>
+
+        <!-- Main Converter Section -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                <svg class="w-6 h-6 inline mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                Convert Images
+            </h2>
+            <p class="text-gray-600 dark:text-gray-300 mb-6">
+                Upload your images and convert them to different formats with optional resizing, compression, and editing features.
+            </p>
+            
+            <form method="POST" enctype="multipart/form-data" class="space-y-6" id="image-converter-form">
+                <input type="hidden" name="conversion_type" value="image_converter">
+                
+                <div class="upload-area" id="image-upload-area">
+                    <input type="file" name="files" id="image-files" accept=".jpg,.jpeg,.png,.bmp,.tiff,.gif,.webp,.tif" class="file-input" multiple required>
+                    <label for="image-files" class="upload-label">
+                        <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <span class="upload-text">Drop your images here or click to browse</span>
+                        <span class="upload-subtext">JPG, PNG, BMP, TIFF, GIF, WEBP supported (Max 25MB each)<br>
+                        <small class="text-gray-400">Note: If multiple files are uploaded, only the first converted file will be downloaded</small></span>
+                    </label>
+                </div>
+
+                <!-- Output Format Selection -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2h2a2 2 0 002-2z"></path>
+                        </svg>
+                        Output Format
+                    </h3>
+                    
+                    <!-- Format Selection -->
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        <div class="flex items-center space-x-3">
+                            <input type="radio" name="output_format" value="jpg" id="format-jpg" class="mt-1" checked>
+                            <div class="flex-1">
+                                <label for="format-jpg" class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+                                    <span class="flex items-center">
+                                        <svg class="w-4 h-4 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        JPG
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3">
+                            <input type="radio" name="output_format" value="png" id="format-png" class="mt-1">
+                            <div class="flex-1">
+                                <label for="format-png" class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+                                    <span class="flex items-center">
+                                        <svg class="w-4 h-4 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        PNG
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3">
+                            <input type="radio" name="output_format" value="webp" id="format-webp" class="mt-1">
+                            <div class="flex-1">
+                                <label for="format-webp" class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+                                    <span class="flex items-center">
+                                        <svg class="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        WEBP
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3">
+                            <input type="radio" name="output_format" value="bmp" id="format-bmp" class="mt-1">
+                            <div class="flex-1">
+                                <label for="format-bmp" class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+                                    <span class="flex items-center">
+                                        <svg class="w-4 h-4 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        BMP
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3">
+                            <input type="radio" name="output_format" value="tiff" id="format-tiff" class="mt-1">
+                            <div class="flex-1">
+                                <label for="format-tiff" class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+                                    <span class="flex items-center">
+                                        <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        TIFF
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center space-x-3">
+                            <input type="radio" name="output_format" value="gif" id="format-gif" class="mt-1">
+                            <div class="flex-1">
+                                <label for="format-gif" class="block text-sm font-medium text-gray-900 dark:text-white cursor-pointer">
+                                    <span class="flex items-center">
+                                        <svg class="w-4 h-4 mr-2 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                        GIF
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Processing Options -->
+                <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        Processing Options
+                    </h3>
+                    
+                    <!-- Resize Options -->
+                    <div class="mb-4">
+                        <h4 class="text-md font-medium text-gray-900 dark:text-white mb-2">Resize</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="resize-width" class="block text-sm text-gray-700 dark:text-gray-300 mb-1">Width (px)</label>
+                                <input type="number" name="resize_width" id="resize-width" class="form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Auto">
+                            </div>
+                            <div>
+                                <label for="resize-height" class="block text-sm text-gray-700 dark:text-gray-300 mb-1">Height (px)</label>
+                                <input type="number" name="resize_height" id="resize-height" class="form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="Auto">
+                            </div>
+                            <div>
+                                <label for="resize-percentage" class="block text-sm text-gray-700 dark:text-gray-300 mb-1">Scale (%)</label>
+                                <input type="number" name="resize_percentage" id="resize-percentage" min="1" max="500" class="form-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="100">
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <input type="checkbox" name="maintain_aspect_ratio" id="maintain-aspect" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked>
+                            <label for="maintain-aspect" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Maintain aspect ratio</label>
+                        </div>
+                    </div>
+                    
+                    <!-- Quality & Effects Options -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="quality" class="block text-sm text-gray-700 dark:text-gray-300 mb-1">Quality</label>
+                            <select name="quality" id="quality" class="form-select w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="high">High (95%)</option>
+                                <option value="medium" selected>Medium (85%)</option>
+                                <option value="low">Low (70%)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="rotation" class="block text-sm text-gray-700 dark:text-gray-300 mb-1">Rotation</label>
+                            <select name="rotation" id="rotation" class="form-select w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                <option value="0">No Rotation</option>
+                                <option value="90">90° Clockwise</option>
+                                <option value="180">180°</option>
+                                <option value="270">270° Clockwise</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div class="flex items-center">
+                            <input type="checkbox" name="convert_to_grayscale" id="grayscale" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            <label for="grayscale" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Convert to grayscale</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" name="preserve_metadata" id="preserve-metadata" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500" checked>
+                            <label for="preserve-metadata" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Preserve EXIF metadata</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button type="submit" class="btn btn-primary px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
+                        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg>
+                        Convert Images
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Features Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <div class="feature-card bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                <div class="flex items-center mb-4">
+                    <svg class="w-8 h-8 text-blue-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Multiple Formats</h3>
+                </div>
+                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                    <li class="flex items-center">
+                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        JPG for photos and web
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        PNG for transparency
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        WEBP for modern web
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        TIFF, BMP, GIF support
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="feature-card bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                <div class="flex items-center mb-4">
+                    <svg class="w-8 h-8 text-purple-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Advanced Features</h3>
+                </div>
+                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                    <li class="flex items-center">
+                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Resize and compress
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Rotate and flip
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Grayscale conversion
+                    </li>
+                    <li class="flex items-center">
+                        <svg class="w-4 h-4 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        Batch processing
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Processing Modal -->
+<div id="processing-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm mx-4 text-center">
+        <div class="mb-4">
+            <div class="spinner mx-auto"></div>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Converting Images</h3>
+        <p id="processing-message" class="text-gray-600 dark:text-gray-300 mb-4">
+            Please wait while we convert your images...
+        </p>
+        <div id="progress-container" class="mb-4">
+            <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <p id="progress-text" class="text-sm text-gray-500 dark:text-gray-400 mt-2">0% complete</p>
+        </div>
+        <p class="text-xs text-gray-400 dark:text-gray-500">
+            Processing time depends on image size and number of files.
+        </p>
+    </div>
+</div>
+
+<!-- Success Modal -->
+<div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-4">
+        <div class="flex items-center space-x-3 mb-4">
+            <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Conversion Complete!</h3>
+        </div>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">
+            Your images have been successfully converted. The download will start automatically.
+        </p>
+        <div class="flex justify-end space-x-3">
+            <button id="close-success" class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+                Close
+            </button>
+            <button id="download-again" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                Download Again
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div id="error-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md mx-4">
+        <div class="flex items-center space-x-3 mb-4">
+            <div class="w-10 h-10 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
+                <svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Conversion Failed</h3>
+        </div>
+        <p id="error-message" class="text-gray-600 dark:text-gray-300 mb-6"></p>
+        <div class="flex justify-end">
+            <button id="close-error" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script src="{{ url_for('static', filename='js/image_converter/image_converter.js') }}" defer></script>
+{% endblock %}

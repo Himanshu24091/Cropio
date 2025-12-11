@@ -1,0 +1,965 @@
+{% extends "base.html" %}
+
+{% block title %}Subscription - {{ current_user.username }}{% endblock %}
+
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', filename='user_dashboard/dashboard.css') }}">
+{% endblock %}
+
+{% block page_content %}
+<div class="dashboard-container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Page Header -->
+    <div class="page-header mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    ⭐ Subscription Management
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400">
+                    Manage your subscription and billing preferences
+                </p>
+            </div>
+            <div class="mt-4 sm:mt-0">
+                <a href="{{ url_for('dashboard.index') }}" class="btn-secondary">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Subscription Status -->
+    <div class="current-subscription mb-8">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2 class="card-title">Current Subscription</h2>
+                <div class="subscription-badge {{ subscription.tier }}">
+                    {% if subscription.is_premium %}
+                        ⭐ Premium Active
+                    {% else %}
+                        🆓 Free Account
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="subscription-details grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="detail-item">
+                        <div class="detail-label">Plan</div>
+                        <div class="detail-value">{{ subscription.tier.title() }}</div>
+                    </div>
+                    
+                    {% if subscription.start_date %}
+                    <div class="detail-item">
+                        <div class="detail-label">Started</div>
+                        <div class="detail-value">{{ subscription.start_date.strftime('%B %d, %Y') }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if subscription.end_date %}
+                    <div class="detail-item">
+                        <div class="detail-label">
+                            {% if subscription.is_premium %}
+                                Expires
+                            {% else %}
+                                Expired
+                            {% endif %}
+                        </div>
+                        <div class="detail-value">
+                            {{ subscription.end_date.strftime('%B %d, %Y') }}
+                            {% if subscription.days_remaining is not none %}
+                                <span class="days-remaining 
+                                    {% if subscription.days_remaining <= 7 %}text-red-600 dark:text-red-400
+                                    {% elif subscription.days_remaining <= 30 %}text-yellow-600 dark:text-yellow-400
+                                    {% else %}text-green-600 dark:text-green-400{% endif %}">
+                                    ({{ subscription.days_remaining }} days)
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="detail-item">
+                        <div class="detail-label">Status</div>
+                        <div class="detail-value">
+                            {% if subscription.is_premium %}
+                                <span class="text-green-600 dark:text-green-400 font-semibold">✓ Active</span>
+                            {% else %}
+                                <span class="text-gray-600 dark:text-gray-400">Basic</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                {% if subscription.is_premium and subscription.days_remaining is not none and subscription.days_remaining <= 7 %}
+                <div class="renewal-alert mt-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                    <div class="flex items-start">
+                        <div class="text-yellow-600 dark:text-yellow-400 mr-3">⚠️</div>
+                        <div>
+                            <h3 class="font-semibold text-yellow-800 dark:text-yellow-300">Subscription Expiring Soon</h3>
+                            <p class="text-yellow-700 dark:text-yellow-400 mt-1">
+                                Your Premium subscription expires in {{ subscription.days_remaining }} days. 
+                                Renew now to continue enjoying unlimited conversions!
+                            </p>
+                            <button onclick="renewSubscription()" class="mt-3 btn-warning">
+                                Renew Subscription
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing Plans -->
+    {% if not subscription.is_premium %}
+    <div class="pricing-section mb-8">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                Upgrade to Premium
+            </h2>
+            <p class="text-gray-600 dark:text-gray-400 text-lg">
+                Unlock unlimited conversions and advanced features
+            </p>
+        </div>
+        
+        <div class="pricing-cards grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <!-- Free Plan -->
+            <div class="pricing-card {{ 'current' if not subscription.is_premium else '' }}">
+                <div class="pricing-header">
+                    <h3 class="pricing-title">Free</h3>
+                    <div class="pricing-price">
+                        <span class="price-amount">₹0</span>
+                        <span class="price-period">/month</span>
+                    </div>
+                    {% if not subscription.is_premium %}
+                        <div class="current-plan-badge">Current Plan</div>
+                    {% endif %}
+                </div>
+                
+                <div class="pricing-features">
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>{{ limits.free.daily_conversions }} conversions per day</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>Up to {{ limits.free.max_file_size }} file size</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>All basic conversion tools</span>
+                    </div>
+                    <div class="feature-item disabled">
+                        <span class="feature-icon">✗</span>
+                        <span>AI-powered features</span>
+                    </div>
+                    <div class="feature-item disabled">
+                        <span class="feature-icon">✗</span>
+                        <span>Priority support</span>
+                    </div>
+                </div>
+                
+                <div class="pricing-footer">
+                    <button class="btn-secondary w-full" disabled>
+                        {% if not subscription.is_premium %}Current Plan{% else %}Downgrade{% endif %}
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Premium Plan -->
+            <div class="pricing-card premium {{ 'recommended' if not subscription.is_premium else '' }}">
+                {% if not subscription.is_premium %}
+                <div class="recommended-badge">Recommended</div>
+                {% endif %}
+                
+                <div class="pricing-header">
+                    <h3 class="pricing-title">Premium</h3>
+                    <div class="pricing-price">
+                        <span class="price-amount">₹{{ premium_price }}</span>
+                        <span class="price-period">/month</span>
+                    </div>
+                </div>
+                
+                <div class="pricing-features">
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>{{ limits.premium.daily_conversions }} conversions</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>Up to {{ limits.premium.max_file_size }} file size</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>All conversion tools + advanced features</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>AI-powered background removal</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>Advanced OCR (multi-language)</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>Batch processing capabilities</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>Priority email support</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">✓</span>
+                        <span>No daily limits</span>
+                    </div>
+                </div>
+                
+                <div class="pricing-footer">
+                    {% if not subscription.is_premium %}
+                        <button onclick="upgradeToPresium()" class="btn-premium w-full">
+                            ⭐ Upgrade to Premium
+                        </button>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mt-2 text-center">
+                            30-day money-back guarantee
+                        </p>
+                    {% else %}
+                        <button class="btn-success w-full" disabled>
+                            ✓ Current Plan
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Feature Comparison -->
+    <div class="feature-comparison mb-8">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2 class="card-title">Feature Comparison</h2>
+            </div>
+            <div class="card-content">
+                <div class="comparison-table overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-gray-200 dark:border-gray-700">
+                                <th class="text-left py-3 px-4 font-semibold text-gray-900 dark:text-white">Feature</th>
+                                <th class="text-center py-3 px-4 font-semibold text-gray-900 dark:text-white">Free</th>
+                                <th class="text-center py-3 px-4 font-semibold text-gray-900 dark:text-white">Premium</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-gray-100 dark:border-gray-800">
+                                <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Daily Conversions</td>
+                                <td class="py-3 px-4 text-center text-gray-600 dark:text-gray-400">{{ limits.free.daily_conversions }}</td>
+                                <td class="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">{{ limits.premium.daily_conversions }}</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 dark:border-gray-800">
+                                <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Maximum File Size</td>
+                                <td class="py-3 px-4 text-center text-gray-600 dark:text-gray-400">{{ limits.free.max_file_size }}</td>
+                                <td class="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">{{ limits.premium.max_file_size }}</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 dark:border-gray-800">
+                                <td class="py-3 px-4 text-gray-700 dark:text-gray-300">AI Features</td>
+                                <td class="py-3 px-4 text-center text-red-500 dark:text-red-400">{{ limits.free.ai_features }}</td>
+                                <td class="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">{{ limits.premium.ai_features }}</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 dark:border-gray-800">
+                                <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Priority Support</td>
+                                <td class="py-3 px-4 text-center text-red-500 dark:text-red-400">{{ limits.free.priority_support }}</td>
+                                <td class="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">{{ limits.premium.priority_support }}</td>
+                            </tr>
+                            <tr class="border-b border-gray-100 dark:border-gray-800">
+                                <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Batch Processing</td>
+                                <td class="py-3 px-4 text-center text-red-500 dark:text-red-400">Limited</td>
+                                <td class="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">Unlimited</td>
+                            </tr>
+                            <tr>
+                                <td class="py-3 px-4 text-gray-700 dark:text-gray-300">Conversion History</td>
+                                <td class="py-3 px-4 text-center text-gray-600 dark:text-gray-400">30 days</td>
+                                <td class="py-3 px-4 text-center text-green-600 dark:text-green-400 font-semibold">Unlimited</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Methods (Premium Users) -->
+    {% if subscription.is_premium %}
+    <div class="payment-methods mb-8">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2 class="card-title">Payment Methods</h2>
+                <button onclick="addPaymentMethod()" class="btn-secondary">
+                    + Add Method
+                </button>
+            </div>
+            <div class="card-content">
+                <div class="payment-list">
+                    <!-- Placeholder for payment methods -->
+                    <div class="payment-item">
+                        <div class="payment-icon">💳</div>
+                        <div class="payment-details">
+                            <div class="payment-type">Credit Card</div>
+                            <div class="payment-info">•••• •••• •••• 1234</div>
+                        </div>
+                        <div class="payment-status">
+                            <span class="status-badge status-active">Primary</span>
+                        </div>
+                        <div class="payment-actions">
+                            <button class="btn-link text-blue-600">Edit</button>
+                            <button class="btn-link text-red-600">Remove</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="billing-info mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">Next Billing Date</h4>
+                    <p class="text-blue-700 dark:text-blue-400">
+                        Your next payment of ₹{{ premium_price }} will be charged on 
+                        {% if subscription.end_date %}
+                            {{ subscription.end_date.strftime('%B %d, %Y') }}
+                        {% else %}
+                            the renewal date
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Billing History -->
+    {% if subscription.is_premium %}
+    <div class="billing-history mb-8">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2 class="card-title">Billing History</h2>
+                <button onclick="downloadInvoices()" class="btn-secondary">
+                    📄 Download All
+                </button>
+            </div>
+            <div class="card-content">
+                <div class="billing-list">
+                    <!-- Placeholder billing entries -->
+                    <div class="billing-item">
+                        <div class="billing-date">{{ subscription.start_date.strftime('%B %d, %Y') if subscription.start_date else 'Unknown' }}</div>
+                        <div class="billing-description">Premium Subscription - Monthly</div>
+                        <div class="billing-amount">₹{{ premium_price }}</div>
+                        <div class="billing-status">
+                            <span class="status-badge status-completed">✓ Paid</span>
+                        </div>
+                        <div class="billing-actions">
+                            <button class="btn-link">📄 Invoice</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="empty-state-small mt-4">
+                    <p class="text-gray-500 dark:text-gray-400 text-center">
+                        Additional billing history will appear here as you continue your subscription.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Subscription Actions -->
+    <div class="subscription-actions">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2 class="card-title">Manage Subscription</h2>
+            </div>
+            <div class="card-content">
+                <div class="action-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {% if not subscription.is_premium %}
+                        <button onclick="upgradeToPresium()" class="action-btn action-upgrade">
+                            <div class="action-icon">⭐</div>
+                            <div class="action-content">
+                                <div class="action-title">Upgrade to Premium</div>
+                                <div class="action-description">Unlock all features</div>
+                            </div>
+                        </button>
+                    {% else %}
+                        <button onclick="renewSubscription()" class="action-btn action-renew">
+                            <div class="action-icon">🔄</div>
+                            <div class="action-content">
+                                <div class="action-title">Renew Subscription</div>
+                                <div class="action-description">Extend your Premium access</div>
+                            </div>
+                        </button>
+                        
+                        <button onclick="cancelSubscription()" class="action-btn action-cancel">
+                            <div class="action-icon">⏸️</div>
+                            <div class="action-content">
+                                <div class="action-title">Cancel Subscription</div>
+                                <div class="action-description">End recurring payments</div>
+                            </div>
+                        </button>
+                    {% endif %}
+                    
+                    <a href="mailto:{{ config.SUPPORT_EMAIL or 'support@cropio.com' }}" class="action-btn action-support">
+                        <div class="action-icon">💬</div>
+                        <div class="action-content">
+                            <div class="action-title">Contact Support</div>
+                            <div class="action-description">Get help with billing</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Section -->
+    <div class="faq-section mt-8">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h2 class="card-title">Frequently Asked Questions</h2>
+            </div>
+            <div class="card-content">
+                <div class="faq-list space-y-4">
+                    <div class="faq-item">
+                        <div class="faq-question">What happens when I upgrade to Premium?</div>
+                        <div class="faq-answer">
+                            You'll immediately get unlimited daily conversions, larger file size limits (up to 5GB), 
+                            and access to AI-powered features like background removal and advanced OCR.
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">Can I cancel my subscription anytime?</div>
+                        <div class="faq-answer">
+                            Yes! You can cancel your Premium subscription at any time. You'll continue to have 
+                            Premium access until the end of your current billing period.
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">What payment methods do you accept?</div>
+                        <div class="faq-answer">
+                            We accept all major credit cards, debit cards, UPI, and net banking through 
+                            secure payment gateways (Razorpay for India, Stripe internationally).
+                        </div>
+                    </div>
+                    
+                    <div class="faq-item">
+                        <div class="faq-question">Is there a refund policy?</div>
+                        <div class="faq-answer">
+                            Yes! We offer a 30-day money-back guarantee. If you're not satisfied with 
+                            Premium features, contact us within 30 days for a full refund.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Modal (Hidden by default) -->
+<div id="paymentModal" class="modal hidden">
+    <div class="modal-overlay" onclick="closePaymentModal()"></div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Upgrade to Premium</h3>
+            <button onclick="closePaymentModal()" class="modal-close">×</button>
+        </div>
+        <div class="modal-body" id="paymentModalBody">
+            <div class="payment-summary mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h4 class="font-semibold mb-2">Order Summary</h4>
+                <div class="flex justify-between">
+                    <span>Cropio Premium (Monthly)</span>
+                    <span class="font-semibold">₹{{ premium_price }}</span>
+                </div>
+                <div class="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                    Billed monthly, cancel anytime
+                </div>
+            </div>
+            
+            <div class="payment-options">
+                <button onclick="payWithRazorpay()" class="payment-option-btn">
+                    <div class="payment-logo">🇮🇳</div>
+                    <div class="payment-details">
+                        <div class="payment-name">Pay with Razorpay</div>
+                        <div class="payment-description">UPI, Cards, Net Banking</div>
+                    </div>
+                </button>
+                
+                <button onclick="payWithStripe()" class="payment-option-btn">
+                    <div class="payment-logo">💳</div>
+                    <div class="payment-details">
+                        <div class="payment-name">Pay with Stripe</div>
+                        <div class="payment-description">International Cards</div>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="payment-security mt-4 text-center">
+                <p class="text-sm text-gray-600 dark:text-gray-400">
+                    🔒 Secure payment processing. Your data is encrypted and protected.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    /**
+     * Upgrade to Premium
+     */
+    function upgradeToPresium() {
+        document.getElementById('paymentModal').classList.remove('hidden');
+    }
+    
+    /**
+     * Close payment modal
+     */
+    function closePaymentModal() {
+        document.getElementById('paymentModal').classList.add('hidden');
+    }
+    
+    /**
+     * Renew subscription
+     */
+    function renewSubscription() {
+        // Same as upgrade for now
+        upgradeToPresium();
+    }
+    
+    /**
+     * Cancel subscription
+     */
+    function cancelSubscription() {
+        if (confirm('Are you sure you want to cancel your Premium subscription? You will lose access to Premium features at the end of your current billing period.')) {
+            // TODO: Implement cancellation logic
+            showSuccess('Subscription cancellation request submitted. You will receive a confirmation email.');
+        }
+    }
+    
+    /**
+     * Pay with Razorpay (Indian payment gateway)
+     */
+    function payWithRazorpay() {
+        // TODO: Implement Razorpay integration
+        alert('Razorpay payment integration will be implemented in Phase 3');
+    }
+    
+    /**
+     * Pay with Stripe (International)
+     */
+    function payWithStripe() {
+        // TODO: Implement Stripe integration
+        alert('Stripe payment integration will be implemented in Phase 3');
+    }
+    
+    /**
+     * Add payment method
+     */
+    function addPaymentMethod() {
+        // TODO: Implement payment method management
+        alert('Payment method management will be implemented in Phase 3');
+    }
+    
+    /**
+     * Download invoices
+     */
+    function downloadInvoices() {
+        // TODO: Implement invoice download
+        alert('Invoice download will be implemented in Phase 3');
+    }
+    
+    /**
+     * Show success message
+     */
+    function showSuccess(message) {
+        const div = document.createElement('div');
+        div.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+        div.textContent = message;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 3000);
+    }
+    
+    /**
+     * Show error message
+     */
+    function showError(message) {
+        const div = document.createElement('div');
+        div.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+        div.textContent = message;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 5000);
+    }
+</script>
+
+<style>
+/* Subscription-specific styles */
+.pricing-cards {
+    margin: 2rem 0;
+}
+
+.pricing-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    padding: 2rem;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.dark .pricing-card {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: rgba(71, 85, 105, 0.5);
+}
+
+.pricing-card.current {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 1px #3b82f6;
+}
+
+.pricing-card.premium {
+    border-color: #f59e0b;
+}
+
+.pricing-card.recommended {
+    transform: scale(1.05);
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+}
+
+.recommended-badge {
+    position: absolute;
+    top: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    padding: 0.25rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.current-plan-badge {
+    background: #3b82f6;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.pricing-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.pricing-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 1rem;
+}
+
+.dark .pricing-title {
+    color: #f1f5f9;
+}
+
+.pricing-price {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+}
+
+.price-amount {
+    font-size: 3rem;
+    font-weight: 800;
+    color: #1e293b;
+}
+
+.dark .price-amount {
+    color: #f1f5f9;
+}
+
+.price-period {
+    font-size: 1rem;
+    color: #64748b;
+    margin-left: 0.5rem;
+}
+
+.dark .price-period {
+    color: #94a3b8;
+}
+
+.pricing-features {
+    margin-bottom: 2rem;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.dark .feature-item {
+    border-bottom-color: rgba(71, 85, 105, 0.3);
+}
+
+.feature-item:last-child {
+    border-bottom: none;
+}
+
+.feature-item.disabled {
+    opacity: 0.5;
+}
+
+.feature-icon {
+    width: 1.5rem;
+    margin-right: 1rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.feature-item:not(.disabled) .feature-icon {
+    color: #10b981;
+}
+
+.feature-item.disabled .feature-icon {
+    color: #ef4444;
+}
+
+.btn-premium {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    width: 100%;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btn-premium:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.btn-success {
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.btn-warning {
+    background: #f59e0b;
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-warning:hover {
+    background: #d97706;
+}
+
+/* Comparison Table */
+.comparison-table table {
+    border-collapse: collapse;
+}
+
+.comparison-table th,
+.comparison-table td {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.dark .comparison-table th,
+.dark .comparison-table td {
+    border-bottom-color: rgba(71, 85, 105, 0.5);
+}
+
+/* Action Buttons */
+.action-grid {
+    gap: 1rem;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+}
+
+.dark .action-btn {
+    background: rgba(51, 65, 85, 0.3);
+    border-color: rgba(71, 85, 105, 0.5);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.action-upgrade:hover {
+    border-color: #f59e0b;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+
+.action-renew:hover {
+    border-color: #10b981;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.action-cancel:hover {
+    border-color: #ef4444;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+.action-support:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.action-icon {
+    font-size: 2rem;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.action-title {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.dark .action-title {
+    color: #f1f5f9;
+}
+
+.action-description {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.dark .action-description {
+    color: #94a3b8;
+}
+
+/* FAQ Styles */
+.faq-item {
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 1rem;
+}
+
+.dark .faq-item {
+    border-bottom-color: rgba(71, 85, 105, 0.3);
+}
+
+.faq-item:last-child {
+    border-bottom: none;
+}
+
+.faq-question {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+}
+
+.dark .faq-question {
+    color: #f1f5f9;
+}
+
+.faq-answer {
+    color: #64748b;
+    line-height: 1.6;
+}
+
+.dark .faq-answer {
+    color: #94a3b8;
+}
+
+/* Payment Modal Styles */
+.payment-option-btn {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 1rem;
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-bottom: 0.5rem;
+}
+
+.dark .payment-option-btn {
+    background: rgba(51, 65, 85, 0.5);
+    border-color: rgba(71, 85, 105, 0.5);
+}
+
+.payment-option-btn:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+.payment-logo {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+}
+
+.payment-name {
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.dark .payment-name {
+    color: #f1f5f9;
+}
+
+.payment-description {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.dark .payment-description {
+    color: #94a3b8;
+}
+
+@media (max-width: 640px) {
+    .pricing-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .pricing-card.recommended {
+        transform: none;
+    }
+    
+    .action-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
