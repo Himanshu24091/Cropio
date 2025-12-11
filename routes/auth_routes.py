@@ -220,16 +220,23 @@ def login():
             # Login user
             login_user(user, remember=remember_me)
             
-            # TEMPORARILY DISABLED: Password strength validation (until DB migration)
-            # TODO: Re-enable after running database migration
+            # Check password strength and redirect if weak (session-based)
             try:
                 from utils.password_validator import validate_password_strength
                 password_check = validate_password_strength(password)
-                current_app.logger.debug(f'Password strength check: {password_check["score"]}/5 for user {user.username}')
-                # Validation disabled - just log for now
+                current_app.logger.debug(f'Password strength: {password_check["score"]}/5 for {user.username}')
+                
+                # If password is weak, redirect to force update page
+                if not password_check['is_strong']:
+                    session['force_password_update'] = True
+                    session['weak_password_reason'] = 'Your password does not meet our security requirements.'
+                    session['password_score'] = password_check['score']
+                    current_app.logger.warning(f'Weak password for {user.username}: score={password_check["score"]}/5')
+                    flash('Your password needs to be updated to meet our security requirements.', 'warning')
+                    return redirect(url_for('auth.force_password_update'))
             except Exception as validation_error:
-                # Silently fail - don't block login
-                current_app.logger.debug(f'Password validation error (ignored): {validation_error}')
+                # If validation fails, just log and continue
+                current_app.logger.debug(f'Password validation error: {validation_error}')
             
             # Redirect to next page or dashboard
             next_page = request.args.get('next')
