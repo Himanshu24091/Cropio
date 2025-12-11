@@ -79,6 +79,11 @@ class User(UserMixin, db.Model):
     last_failed_login = db.Column(db.DateTime, nullable=True)
     password_changed_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    # Password strength tracking (NEW)
+    password_alert_dismissed_at = db.Column(db.DateTime, nullable=True)
+    password_strength_checked = db.Column(db.Boolean, default=False, nullable=False)
+    last_password_change = db.Column(db.DateTime, nullable=True)
+    
     # Preferences
     email_notifications = db.Column(db.Boolean, default=True)
     marketing_emails = db.Column(db.Boolean, default=False)
@@ -215,6 +220,40 @@ class User(UserMixin, db.Model):
                 self.is_staff = False
             return True
         return False
+    
+    def has_weak_password(self):
+        """
+        Check if user's password is weak based on current requirements.
+        Note: This can only be checked during login when we have the plain password.
+        This flag is set during login validation.
+        """
+        return not self.password_strength_checked
+    
+    def should_show_password_alert(self):
+        """Check if weak password alert should be shown to user"""
+        if self.password_strength_checked:
+            return False  # Password is strong, no alert needed
+        
+        # Check if alert was recently dismissed
+        if self.password_alert_dismissed_at:
+            from datetime import timedelta
+            # Show alert again after 7 days
+            seven_days_ago = datetime.utcnow() - timedelta(days=7)
+            if self.password_alert_dismissed_at > seven_days_ago:
+                return False  # Alert was dismissed recently
+        
+        return True  # Show alert
+    
+    def dismiss_password_alert(self, days=7):
+        """Temporarily dismiss the weak password alert"""
+        self.password_alert_dismissed_at = datetime.utcnow()
+        db.session.commit()
+    
+    def mark_password_as_strong(self):
+        """Mark user's password as meeting strength requirements"""
+        self.password_strength_checked = True
+        self.password_alert_dismissed_at = None  # Clear any dismissal
+        db.session.commit()
     
     def __repr__(self):
         return f'<User {self.username}>'

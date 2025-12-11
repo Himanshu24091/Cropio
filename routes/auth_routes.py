@@ -84,13 +84,32 @@ def register():
         if not registration_enabled:
             errors.append('Registration is currently disabled.')
         
+        # Password strength validation - enforce strong passwords
+        import re
+        password_errors = []
+        
+        if not password:
+            password_errors.append('Password is required.')
+        else:
+            if len(password) < 8:
+                password_errors.append('Password must be at least 8 characters long.')
+            if not re.search(r'[a-z]', password):
+                password_errors.append('Password must contain at least one lowercase letter (a-z).')
+            if not re.search(r'[A-Z]', password):
+                password_errors.append('Password must contain at least one uppercase letter (A-Z).')
+            if not re.search(r'[0-9]', password):
+                password_errors.append('Password must contain at least one number (0-9).')
+            if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+                password_errors.append('Password must contain at least one special character (!@#$%^&*).')
+        
+        # Add all password errors to main errors list
+        errors.extend(password_errors)
+        
         # Basic validation
         if not username or len(username) < 3:
             errors.append('Username must be at least 3 characters long.')
         if not email or '@' not in email:
             errors.append('Please enter a valid email address.')
-        if not password or len(password) < 6:
-            errors.append('Password must be at least 6 characters long.')
         if password != confirm_password:
             errors.append('Passwords do not match.')
         
@@ -201,6 +220,26 @@ def login():
             # Login user
             login_user(user, remember=remember_me)
             
+            # NEW: Check password strength for existing users
+            from utils.password_validator import validate_password_strength
+            password_check = validate_password_strength(password)
+            
+            if not password_check['is_strong']:
+                # Password is weak - redirect to forced update page
+                session['force_password_update'] = True
+                session['weak_password_reason'] = 'Your password does not meet our new security requirements.'
+                current_app.logger.warning(
+                    f'Weak password detected for user: {user.username}, '
+                    f'score={password_check["score"]}/5, redirecting to update page'
+                )
+                flash('Your password needs to be updated to meet our new security requirements.', 'warning')
+                return redirect(url_for('auth.force_password_update'))
+            else:
+                # Password is strong - mark as checked
+                if not user.password_strength_checked:
+                    user.mark_password_as_strong()
+                    current_app.logger.info(f'Password strength verified for user: {user.username}')
+            
             # Redirect to next page or dashboard
             next_page = request.args.get('next')
             if next_page:
@@ -251,6 +290,76 @@ def verify_email():
         flash('Failed to verify email. Please try again.', 'error')
         print(f"verify_email error: {e}")
         return redirect(url_for('auth.login'))
+
+
+@auth_bp.route('/force-password-update', methods=['GET', 'POST'])
+@login_required
+def force_password_update():
+    """Force users with weak passwords to update before accessing the site"""
+    
+    # Check if user actually needs to update password
+    if current_user.password_strength_checked:
+        # Password is already strong, redirect to dashboard
+        return redirect(url_for('main.index'))
+    
+    if request.method == 'POST':
+        current_password = request.form.get('current_password', '')
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        
+        errors = []
+        
+        # Verify current password
+        if not current_user.check_password(current_password):
+            errors.append('Current password is incorrect.')
+        
+        # Validate new password strength
+        from utils.password_validator import validate_password_strength
+        password_check = validate_password_strength(new_password)
+        if not password_check['is_strong']:
+            errors.append('New password does not meet security requirements.')
+            for req in password_check['missing_requirements']:
+                errors.append(f'  • {req}')
+        
+        # Check if passwords match
+        if new_password != confirm_password:
+            errors.append('New passwords do not match.')
+        
+        # Check if new password is different from current
+        if current_password == new_password:
+            errors.append('New password must be different from your current password.')
+        
+        if errors:
+            for error in errors:
+                flash(error, 'error')
+            from flask_wtf.csrf import generate_csrf
+            return render_template('auth/force_password_update.html', csrf_token=generate_csrf())
+        
+        # Update password
+        try:
+            current_user.set_password(new_password)
+            current_user.mark_password_as_strong()
+            current_user.last_password_change = datetime.utcnow()
+            db.session.commit()
+            
+            # Clear session flag
+            session.pop('force_password_update', None)
+            session.pop('weak_password_reason', None)
+            
+            current_app.logger.info(f'Password updated successfully for user: {current_user.username}')
+            flash('Password updated successfully! Your account is now secure.', 'success')
+            return redirect(url_for('main.index'))
+            
+        except Exception as e:
+            db.session.rollback()
+            current_app.logger.error(f'Password update failed for user {current_user.username}: {e}')
+            flash('Failed to update password. Please try again.', 'error')
+            from flask_wtf.csrf import generate_csrf
+            return render_template('auth/force_password_update.html', csrf_token=generate_csrf())
+    
+    # GET request - show the form
+    from flask_wtf.csrf import generate_csrf
+    return render_template('auth/force_password_update.html', csrf_token=generate_csrf())
 
 @auth_bp.route('/request-password-reset', methods=['GET', 'POST'])
 @rate_limit(requests_per_minute=3, per_user=False)  # NEW: Rate limit password reset requests
