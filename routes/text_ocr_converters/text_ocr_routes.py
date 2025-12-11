@@ -24,8 +24,8 @@ except Exception as e:
 try:
     import pytesseract
     # Ensure Tesseract path is set
-    if not pytesseract.pytesseract.pytesseract_cmd or pytesseract.pytesseract.pytesseract_cmd == 'tesseract':
-        pytesseract.pytesseract.pytesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+    if not pytesseract.pytesseract.tesseract_cmd or pytesseract.pytesseract.tesseract_cmd == 'tesseract':
+        pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
     TESSERACT_AVAILABLE = True
 except ImportError:
     TESSERACT_AVAILABLE = False
