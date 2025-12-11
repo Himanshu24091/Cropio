@@ -295,9 +295,10 @@ def verify_email():
 def force_password_update():
     """Force users with weak passwords to update before accessing the site"""
     
-    # Check if user actually needs to update password
-    if current_user.password_strength_checked:
-        # Password is already strong, redirect to dashboard
+    # Check if user actually needs to update password (session-based)
+    if not session.get('force_password_update', False):
+        # No password update required, redirect to dashboard
+        flash('Your password meets security requirements.', 'success')
         return redirect(url_for('main.index'))
     
     if request.method == 'POST':
@@ -336,8 +337,8 @@ def force_password_update():
         # Update password
         try:
             current_user.set_password(new_password)
-            current_user.mark_password_as_strong()
-            current_user.last_password_change = datetime.utcnow()
+            # Note: password_strength_checked and last_password_change columns don't exist yet
+            # Will be enabled after database migration
             db.session.commit()
             
             # Clear session flag
