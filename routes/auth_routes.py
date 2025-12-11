@@ -235,10 +235,14 @@ def login():
                 flash('Your password needs to be updated to meet our new security requirements.', 'warning')
                 return redirect(url_for('auth.force_password_update'))
             else:
-                # Password is strong - mark as checked
-                if not user.password_strength_checked:
-                    user.mark_password_as_strong()
-                    current_app.logger.info(f'Password strength verified for user: {user.username}')
+                # Password is strong - mark as checked (with error handling)
+                try:
+                    if hasattr(user, 'password_strength_checked') and not user.password_strength_checked:
+                        user.mark_password_as_strong()
+                        current_app.logger.info(f'Password strength verified for user: {user.username}')
+                except Exception as e:
+                    # Silently fail if columns don't exist yet
+                    current_app.logger.debug(f'Could not mark password as strong: {e}')
             
             # Redirect to next page or dashboard
             next_page = request.args.get('next')
