@@ -360,6 +360,28 @@ def download_converted_file(conversion_id):
             except:
                 pass
         
+        
+        # Track analytics for logged-in users
+        if current_user.is_authenticated:
+            try:
+                from utils.analytics_tracker import track_feature
+                
+                # Determine conversion direction
+                if output_format == 'mp4':
+                    feature_name = 'gif_to_mp4'
+                else:
+                    feature_name = 'mp4_to_gif'
+                
+                track_feature(
+                    feature_name=feature_name,
+                    feature_category='video_conversion',
+                    extra_metadata={'conversion_id': conversion_id, 'output_format': output_format},
+                    success=True
+                )
+                print(f"[ANALYTICS] Tracked: {feature_name}")
+            except Exception as e:
+                print(f"[ANALYTICS] Error: {e}")
+        
         # Schedule cleanup after download
         import threading
         cleanup_thread = threading.Thread(target=cleanup_after_send, daemon=True)

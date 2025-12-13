@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block page_title %}{% endblock %} - Cropio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Theme initialization */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .legal-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .legal-container {
+            background: #1f2937;
+            color: #f3f4f6;
+        }
+
+        .legal-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .dark .legal-header {
+            border-bottom-color: #374151;
+        }
+
+        .legal-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        .dark .legal-title {
+            color: #f9fafb;
+        }
+
+        .legal-updated {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .legal-content {
+            line-height: 1.8;
+            color: #374151;
+        }
+
+        .dark .legal-content {
+            color: #d1d5db;
+        }
+
+        .legal-content h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+            color: #111827;
+        }
+
+        .dark .legal-content h2 {
+            color: #f3f4f6;
+        }
+
+        .legal-content h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            color: #1f2937;
+        }
+
+        .dark .legal-content h3 {
+            color: #e5e7eb;
+        }
+
+        .legal-content p {
+            margin-bottom: 1rem;
+        }
+
+        .legal-content ul,
+        .legal-content ol {
+            margin-left: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .legal-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .legal-back-btn {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.75rem 1.5rem;
+            background: #3b82f6;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .legal-back-btn:hover {
+            background: #2563eb;
+        }
+
+        /* Theme toggle button */
+        .theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 3rem;
+            height: 3rem;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .theme-toggle:hover {
+            background: #2563eb;
+        }
+
+        @media print {
+
+            .legal-back-btn,
+            .theme-toggle {
+                display: none;
+            }
+        }
+    </style>
+    <script>
+        // Theme initialization
+        (function () {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+                if (!savedTheme) localStorage.setItem('theme', 'dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            }
+        })();
+    </script>
+</head>
+
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 antialiased min-h-screen">
+    <!-- Theme Toggle Button -->
+    <button type="button" id="theme-toggle" class="theme-toggle" title="Toggle dark mode">
+        <span id="theme-icon">🌙</span>
+    </button>
+
+    <div class="legal-container">
+        <div class="legal-header">
+            <h1 class="legal-title">{% block legal_title %}{% endblock %}</h1>
+            <p class="legal-updated">Last Updated: {% block last_updated %}December 13, 2025{% endblock %}</p>
+        </div>
+
+        <div class="legal-content">
+            {% block legal_content %}{% endblock %}
+        </div>
+
+        <a href="/" class="legal-back-btn">← Back to Home</a>
+    </div>
+
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+
+        function updateThemeIcon() {
+            const isDark = document.documentElement.classList.contains('dark');
+            themeIcon.textContent = isDark ? '☀️' : '🌙';
+        }
+
+        updateThemeIcon();
+
+        themeToggle.addEventListener('click', function () {
+            const isDark = document.documentElement.classList.contains('dark');
+
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+
+            updateThemeIcon();
+        });
+    </script>
+</body>
+
+</html>

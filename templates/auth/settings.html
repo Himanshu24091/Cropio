@@ -18,15 +18,15 @@
 
         <!-- Flash Messages -->
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="flash-messages mb-6">
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ 'error' if category == 'error' else category }}">
-                            {{ message }}
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+        {% if messages %}
+        <div class="flash-messages mb-6">
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'error' if category == 'error' else category }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
         {% endwith %}
 
         <!-- Settings Menu -->
@@ -45,7 +45,7 @@
                         </div>
                         <div class="setting-arrow">→</div>
                     </a>
-                    
+
                     <a href="{{ url_for('auth.change_password') }}" class="setting-option">
                         <div class="setting-icon">🔒</div>
                         <div class="setting-content">
@@ -71,8 +71,8 @@
                         </div>
                         <div class="setting-arrow">→</div>
                     </a>
-                    
-                    <a href="{{ url_for('dashboard.index') }}" class="setting-option">
+
+                    <a href="{{ url_for('analytics.dashboard') }}" class="setting-option">
                         <div class="setting-icon">📊</div>
                         <div class="setting-content">
                             <div class="setting-title">Usage Analytics</div>
@@ -95,12 +95,12 @@
                             <div class="setting-title">Email Verification</div>
                             <div class="setting-description">
                                 {% if current_user.email_verified %}
-                                    <span class="text-green-600 dark:text-green-400">✓ Verified</span>
+                                <span class="text-green-600 dark:text-green-400">✓ Verified</span>
                                 {% else %}
-                                    <span class="text-amber-600 dark:text-amber-400">⚠ Not verified</span>
-                                    <button onclick="resendVerification()" class="ml-2 text-blue-600 underline text-sm">
-                                        Resend email
-                                    </button>
+                                <span class="text-amber-600 dark:text-amber-400">⚠ Not verified</span>
+                                <button onclick="resendVerification()" class="ml-2 text-blue-600 underline text-sm">
+                                    Resend email
+                                </button>
                                 {% endif %}
                             </div>
                         </div>
@@ -114,7 +114,8 @@
                         </div>
                         <div class="setting-toggle">
                             <label class="toggle-switch">
-                                <input type="checkbox" checked disabled>
+                                <input type="checkbox" id="sessionTimeoutToggle" {% if
+                                    current_user.session_timeout_enabled %}checked{% endif %}>
                                 <span class="toggle-slider"></span>
                             </label>
                         </div>
@@ -142,14 +143,14 @@
 
         <!-- Quick Actions -->
         <div class="quick-actions mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <div class="flex flex-wrap gap-3 justify-center">
-                <a href="{{ url_for('auth.profile') }}" class="btn btn-secondary">
+            <div class="flex gap-3 justify-center">
+                <a href="{{ url_for('auth.profile') }}" class="action-btn action-btn-secondary">
                     ← Back to Profile
                 </a>
-                <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary">
+                <a href="{{ url_for('dashboard.index') }}" class="action-btn action-btn-primary">
                     📊 Dashboard
                 </a>
-                <a href="{{ url_for('main.index') }}" class="btn btn-secondary">
+                <a href="{{ url_for('main.index') }}" class="action-btn action-btn-secondary">
                     🏠 Home
                 </a>
             </div>
@@ -158,134 +159,265 @@
 </div>
 
 <style>
-/* Settings-specific styles */
-.setting-section {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 1.5rem;
-}
+    /* Settings-specific styles */
+    .setting-section {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 1.5rem;
+    }
 
-.dark .setting-section {
-    background: #0f172a;
-    border-color: #334155;
-}
+    .dark .setting-section {
+        background: #0f172a;
+        border-color: #334155;
+    }
 
-.setting-option {
-    display: flex;
-    align-items: center;
-    padding: 1rem;
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    text-decoration: none;
-    transition: all 0.15s ease;
-}
+    .setting-option {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: white;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
 
-.dark .setting-option {
-    background: #1f2937;
-    border-color: #374151;
-}
+    .dark .setting-option {
+        background: #1f2937;
+        border-color: #374151;
+    }
 
-.setting-option:hover {
-    border-color: #3b82f6;
-    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
-}
+    .setting-option:hover {
+        border-color: #3b82f6;
+        box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+    }
 
-.setting-option.danger:hover {
-    border-color: #dc2626;
-    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
-}
+    .setting-option.danger:hover {
+        border-color: #dc2626;
+        box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
+    }
 
-.setting-icon {
-    font-size: 1.5rem;
-    margin-right: 1rem;
-    width: 40px;
-    text-align: center;
-}
+    .setting-icon {
+        font-size: 1.5rem;
+        margin-right: 1rem;
+        width: 40px;
+        text-align: center;
+    }
 
-.setting-content {
-    flex: 1;
-}
+    .setting-content {
+        flex: 1;
+    }
 
-.setting-title {
-    font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 0.25rem;
-}
+    .setting-title {
+        font-weight: 600;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+    }
 
-.dark .setting-title {
-    color: #f9fafb;
-}
+    .dark .setting-title {
+        color: #f9fafb;
+    }
 
-.setting-description {
-    font-size: 0.875rem;
-    color: #6b7280;
-}
+    .setting-description {
+        font-size: 0.875rem;
+        color: #6b7280;
+    }
 
-.dark .setting-description {
-    color: #9ca3af;
-}
+    .dark .setting-description {
+        color: #9ca3af;
+    }
 
-.setting-arrow {
-    font-size: 1.25rem;
-    color: #9ca3af;
-}
+    .setting-arrow {
+        font-size: 1.25rem;
+        color: #9ca3af;
+    }
 
-.setting-toggle {
-    margin-left: 1rem;
-}
+    .setting-toggle {
+        margin-left: 1rem;
+    }
 
-.toggle-switch {
-    position: relative;
-    display: inline-block;
-    width: 50px;
-    height: 24px;
-}
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
 
-.toggle-switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
 
-.toggle-slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: #ccc;
-    transition: 0.4s;
-    border-radius: 24px;
-}
+    .toggle-slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: 0.4s;
+        border-radius: 24px;
+    }
 
-.toggle-slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: 0.4s;
-    border-radius: 50%;
-}
+    .toggle-slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: 0.4s;
+        border-radius: 50%;
+    }
 
-input:checked + .toggle-slider {
-    background-color: #3b82f6;
-}
+    input:checked+.toggle-slider {
+        background-color: #3b82f6;
+    }
 
-input:checked + .toggle-slider:before {
-    transform: translateX(26px);
-}
+    input:checked+.toggle-slider:before {
+        transform: translateX(26px);
+    }
+
+    /* Action Buttons Styling */
+    .action-btn {
+        flex: 1;
+        max-width: 320px;
+        padding: 14px 24px;
+        font-size: 15px;
+        font-weight: 500;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+
+    .action-btn-primary {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        border-color: #2563eb;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    .action-btn-primary:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        transform: translateY(-2px);
+    }
+
+    .action-btn-secondary {
+        background: #f1f5f9;
+        color: #475569;
+        border-color: #e2e8f0;
+    }
+
+    .dark .action-btn-secondary {
+        background: #334155;
+        color: #cbd5e1;
+        border-color: #475569;
+    }
+
+    .action-btn-secondary:hover {
+        background: #e2e8f0;
+        border-color: #cbd5e1;
+        transform: translateY(-2px);
+    }
+
+    .dark .action-btn-secondary:hover {
+        background: #475569;
+        border-color: #64748b;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .quick-actions .flex {
+            flex-direction: column;
+        }
+
+        .action-btn {
+            max-width: 100%;
+        }
+    }
 </style>
 
 <script>
-function resendVerification() {
-    // TODO: Implement email verification resend
-    alert('Email verification will be implemented in the next update!');
-}
+    function resendVerification() {
+        // TODO: Implement email verification resend
+        alert('Email verification will be implemented in the next update!');
+    }
+
+    // Session Timeout Toggle Handler
+    document.addEventListener('DOMContentLoaded', function () {
+        const sessionTimeoutToggle = document.getElementById('sessionTimeoutToggle');
+
+        if (sessionTimeoutToggle) {
+            sessionTimeoutToggle.addEventListener('change', function () {
+                const isEnabled = this.checked;
+
+                // Show loading state
+                this.disabled = true;
+
+                // Send AJAX request to update session timeout preference
+                fetch('/api/user/session-timeout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        enabled: isEnabled
+                    })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message
+                            showNotification(
+                                isEnabled ? 'Session timeout enabled' : 'Session timeout disabled',
+                                'success'
+                            );
+                        } else {
+                            // Revert toggle on error
+                            this.checked = !isEnabled;
+                            showNotification(data.error || 'Failed to update session timeout', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Revert toggle on error
+                        this.checked = !isEnabled;
+                        showNotification('Failed to update session timeout', 'error');
+                    })
+                    .finally(() => {
+                        // Re-enable toggle
+                        this.disabled = false;
+                    });
+            });
+        }
+    });
+
+    // Simple notification function
+    function showNotification(message, type) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'
+            } text-white`;
+        notification.textContent = message;
+
+        document.body.appendChild(notification);
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
 </script>
 {% endblock %}

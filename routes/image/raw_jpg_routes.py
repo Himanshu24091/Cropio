@@ -248,6 +248,28 @@ def download_converted_file(filename):
             else:
                 mimetype = 'application/octet-stream'
         
+        # Track analytics for logged-in users
+        if current_user.is_authenticated:
+            try:
+                from utils.analytics_tracker import track_feature
+                
+                # Determine conversion direction based on file extension
+                ext = filename.lower().split('.')[-1]
+                if ext in ['cr2', 'cr3', 'nef', 'arw', 'dng', 'raf', 'rw2', 'orf', 'pef', 'srw']:
+                    feature_name = 'jpg_to_raw'
+                else:
+                    feature_name = 'raw_to_jpg'
+                
+                track_feature(
+                    feature_name=feature_name,
+                    feature_category='image_conversion',
+                    extra_metadata={'file_type': ext, 'filename': filename},
+                    success=True
+                )
+                print(f"[ANALYTICS] Tracked: {feature_name}")
+            except Exception as e:
+                print(f"[ANALYTICS] Error: {e}")
+        
         return send_file(
             file_path,
             as_attachment=True,

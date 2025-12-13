@@ -1,0 +1,227 @@
+/* Analytics Dashboard Styles */
+
+/* Period Selector Buttons */
+.period-btn {
+    padding: 0.5rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    color: #64748b;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.period-btn:hover {
+    background: #f1f5f9;
+    color: #3b82f6;
+}
+
+.dark .period-btn:hover {
+    background: #334155;
+    color: #60a5fa;
+}
+
+.period-btn.active {
+    background: #3b82f6;
+    color: white;
+    font-weight: 600;
+}
+
+.dark .period-btn.active {
+    background: #2563eb;
+}
+
+/* Statistics Cards */
+.stat-card {
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: white;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    opacity: 0.9;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    opacity: 0.9;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.stat-subtitle {
+    font-size: 0.75rem;
+    opacity: 0.8;
+    margin-top: 0.25rem;
+}
+
+/* Chart Cards */
+.chart-card {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+}
+
+.dark .chart-card {
+    background: #1e293b;
+}
+
+.chart-header {
+    margin-bottom: 1.5rem;
+}
+
+.chart-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.dark .chart-title {
+    color: #f1f5f9;
+}
+
+.chart-subtitle {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.dark .chart-subtitle {
+    color: #94a3b8;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+}
+
+/* Table Styles */
+table {
+    border-collapse: collapse;
+}
+
+table thead tr {
+    background: #f8fafc;
+}
+
+.dark table thead tr {
+    background: #0f172a;
+}
+
+table tbody tr {
+    border-bottom: 1px solid #e2e8f0;
+    transition: background 0.2s;
+}
+
+.dark table tbody tr {
+    border-bottom-color: #334155;
+}
+
+table tbody tr:hover {
+    background: #f8fafc;
+}
+
+.dark table tbody tr:hover {
+    background: #1e293b;
+}
+
+table td {
+    padding: 0.75rem 1rem;
+    color: #475569;
+    font-size: 0.875rem;
+}
+
+.dark table td {
+    color: #cbd5e1;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.dark .status-success {
+    background: #14532d;
+    color: #86efac;
+}
+
+.status-error {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.dark .status-error {
+    background: #7f1d1d;
+    color: #fca5a5;
+}
+
+/* Loading State */
+.loading {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid #e2e8f0;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .stat-icon {
+        font-size: 2rem;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+    }
+
+    .chart-container {
+        height: 250px;
+    }
+}

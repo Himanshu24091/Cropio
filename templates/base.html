@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='base.css') }}">
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Legal Modals CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/terms-modal.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/privacy-modal.css') }}">
     <!-- CSRF Token for AJAX -->
     <meta name="csrf-token" content="{{ csrf_token if csrf_token is defined else '' }}">
     {% block head %}{% endblock %}
@@ -147,11 +150,28 @@
                         <button class="nav-link focus:outline-none flex items-center space-x-2">
                             <!-- User Avatar -->
                             <div
-                                class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                                {{ current_user.username[0].upper() if current_user is defined else 'U' }}
+                                class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
+                                {% if current_user is defined and current_user.profile_picture_url %}
+                                <img src="{{ current_user.profile_picture_url }}"
+                                    alt="{{ current_user.display_name or current_user.username }}"
+                                    class="w-full h-full object-cover">
+                                {% elif current_user is defined and current_user.first_name and current_user.last_name
+                                %}
+                                {{ current_user.first_name[0].upper() }}{{ current_user.last_name[0].upper() }}
+                                {% elif current_user is defined %}
+                                {{ current_user.username[0].upper() }}
+                                {% else %}
+                                U
+                                {% endif %}
                             </div>
-                            <span class="hidden lg:inline text-white">{{ current_user.username if current_user is
-                                defined else 'User' }}</span>
+                            <span class="hidden lg:inline text-white">
+                                {% if current_user is defined %}
+                                {{ current_user.display_name or (current_user.first_name + ' ' + current_user.last_name
+                                if current_user.first_name else current_user.username) }}
+                                {% else %}
+                                User
+                                {% endif %}
+                            </span>
                             {% if current_user is defined and current_user.is_premium() %}
                             <span
                                 class="hidden lg:inline bg-yellow-500 text-black px-2 py-0.5 text-xs font-bold rounded-full">PRO</span>
@@ -165,7 +185,10 @@
                         <div
                             class="absolute right-0 mt-2 w-56 bg-slate-800 dark:bg-slate-700 shadow-xl rounded-lg hidden group-hover:block border border-slate-600 z-50">
                             <div class="px-4 py-3 border-b border-slate-600">
-                                <p class="text-white font-medium">{{ current_user.username }}</p>
+                                <p class="text-white font-medium">
+                                    {{ current_user.display_name or (current_user.first_name + ' ' +
+                                    current_user.last_name if current_user.first_name else current_user.username) }}
+                                </p>
                                 <p class="text-slate-300 text-sm">{{ current_user.email }}</p>
                                 <p class="text-slate-400 text-xs mt-1">
                                     {{ 'Premium Account' if current_user.is_premium() else 'Free Account' }}
@@ -605,11 +628,11 @@
                         </p>
                     </div>
                     <div class="flex items-center space-x-6">
-                        <a href="#"
-                            class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm">Privacy
+                        <a href="#" onclick="openPrivacyModal(); return false;"
+                            class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm cursor-pointer">Privacy
                             & Policy</a>
-                        <a href="#"
-                            class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm">Terms
+                        <a href="#" onclick="openTermsModal(); return false;"
+                            class="text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm cursor-pointer">Terms
                             & Condition</a>
                     </div>
                 </div>
@@ -617,11 +640,45 @@
         </div>
     </footer>
 
+    <!-- Terms of Service Modal -->
+    <div id="termsModal" class="terms-modal">
+        <div class="terms-modal-content">
+            <div class="terms-modal-header">
+                <h2 class="terms-modal-title">Terms of Service</h2>
+            </div>
+            <div class="terms-modal-body">
+                {% include 'legal/terms_content.html' %}
+            </div>
+            <div class="terms-modal-footer">
+                <button onclick="closeTermsModal()" class="terms-modal-ok-btn">OK, I Understand</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="privacy-modal">
+        <div class="privacy-modal-content">
+            <div class="privacy-modal-header">
+                <h2 class="privacy-modal-title">Privacy Policy</h2>
+            </div>
+            <div class="privacy-modal-body">
+                {% include 'legal/privacy_content.html' %}
+            </div>
+            <div class="privacy-modal-footer">
+                <button onclick="closePrivacyModal()" class="privacy-modal-ok-btn">OK, I Understand</button>
+            </div>
+        </div>
+    </div>
+
     <!-- CSRF Token handling for AJAX requests -->
     <script src="{{ url_for('static', filename='js/csrf.js') }}" defer></script>
 
     <!-- Theme toggle functionality - loaded on all pages -->
     <script src="{{ url_for('static', filename='js/theme.js') }}" defer></script>
+
+    <!-- Legal Modals JavaScript -->
+    <script src="{{ url_for('static', filename='js/terms-modal.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/privacy-modal.js') }}"></script>
 
     <!-- Page-specific scripts -->
     {% block page_scripts %}{% endblock %}

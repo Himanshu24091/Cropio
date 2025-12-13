@@ -1,0 +1,226 @@
+/* Terms of Service Modal Styles */
+
+.terms-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.terms-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.terms-modal-content {
+    background-color: #ffffff;
+    margin: auto;
+    padding: 0;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 85vh;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    animation: slideUp 0.3s ease-out;
+}
+
+/* Dark mode support */
+.dark .terms-modal-content {
+    background-color: #1f2937;
+    color: #f3f4f6;
+}
+
+.terms-modal-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 2px solid #e5e7eb;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-radius: 12px 12px 0 0;
+}
+
+.dark .terms-modal-header {
+    border-bottom-color: #374151;
+}
+
+.terms-modal-title {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.terms-modal-title::before {
+    content: "📄";
+    font-size: 2rem;
+}
+
+.terms-modal-body {
+    padding: 2rem;
+    overflow-y: auto;
+    flex: 1;
+    line-height: 1.8;
+    color: #374151;
+}
+
+.dark .terms-modal-body {
+    color: #d1d5db;
+}
+
+/* Scrollbar styling */
+.terms-modal-body::-webkit-scrollbar {
+    width: 10px;
+}
+
+.terms-modal-body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 5px;
+}
+
+.dark .terms-modal-body::-webkit-scrollbar-track {
+    background: #374151;
+}
+
+.terms-modal-body::-webkit-scrollbar-thumb {
+    background: #3b82f6;
+    border-radius: 5px;
+}
+
+.terms-modal-body::-webkit-scrollbar-thumb:hover {
+    background: #2563eb;
+}
+
+.terms-modal-body h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: #111827;
+}
+
+.dark .terms-modal-body h2 {
+    color: #f3f4f6;
+}
+
+.terms-modal-body h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: #1f2937;
+}
+
+.dark .terms-modal-body h3 {
+    color: #e5e7eb;
+}
+
+.terms-modal-body p {
+    margin-bottom: 1rem;
+}
+
+.terms-modal-body ul,
+.terms-modal-body ol {
+    margin-left: 2rem;
+    margin-bottom: 1rem;
+}
+
+.terms-modal-body li {
+    margin-bottom: 0.5rem;
+}
+
+.terms-modal-footer {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: center;
+    background-color: #f9fafb;
+    border-radius: 0 0 12px 12px;
+}
+
+.dark .terms-modal-footer {
+    background-color: #111827;
+    border-top-color: #374151;
+}
+
+.terms-modal-ok-btn {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    padding: 0.75rem 3rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.terms-modal-ok-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.terms-modal-ok-btn:active {
+    transform: translateY(0);
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .terms-modal-content {
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .terms-modal-header {
+        padding: 1rem 1.5rem;
+    }
+
+    .terms-modal-title {
+        font-size: 1.5rem;
+    }
+
+    .terms-modal-body {
+        padding: 1.5rem;
+    }
+
+    .terms-modal-footer {
+        padding: 1rem 1.5rem;
+    }
+
+    .terms-modal-ok-btn {
+        padding: 0.75rem 2rem;
+        width: 100%;
+    }
+}

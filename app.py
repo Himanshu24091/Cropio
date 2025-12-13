@@ -91,11 +91,13 @@ from routes.api_routes import api_bp
 # Import admin routes
 from routes.admin import admin  # Admin routes
 from routes.health_routes import health_bp  # Health check endpoints
+from routes.legal_routes import legal_bp  # Legal pages (Terms, Privacy)
+from routes.analytics_routes import analytics_bp  # Usage Analytics
 # from routes.universal_converter_routes import universal_converter_bp  # Commented out due to missing dependencies
 
 # Phase 1.5 - New converter blueprints (with unique names to avoid conflicts)
 try:
-    from routes.document.latex_pdf_routes import latex_pdf_bp as latex_pdf_doc_bp
+    from routes.latex_pdf_routes import latex_pdf_bp as latex_pdf_doc_bp
 except:
     latex_pdf_doc_bp = None
     
@@ -309,6 +311,8 @@ def create_app():
         app.register_blueprint(api_bp)  # Global API routes
         app.register_blueprint(health_bp)  # Health check endpoints
         app.register_blueprint(admin)
+        app.register_blueprint(legal_bp)  # Legal pages
+        app.register_blueprint(analytics_bp)  # Usage Analytics
         
         # Register new organized converter blueprints
         if latex_pdf_doc_bp:
@@ -361,6 +365,13 @@ def shutdown_handler():
         cropio_logger.error(f"Error during scheduler shutdown: {e}")
     
     cropio_logger.info("Cropio SaaS Platform shutdown complete")
+
+# Route to serve uploaded files
+@app.route('/uploads/<path:filename>')
+def uploaded_file(filename):
+    """Serve uploaded files"""
+    from flask import send_from_directory
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 # Register shutdown handler
 atexit.register(shutdown_handler)

@@ -274,6 +274,22 @@ def download_converted_file(filename):
         # Determine the correct mimetype
         mimetype = 'application/pdf'
         
+        
+        # Track analytics for logged-in users
+        if current_user.is_authenticated:
+            try:
+                from utils.analytics_tracker import track_feature
+                
+                track_feature(
+                    feature_name='html_to_pdf_snapshot',
+                    feature_category='web_conversion',
+                    extra_metadata={'filename': filename, 'download_mode': download_mode},
+                    success=True
+                )
+                print(f"[ANALYTICS] Tracked: html_to_pdf_snapshot")
+            except Exception as e:
+                print(f"[ANALYTICS] Error: {e}")
+        
         # Check if user wants to download or view in browser
         download_mode = request.args.get('download', 'false').lower() == 'true'
         

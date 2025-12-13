@@ -48,6 +48,8 @@ def register():
         # NEW: Enhanced input validation and sanitization
         raw_username = request.form.get('username', '').strip()
         raw_email = request.form.get('email', '').strip().lower()
+        raw_first_name = request.form.get('first_name', '').strip()
+        raw_last_name = request.form.get('last_name', '').strip()
         password = request.form.get('password', '')
         confirm_password = request.form.get('confirm_password', '')
         
@@ -69,6 +71,8 @@ def register():
         # NEW: Sanitize validated inputs
         username = sanitize_user_input(raw_username)
         email = sanitize_user_input(raw_email)
+        first_name = sanitize_user_input(raw_first_name)
+        last_name = sanitize_user_input(raw_last_name)
         
         # NEW: Log registration attempt for security monitoring
         current_app.logger.info(
@@ -110,6 +114,10 @@ def register():
             errors.append('Username must be at least 3 characters long.')
         if not email or '@' not in email:
             errors.append('Please enter a valid email address.')
+        if not first_name or len(first_name) < 2:
+            errors.append('First name must be at least 2 characters long.')
+        if not last_name or len(last_name) < 2:
+            errors.append('Last name must be at least 2 characters long.')
         if password != confirm_password:
             errors.append('Passwords do not match.')
         
@@ -126,10 +134,13 @@ def register():
             return render_template('auth/register.html', username=username, email=email, csrf_token=generate_csrf())
         
         try:
-            # Create new user
+            # Create new user with name fields
             new_user = User(
                 username=username,
                 email=email,
+                first_name=first_name,
+                last_name=last_name,
+                display_name=f"{first_name} {last_name}",  # Auto-generate display name
                 subscription_tier='free',
                 email_verified=False,  # In production, implement email verification
                 is_active=True
@@ -652,7 +663,8 @@ def change_password():
         if errors:
             for error in errors:
                 flash(error, 'error')
-            return render_template('auth/change_password.html')
+            from flask_wtf.csrf import generate_csrf
+            return render_template('auth/change_password.html', csrf_token=generate_csrf())
         
         try:
             current_user.set_password(new_password)
@@ -665,7 +677,8 @@ def change_password():
             flash('Failed to change password. Please try again.', 'error')
             print(f"Password change error: {e}")
     
-    return render_template('auth/change_password.html')
+    from flask_wtf.csrf import generate_csrf
+    return render_template('auth/change_password.html', csrf_token=generate_csrf())
 
 
 @auth_bp.route('/delete-account', methods=['GET', 'POST'])
@@ -679,15 +692,18 @@ def delete_account():
         
         if not password:
             flash('Please enter your password to delete account.', 'error')
-            return render_template('auth/delete_account.html')
+            from flask_wtf.csrf import generate_csrf
+            return render_template('auth/delete_account.html', csrf_token=generate_csrf())
         
         if not current_user.check_password(password):
             flash('Incorrect password.', 'error')
-            return render_template('auth/delete_account.html')
+            from flask_wtf.csrf import generate_csrf
+            return render_template('auth/delete_account.html', csrf_token=generate_csrf())
         
         if not confirm_delete:
             flash('Please confirm account deletion.', 'error')
-            return render_template('auth/delete_account.html')
+            from flask_wtf.csrf import generate_csrf
+            return render_template('auth/delete_account.html', csrf_token=generate_csrf())
         
         try:
             username = current_user.username
@@ -717,7 +733,8 @@ def delete_account():
             flash('Failed to delete account. Please try again.', 'error')
             print(f"Account deletion error: {e}")
     
-    return render_template('auth/delete_account.html')
+    from flask_wtf.csrf import generate_csrf
+    return render_template('auth/delete_account.html', csrf_token=generate_csrf())
 
 
 @auth_bp.route('/sessions')
@@ -844,6 +861,136 @@ def handle_auth_security_violation(e):
     )
     flash('Security violation detected. Action blocked.', 'error')
     return redirect(url_for('main.index')), 403
+
+
+@auth_bp.route('/api/user/upload-photo', methods=['POST'])
+@login_required
+def upload_profile_photo():
+    """API endpoint to upload user profile photo"""
+    try:
+        if 'photo' not in request.files:
+            return jsonify({
+                'success': False,
+                'error': 'No file provided'
+            }), 400
+        
+        file = request.files['photo']
+        
+        if file.filename == '':
+            return jsonify({
+                'success': False,
+                'error': 'No file selected'
+            }), 400
+        
+        # Validate file type
+        allowed_extensions = {'jpg', 'jpeg', 'png'}
+        file_ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+        
+        if file_ext not in allowed_extensions:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid file type. Only JPG and PNG are allowed.'
+            }), 400
+        
+        # Validate file size (max 5MB)
+        file.seek(0, 2)  # Seek to end
+        file_size = file.tell()
+        file.seek(0)  # Reset to beginning
+        
+        if file_size > 5 * 1024 * 1024:
+            return jsonify({
+                'success': False,
+                'error': 'File size must be less than 5MB'
+            }), 400
+        
+        # Create user-specific directory
+        from flask import current_app
+        from werkzeug.utils import secure_filename
+        import os
+        
+        upload_folder = current_app.config['UPLOAD_FOLDER']
+        user_photo_dir = os.path.join(upload_folder, 'profile_photos', str(current_user.id))
+        os.makedirs(user_photo_dir, exist_ok=True)
+        
+        # Generate secure filename
+        filename = f"profile.{file_ext}"
+        filepath = os.path.join(user_photo_dir, filename)
+        
+        # Delete old photo if exists
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        
+        # Save new photo
+        file.save(filepath)
+        
+        # Update user profile picture URL
+        photo_url = f"/uploads/profile_photos/{current_user.id}/{filename}"
+        current_user.profile_picture_url = photo_url
+        db.session.commit()
+        
+        current_app.logger.info(
+            f'Profile photo uploaded: user={current_user.username}, '
+            f'size={file_size}, IP={request.remote_addr}'
+        )
+        
+        return jsonify({
+            'success': True,
+            'photo_url': photo_url,
+            'message': 'Profile photo uploaded successfully'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Photo upload error: {e}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to upload photo'
+        }), 500
+
+
+@auth_bp.route('/api/user/session-timeout', methods=['POST'])
+@login_required
+def update_session_timeout():
+    """API endpoint to update user session timeout preference"""
+    try:
+        data = request.get_json()
+        
+        if not data or 'enabled' not in data:
+            return jsonify({
+                'success': False,
+                'error': 'Invalid request data'
+            }), 400
+        
+        enabled = data.get('enabled')
+        
+        # Validate boolean value
+        if not isinstance(enabled, bool):
+            return jsonify({
+                'success': False,
+                'error': 'Invalid value for enabled field'
+            }), 400
+        
+        # Update user preference
+        current_user.session_timeout_enabled = enabled
+        db.session.commit()
+        
+        current_app.logger.info(
+            f'Session timeout preference updated: user={current_user.username}, '
+            f'enabled={enabled}, IP={request.remote_addr}'
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': f'Session timeout {"enabled" if enabled else "disabled"}'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f'Session timeout update error: {e}')
+        return jsonify({
+            'success': False,
+            'error': 'Failed to update session timeout preference'
+        }), 500
 
 
 # NEW: After request hook for security logging

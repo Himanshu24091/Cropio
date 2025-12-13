@@ -364,6 +364,24 @@ def api_download():
             tmp_file.write(content)
             tmp_file_path = tmp_file.name
         
+        
+        # Track analytics for logged-in users
+        if current_user.is_authenticated:
+            try:
+                from utils.analytics_tracker import track_feature
+                
+                feature_name = 'yaml_to_json' if file_type == 'json' else 'json_to_yaml'
+                
+                track_feature(
+                    feature_name=feature_name,
+                    feature_category='config_conversion',
+                    extra_metadata={'file_type': file_type, 'content_size': len(content)},
+                    success=True
+                )
+                print(f"[ANALYTICS] Tracked: {feature_name}")
+            except Exception as e:
+                print(f"[ANALYTICS] Error: {e}")
+        
         # Generate download filename
         download_filename = f"{filename}.{ext}"
         

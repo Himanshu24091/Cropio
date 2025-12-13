@@ -1,0 +1,115 @@
+/**
+ * Terms of Service Modal JavaScript
+ * Handles opening and closing of Terms of Service modal
+ */
+
+// Terms of Service content
+const termsContent = `
+    <h2>1. Introduction</h2>
+    <p>Welcome to Cropio! These Terms of Service ("Terms") govern your use of the Cropio file conversion platform ("Service"). By accessing or using our Service, you agree to be bound by these Terms.</p>
+
+    <h2>2. Acceptance of Terms</h2>
+    <p>By creating an account or using Cropio, you acknowledge that you have read, understood, and agree to be bound by these Terms and our Privacy Policy.</p>
+
+    <h2>3. Description of Service</h2>
+    <p>Cropio is a professional-grade SaaS platform that provides file conversion and processing services, including:</p>
+    <ul>
+        <li>Image format conversion (PNG, JPG, WEBP, HEIC, RAW, GIF, etc.)</li>
+        <li>PDF processing (conversion, editing, merging, compression, security)</li>
+        <li>Document conversion (DOCX, Markdown, LaTeX, Excel, PowerPoint)</li>
+        <li>OCR and text extraction services</li>
+        <li>Over 40 different file conversion types</li>
+    </ul>
+
+    <h2>4. User Accounts</h2>
+    <h3>4.1 Free Account Benefits:</h3>
+    <ul>
+        <li>5 conversions per day</li>
+        <li>Maximum file size: 50MB</li>
+        <li>Access to all basic conversion tools</li>
+        <li>Conversion history tracking</li>
+    </ul>
+
+    <h3>4.2 Premium Account Benefits:</h3>
+    <ul>
+        <li>Unlimited conversions</li>
+        <li>Maximum file size: 5GB</li>
+        <li>Priority processing</li>
+        <li>Advanced features and batch processing</li>
+    </ul>
+
+    <h2>5. User Responsibilities</h2>
+    <p>You agree NOT to:</p>
+    <ul>
+        <li>Upload files containing malware or viruses</li>
+        <li>Upload copyrighted material without authorization</li>
+        <li>Upload illegal, harmful, or offensive content</li>
+        <li>Attempt to circumvent usage limits</li>
+        <li>Use automated systems without permission</li>
+    </ul>
+
+    <h2>6. File Storage and Deletion</h2>
+    <p>We automatically delete uploaded and converted files after 30 minutes for security and privacy. Download your files immediately.</p>
+
+    <h2>7. Intellectual Property</h2>
+    <p>You retain all rights to your uploaded files. We do not claim ownership of your content.</p>
+
+    <h2>8. Disclaimer of Warranties</h2>
+    <p>THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND. We do not guarantee conversion accuracy or uninterrupted service.</p>
+
+    <h2>9. Limitation of Liability</h2>
+    <p>Our total liability shall not exceed the amount you paid us in the last 12 months, or ₹1,000, whichever is less.</p>
+
+    <h2>10. Contact Information</h2>
+    <p>For questions about these Terms, contact us at: <strong>support@cropio.com</strong></p>
+
+    <p style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 0.875rem;">
+        By using Cropio, you acknowledge that you have read and agree to these Terms of Service.
+    </p>
+`;
+
+/**
+ * Open Terms of Service modal
+ */
+function openTermsModal() {
+    const modal = document.getElementById('termsModal');
+    if (modal) {
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+}
+
+/**
+ * Close Terms of Service modal
+ */
+function closeTermsModal() {
+    const modal = document.getElementById('termsModal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = ''; // Restore scrolling
+    }
+}
+
+// Prevent closing modal when clicking on modal content
+document.addEventListener('DOMContentLoaded', function () {
+    const modal = document.getElementById('termsModal');
+    if (modal) {
+        const modalContent = modal.querySelector('.terms-modal-content');
+        if (modalContent) {
+            modalContent.addEventListener('click', function (event) {
+                event.stopPropagation();
+            });
+        }
+    }
+});
+
+// Prevent closing modal with Escape key
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+        const modal = document.getElementById('termsModal');
+        if (modal && modal.classList.contains('active')) {
+            event.preventDefault();
+            // Do nothing - user must click OK button
+        }
+    }
+});

@@ -11,20 +11,36 @@
 {% block page_content %}
 <div class="profile-container">
     <div class="profile-header">
-        <div class="profile-avatar">
-            <div class="avatar-placeholder">
+        <div class="profile-avatar" id="profileAvatarContainer">
+            {% if user.profile_picture_url %}
+            <img src="{{ user.profile_picture_url }}" alt="{{ user.display_name or user.username }}"
+                class="avatar-image" id="avatarImage">
+            {% else %}
+            <div class="avatar-placeholder" id="avatarPlaceholder">
+                {% if user.first_name and user.last_name %}
+                {{ user.first_name[0].upper() }}{{ user.last_name[0].upper() }}
+                {% else %}
                 {{ user.username[0].upper() }}
+                {% endif %}
             </div>
+            {% endif %}
+            <div class="avatar-upload-overlay" onclick="document.getElementById('profilePhotoInput').click()">
+                <i class="fas fa-camera"></i>
+                <span>Upload Photo</span>
+            </div>
+            <input type="file" id="profilePhotoInput" accept="image/jpeg,image/png,image/jpg" style="display: none;">
         </div>
         <div class="profile-info">
-            <h1 class="profile-name">{{ user.username }}</h1>
+            <h1 class="profile-name">{{ user.display_name or (user.first_name + ' ' + user.last_name if user.first_name
+                else user.username) }}</h1>
             <p class="profile-email">{{ user.email }}</p>
             <div class="profile-badges">
-                <span class="badge badge-{{ user.subscription_tier.lower() }}">{{ user.subscription_tier.title() }} Plan</span>
+                <span class="badge badge-{{ user.subscription_tier.lower() }}">{{ user.subscription_tier.title() }}
+                    Plan</span>
                 {% if user.email_verified %}
-                    <span class="badge badge-success">✓ Verified</span>
+                <span class="badge badge-success">✓ Verified</span>
                 {% else %}
-                    <span class="badge badge-warning">⚠ Unverified</span>
+                <span class="badge badge-warning">⚠ Unverified</span>
                 {% endif %}
             </div>
         </div>
@@ -35,15 +51,15 @@
 
     <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="flash-messages">
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'error' if category == 'error' else category }}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
+    {% if messages %}
+    <div class="flash-messages">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ 'error' if category == 'error' else category }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     {% endwith %}
 
     <div class="profile-content">
@@ -69,9 +85,9 @@
                 <div class="info-item">
                     <label>Email Status</label>
                     {% if user.email_verified %}
-                        <span class="status verified">Verified</span>
+                    <span class="status verified">Verified</span>
                     {% else %}
-                        <span class="status unverified">Not Verified</span>
+                    <span class="status unverified">Not Verified</span>
                     {% endif %}
                 </div>
                 <div class="info-item">
@@ -111,10 +127,10 @@
                     Change Password
                 </a>
                 {% if not user.email_verified %}
-                    <a href="#" class="action-btn verify">
-                        <i class="icon-mail"></i>
-                        Verify Email
-                    </a>
+                <a href="#" class="action-btn verify">
+                    <i class="icon-mail"></i>
+                    Verify Email
+                </a>
                 {% endif %}
                 <a href="{{ url_for('dashboard.index') }}" class="action-btn dashboard">
                     <i class="icon-dashboard"></i>
@@ -139,5 +155,61 @@
 {% endblock %}
 
 {% block page_scripts %}
+<style>
+    .profile-avatar {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        overflow: hidden;
+        cursor: pointer;
+    }
+
+    .avatar-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-upload-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s;
+        color: white;
+        font-size: 12px;
+    }
+
+    .profile-avatar:hover .avatar-upload-overlay {
+        opacity: 1;
+    }
+
+    .avatar-upload-overlay i {
+        font-size: 24px;
+        margin-bottom: 4px;
+    }
+</style>
+<script>
+    document.getElementById('profilePhotoInput').addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (!file.type.match('image/(jpeg|jpg|png)')) { alert('Please upload JPG or PNG'); return; }
+        if (file.size > 5 * 1024 * 1024) { alert('Max 5MB'); return; }
+        const formData = new FormData();
+        formData.append('photo', file);
+        fetch('/api/user/upload-photo', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(d => { if (d.success) location.reload(); else alert(d.error); })
+            .catch(() => alert('Upload failed'));
+    });
+</script>
 <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
 {% endblock %}

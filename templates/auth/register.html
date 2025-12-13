@@ -5,6 +5,8 @@
 {% block head %}
 <link rel="stylesheet" href="{{ url_for('static', filename='auth/auth.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/password-strength.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/terms-modal.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/privacy-modal.css') }}">
 {% endblock %}
 
 {% block page_content %}
@@ -44,6 +46,22 @@
                     value="{{ request.form.username or '' }}" required autofocus minlength="3" maxlength="20"
                     placeholder="Choose a unique username">
                 <div id="usernameValidation" class="validation-message"></div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="first_name" class="form-label">First Name</label>
+                    <input type="text" id="first_name" name="first_name" class="form-input"
+                        value="{{ request.form.first_name or '' }}" required minlength="2" maxlength="50"
+                        placeholder="Enter your first name">
+                </div>
+
+                <div class="form-group">
+                    <label for="last_name" class="form-label">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" class="form-input"
+                        value="{{ request.form.last_name or '' }}" required minlength="2" maxlength="50"
+                        placeholder="Enter your last name">
+                </div>
             </div>
 
             <div class="form-group">
@@ -105,8 +123,10 @@
                 <input type="checkbox" id="terms_accepted" name="terms_accepted" required
                     class="rounded border-gray-300">
                 <label for="terms_accepted" class="text-sm text-gray-600 dark:text-gray-400">
-                    I agree to the <a href="#" class="text-blue-600 hover:underline">Terms of Service</a>
-                    and <a href="#" class="text-blue-600 hover:underline">Privacy Policy</a>
+                    I agree to the <a href="#" onclick="openTermsModal(); return false;"
+                        class="text-blue-600 hover:underline">Terms of Service</a>
+                    and <a href="#" onclick="openPrivacyModal(); return false;"
+                        class="text-blue-600 hover:underline">Privacy Policy</a>
                 </label>
             </div>
 
@@ -123,9 +143,41 @@
         </div>
     </div>
 </div>
+
+<!-- Terms of Service Modal -->
+<div id="termsModal" class="terms-modal">
+    <div class="terms-modal-content">
+        <div class="terms-modal-header">
+            <h2 class="terms-modal-title">Terms of Service</h2>
+        </div>
+        <div class="terms-modal-body">
+            {% include 'legal/terms_content.html' %}
+        </div>
+        <div class="terms-modal-footer">
+            <button onclick="closeTermsModal()" class="terms-modal-ok-btn">OK, I Understand</button>
+        </div>
+    </div>
+</div>
+
+<!-- Privacy Policy Modal -->
+<div id="privacyModal" class="privacy-modal">
+    <div class="privacy-modal-content">
+        <div class="privacy-modal-header">
+            <h2 class="privacy-modal-title">Privacy Policy</h2>
+        </div>
+        <div class="privacy-modal-body">
+            {% include 'legal/privacy_content.html' %}
+        </div>
+        <div class="privacy-modal-footer">
+            <button onclick="closePrivacyModal()" class="privacy-modal-ok-btn">OK, I Understand</button>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block page_scripts %}
 <script src="{{ url_for('static', filename='js/password-strength.js') }}"></script>
 <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+<script src="{{ url_for('static', filename='js/terms-modal.js') }}"></script>
+<script src="{{ url_for('static', filename='js/privacy-modal.js') }}"></script>
 {% endblock %}

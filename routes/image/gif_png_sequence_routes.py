@@ -385,6 +385,21 @@ def download_result(conversion_id, result_type):
             # Download ZIP file of PNG frames
             zip_path = result_data.get('zip_path')
             if zip_path and os.path.exists(zip_path):
+                # Track analytics for logged-in users
+                if current_user.is_authenticated:
+                    try:
+                        from utils.analytics_tracker import track_feature
+                        
+                        track_feature(
+                            feature_name='gif_to_png_sequence',
+                            feature_category='animation_conversion',
+                            extra_metadata={'conversion_id': conversion_id, 'frame_count': result_data.get('frame_count', 0)},
+                            success=True
+                        )
+                        print(f"[ANALYTICS] Tracked: gif_to_png_sequence")
+                    except Exception as e:
+                        print(f"[ANALYTICS] Error: {e}")
+                
                 # Schedule cleanup in thread with proper Flask context
                 threaded_cleanup_with_context(conversion_id, current_app._get_current_object())
                 
@@ -399,6 +414,21 @@ def download_result(conversion_id, result_type):
             # Download GIF file
             gif_path = result_data.get('output_path')
             if gif_path and os.path.exists(gif_path):
+                # Track analytics for logged-in users
+                if current_user.is_authenticated:
+                    try:
+                        from utils.analytics_tracker import track_feature
+                        
+                        track_feature(
+                            feature_name='png_sequence_to_gif',
+                            feature_category='animation_conversion',
+                            extra_metadata={'conversion_id': conversion_id},
+                            success=True
+                        )
+                        print(f"[ANALYTICS] Tracked: png_sequence_to_gif")
+                    except Exception as e:
+                        print(f"[ANALYTICS] Error: {e}")
+                
                 # Schedule cleanup in thread with proper Flask context
                 threaded_cleanup_with_context(conversion_id, current_app._get_current_object())
                 

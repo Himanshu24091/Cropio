@@ -89,6 +89,7 @@ class User(UserMixin, db.Model):
     email_notifications = db.Column(db.Boolean, default=True)
     marketing_emails = db.Column(db.Boolean, default=False)
     sms_notifications = db.Column(db.Boolean, default=False)
+    session_timeout_enabled = db.Column(db.Boolean, default=True, nullable=False)
     
     # Relationships
     conversions = db.relationship('ConversionHistory', backref='user', lazy=True, cascade='all, delete-orphan')
@@ -424,6 +425,104 @@ class UserSession(db.Model):
     
     def __repr__(self):
         return f'<UserSession {self.user.username} from {self.ip_address}>'
+
+
+class UsageAnalytics(db.Model):
+    """Track feature usage for logged-in users"""
+    __tablename__ = 'usage_analytics'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    
+    # Feature information
+    feature_name = db.Column(db.String(100), nullable=False, index=True)
+    feature_category = db.Column(db.String(50), nullable=True, index=True)  # e.g., 'conversion', 'pdf_tool', 'image'
+    
+    # Usage details
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False, index=True)
+    
+    # Additional metadata (JSON format)
+    extra_metadata = db.Column(db.Text, nullable=True)  # Store JSON data like file size, format, etc.
+    
+    # Performance tracking
+    processing_time = db.Column(db.Float, nullable=True)  # Time taken in seconds
+    success = db.Column(db.Boolean, default=True, nullable=False)
+    
+    # Relationship
+    user = db.relationship('User', backref=db.backref('usage_analytics', lazy=True, cascade='all, delete-orphan'))
+    
+    @staticmethod
+    def track_usage(user_id, feature_name, feature_category=None, extra_metadata=None, processing_time=None, success=True):
+        """Track a feature usage"""
+        usage = UsageAnalytics(
+            user_id=user_id,
+            feature_name=feature_name,
+            feature_category=feature_category,
+            extra_metadata=extra_metadata,
+            processing_time=processing_time,
+            success=success
+        )
+        db.session.add(usage)
+        db.session.commit()
+        return usage
+    
+    @staticmethod
+    def get_user_stats(user_id, days=30):
+        """Get usage statistics for a user"""
+        from sqlalchemy import func
+        cutoff_date = datetime.utcnow() - timedelta(days=days)
+        
+        stats = db.session.query(
+            UsageAnalytics.feature_name,
+            func.count(UsageAnalytics.id).label('count')
+        ).filter(
+            UsageAnalytics.user_id == user_id,
+            UsageAnalytics.timestamp >= cutoff_date
+        ).group_by(UsageAnalytics.feature_name).all()
+        
+        return {stat.feature_name: stat.count for stat in stats}
+    
+    @staticmethod
+    def get_usage_by_period(user_id, period='day'):
+        """Get usage data grouped by time period"""
+        from sqlalchemy import func, cast, String
+        
+        if period == 'day':
+            days = 7
+            # PostgreSQL: DATE(timestamp)
+            date_format = func.date(UsageAnalytics.timestamp)
+        elif period == 'week':
+            days = 28
+            # PostgreSQL: to_char(timestamp, 'IYYY-IW') for ISO week
+            date_format = func.to_char(UsageAnalytics.timestamp, 'IYYY-IW')
+        elif period == 'month':
+            days = 365
+            # PostgreSQL: to_char(timestamp, 'YYYY-MM')
+            date_format = func.to_char(UsageAnalytics.timestamp, 'YYYY-MM')
+        elif period == 'year':
+            days = 365 * 3
+            # PostgreSQL: EXTRACT(YEAR FROM timestamp)
+            date_format = cast(func.extract('year', UsageAnalytics.timestamp), String)
+        else:
+            days = 7
+            date_format = func.date(UsageAnalytics.timestamp)
+        
+        cutoff_date = datetime.utcnow() - timedelta(days=days)
+        
+        usage_data = db.session.query(
+            date_format.label('period'),
+            UsageAnalytics.feature_name,
+            func.count(UsageAnalytics.id).label('count')
+        ).filter(
+            UsageAnalytics.user_id == user_id,
+            UsageAnalytics.timestamp >= cutoff_date
+        ).group_by('period', UsageAnalytics.feature_name).all()
+        
+        return usage_data
+    
+    def __repr__(self):
+        return f'<UsageAnalytics {self.user.username} - {self.feature_name}>'
+
 
 
 class UserRole(db.Model):

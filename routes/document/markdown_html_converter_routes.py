@@ -275,14 +275,43 @@ def api_convert():
         result['processing_time'] = processing_time
         result['stats']['processing_time'] = f"{processing_time:.3f}s"
         
-        # Log conversion if user is authenticated
+        
+        # Track analytics for logged-in users
         if current_user.is_authenticated:
             try:
-                # Here you would typically log the conversion to database
-                # log_conversion(current_user.id, mode, len(content), processing_time)
-                pass
+                from utils.analytics_tracker import track_feature
+                import json
+                
+                # Determine feature name based on mode
+                if mode == 'markdown-to-html':
+                    feature_name = 'markdown_to_html'
+                else:
+                    feature_name = 'html_to_markdown'
+                
+                # Prepare metadata
+                metadata = {
+                    'mode': mode,
+                    'content_size': len(content),
+                    'output_size': len(result.get('output', '')),
+                    'processing_time': processing_time
+                }
+                
+                print(f"[ANALYTICS] Tracking conversion: {feature_name}, user: {current_user.username}")
+                
+                track_result = track_feature(
+                    feature_name=feature_name,
+                    feature_category='document_conversion',
+                    extra_metadata=metadata,
+                    processing_time=processing_time,
+                    success=True
+                )
+                
+                print(f"[ANALYTICS] Tracking successful: {track_result}")
+                
             except Exception as e:
-                print(f"Error logging conversion: {e}")
+                print(f"[ANALYTICS] Tracking error: {e}")
+                import traceback
+                traceback.print_exc()
         
         return jsonify(result)
         
@@ -444,12 +473,46 @@ def api_download():
         if file_type == 'html':
             ext = 'html'
             mimetype = 'text/html'
+            feature_name = 'markdown_to_html'
         elif file_type == 'markdown':
             ext = 'md'
             mimetype = 'text/markdown'
+            feature_name = 'html_to_markdown'
         else:
             ext = 'txt'
             mimetype = 'text/plain'
+            feature_name = 'markdown_html_converter'
+        
+        # Track analytics for logged-in users
+        if current_user.is_authenticated:
+            try:
+                from utils.analytics_tracker import track_feature
+                import json
+                
+                # Prepare metadata
+                metadata = {
+                    'file_type': file_type,
+                    'content_size': len(content),
+                    'filename': filename
+                }
+                
+                print(f"[ANALYTICS] Tracking conversion: {feature_name}, user: {current_user.username}")
+                
+                result = track_feature(
+                    feature_name=feature_name,
+                    feature_category='document_conversion',
+                    extra_metadata=metadata,
+                    success=True
+                )
+                
+                print(f"[ANALYTICS] Tracking result: {result}")
+                
+            except Exception as e:
+                print(f"[ANALYTICS] Tracking error: {e}")
+                import traceback
+                traceback.print_exc()
+        else:
+            print(f"[ANALYTICS] User not authenticated, skipping tracking")
         
         # Create temporary file
         with tempfile.NamedTemporaryFile(mode='w', suffix=f'.{ext}', delete=False, encoding='utf-8') as tmp_file:
